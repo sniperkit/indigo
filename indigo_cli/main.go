@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/mosuka/bleve-server/bleve-server/cmd"
+	"github.com/mosuka/indigo/indigo_cli/cmd"
 )
 
 func main() {

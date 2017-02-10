@@ -2,21 +2,21 @@
 # Logging configuration
 #
 log:
-    file: ./bleve-rest.log
+    file: ./indigo_rest.log
     level: info
     format: text
 
 #
-# REST Server configuration
+# Indigo REST Server configuration
 #
 server:
     name: localhost
     port: 20000
 
 #
-# Bleve Server configuration
+# Indigo gRPC Server configuration
 #
-bleve:
+grpc:
     server:
         name: localhot
         port: 10000

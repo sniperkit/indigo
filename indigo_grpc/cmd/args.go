@@ -5,7 +5,7 @@ import "github.com/spf13/viper"
 var configDir string = "."
 var config *viper.Viper = viper.New()
 
-var logFile string = "./bleve-server.log"
+var logFile string = "./indigo_grpc.log"
 var logLevel string = "info"
 var logFormat string = "text"
 

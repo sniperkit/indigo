@@ -2,12 +2,12 @@
 # Logging configuration
 #
 log:
-    file: ./bleve-server.log
+    file: ./indigo_grpc.log
     level: info
     format: text
 
 #
-# Blever Server configuration
+# Indigo gRPC Server configuration
 #
 server:
     name: localhost

@@ -1,11 +1,11 @@
-package server
+package grpc
 
 import (
 	"bytes"
 	"encoding/json"
 	"github.com/blevesearch/bleve"
-	_ "github.com/mosuka/bleve-server/config"
-	"github.com/mosuka/bleve-server/proto"
+	_ "github.com/mosuka/indigo/config"
+	"github.com/mosuka/indigo/proto"
 	"github.com/spf13/viper"
 	"golang.org/x/net/context"
 	"io/ioutil"
@@ -13,12 +13,12 @@ import (
 	"os"
 )
 
-type bleveServer struct {
+type indigoGRPCServer struct {
 	mappingConfig *viper.Viper
 	index         bleve.Index
 }
 
-func NewBleveServer(indexDir string, indexMappingFile string, indexType string, indexStore string) *bleveServer {
+func NewIndigoGRPCServer(indexDir string, indexMappingFile string, indexType string, indexStore string) *indigoGRPCServer {
 	var err error
 	var mappingConfig = viper.New()
 	var mappingBytes []byte
@@ -57,13 +57,13 @@ func NewBleveServer(indexDir string, indexMappingFile string, indexType string, 
 		log.Printf("error: %s", err.Error())
 	}
 
-	return &bleveServer{
+	return &indigoGRPCServer{
 		mappingConfig: mappingConfig,
 		index:         index,
 	}
 }
 
-func (bs *bleveServer) Mapping(ctx context.Context, r *proto.MappingRequest) (*proto.MappingResponse, error) {
+func (bs *indigoGRPCServer) Mapping(ctx context.Context, r *proto.MappingRequest) (*proto.MappingResponse, error) {
 	log.Print("info: Mapping")
 
 	/*
@@ -81,7 +81,7 @@ func (bs *bleveServer) Mapping(ctx context.Context, r *proto.MappingRequest) (*p
 	return &proto.MappingResponse{Mapping: string(bytesResponse)}, nil
 }
 
-func (bs *bleveServer) Index(ctx context.Context, r *proto.IndexRequest) (*proto.IndexResponse, error) {
+func (bs *indigoGRPCServer) Index(ctx context.Context, r *proto.IndexRequest) (*proto.IndexResponse, error) {
 	log.Print("info: Index")
 
 	documentCount := 0
@@ -141,7 +141,7 @@ func (bs *bleveServer) Index(ctx context.Context, r *proto.IndexRequest) (*proto
 	return &proto.IndexResponse{DocumentCount: int32(documentCount)}, nil
 }
 
-func (bs *bleveServer) Delete(ctx context.Context, r *proto.DeleteRequest) (*proto.IndexResponse, error) {
+func (bs *indigoGRPCServer) Delete(ctx context.Context, r *proto.DeleteRequest) (*proto.IndexResponse, error) {
 	log.Print("info: Delete")
 
 	documentCount := 0
@@ -204,7 +204,7 @@ func (bs *bleveServer) Delete(ctx context.Context, r *proto.DeleteRequest) (*pro
 	return &proto.IndexResponse{DocumentCount: int32(documentCount)}, nil
 }
 
-func (bs *bleveServer) Search(ctx context.Context, r *proto.SearchRequest) (*proto.SearchResponse, error) {
+func (bs *indigoGRPCServer) Search(ctx context.Context, r *proto.SearchRequest) (*proto.SearchResponse, error) {
 	log.Print("info: Search")
 
 	var bytesResponse []byte

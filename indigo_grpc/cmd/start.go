@@ -3,8 +3,8 @@ package cmd
 import (
 	"fmt"
 	"github.com/comail/colog"
-	"github.com/mosuka/bleve-server/proto"
-	"github.com/mosuka/bleve-server/server"
+	g "github.com/mosuka/indigo/grpc"
+	"github.com/mosuka/indigo/proto"
 	"github.com/spf13/cobra"
 	"google.golang.org/grpc"
 	"log"
@@ -17,8 +17,8 @@ import (
 
 var startCmd = &cobra.Command{
 	Use:   "start",
-	Short: "start Bleve Server",
-	Long:  `The start command starts the Bleve Server.`,
+	Short: "start Indigo gRPC Server",
+	Long:  `The start command starts the Indigo gRPC Server.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		/*
 		 * set log file
@@ -75,12 +75,12 @@ var startCmd = &cobra.Command{
 		colog.Register()
 
 		/*
-		 * set server port number
+		 * set grpc port number
 		 */
 		serverName = config.GetString("server.name")
 
 		/*
-		 * set server port number
+		 * set grpc port number
 		 */
 		serverPort = config.GetInt("server.port")
 
@@ -107,8 +107,8 @@ var startCmd = &cobra.Command{
 		/*
 		 * start Bleve Server asynchronously
 		 */
-		bleveServer := grpc.NewServer()
-		proto.RegisterBleveServer(bleveServer, server.NewBleveServer(indexDir, indexMapping, indexType, indexStore))
+		server := grpc.NewServer()
+		proto.RegisterIndigoServer(server, g.NewIndigoGRPCServer(indexDir, indexMapping, indexType, indexStore))
 		listener, err := net.Listen("tcp", fmt.Sprintf(":%d", serverPort))
 		if err != nil {
 			log.Printf("error: %s\n", err.Error())
@@ -117,7 +117,7 @@ var startCmd = &cobra.Command{
 
 		go func() {
 			log.Printf("info: start server name=%s port=%d\n", serverName, serverPort)
-			bleveServer.Serve(listener)
+			server.Serve(listener)
 			return
 		}()
 
@@ -135,23 +135,23 @@ var startCmd = &cobra.Command{
 			switch s {
 			case syscall.SIGHUP:
 				log.Printf("info: stop server name=%s port=%d trap=SIGHUP\n", serverName, serverPort)
-				bleveServer.GracefulStop()
+				server.GracefulStop()
 				return nil
 			case syscall.SIGINT:
 				log.Printf("info: stop server name=%s port=%d trap=SIGINT\n", serverName, serverPort)
-				bleveServer.GracefulStop()
+				server.GracefulStop()
 				return nil
 			case syscall.SIGTERM:
 				log.Printf("info: stop server name=%s port=%d trap=SIGTERM\n", serverName, serverPort)
-				bleveServer.GracefulStop()
+				server.GracefulStop()
 				return nil
 			case syscall.SIGQUIT:
 				log.Printf("info: stop server name=%s port=%d trap=SIGQUIT\n", serverName, serverPort)
-				bleveServer.GracefulStop()
+				server.GracefulStop()
 				return nil
 			default:
 				log.Printf("info: stop server name=%s port=%d trap=unknown\n", serverName, serverPort)
-				bleveServer.GracefulStop()
+				server.GracefulStop()
 				return nil
 			}
 		}
@@ -162,9 +162,9 @@ var startCmd = &cobra.Command{
 
 func initConfig() {
 	/*
-	 * bleve-server.yaml
+	 * indigo_grpc.yaml
 	 */
-	config.SetConfigName("bleve-server")
+	config.SetConfigName("indigo_grpc")
 	config.SetConfigType("yaml")
 	config.AddConfigPath(configDir)
 	err := config.ReadInConfig()
@@ -176,8 +176,8 @@ func initConfig() {
 	config.BindPFlag("log.level", startCmd.Flags().Lookup("log-level"))
 	config.BindPFlag("log.format", startCmd.Flags().Lookup("log-format"))
 
-	config.BindPFlag("server.name", startCmd.Flags().Lookup("server-name"))
-	config.BindPFlag("server.port", startCmd.Flags().Lookup("server-port"))
+	config.BindPFlag("grpc.name", startCmd.Flags().Lookup("grpc-name"))
+	config.BindPFlag("grpc.port", startCmd.Flags().Lookup("grpc-port"))
 
 	config.BindPFlag("index.dir", startCmd.Flags().Lookup("index-dir"))
 	config.BindPFlag("index.type", startCmd.Flags().Lookup("index-type"))
@@ -194,8 +194,8 @@ func init() {
 	startCmd.Flags().StringVarP(&logLevel, "log-level", "l", logLevel, "log level")
 	startCmd.Flags().StringVarP(&logFormat, "log-format", "F", logFormat, "log format")
 
-	startCmd.Flags().StringVarP(&serverName, "server-name", "n", serverName, "name to run Bleve Server on")
-	startCmd.Flags().IntVarP(&serverPort, "server-port", "p", serverPort, "port to run Bleve Server on")
+	startCmd.Flags().StringVarP(&serverName, "server-name", "n", serverName, "name to run Indigo Server on")
+	startCmd.Flags().IntVarP(&serverPort, "server-port", "p", serverPort, "port to run Indigo Server on")
 
 	startCmd.Flags().StringVarP(&indexDir, "index-dir", "d", indexDir, "index path")
 	startCmd.Flags().StringVarP(&indexMapping, "index-mapping", "m", indexMapping, "index mapping")

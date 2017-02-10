@@ -30,14 +30,11 @@ _testmain.go
 # Gogland
 .idea/
 
-# Bleve Server
+# Indigo
 *.log
-
 vendor/*
 !/vendor/manifest
-
 index/
-
-bleve-cli/bleve-cli
-bleve-server/bleve-server
-bleve-rest/bleve-rest
+indigo_cli/indigo_cli
+indigo_grpc/indigo_grpc
+indigo_rest/indigo_rest

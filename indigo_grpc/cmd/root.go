@@ -7,9 +7,9 @@ import (
 )
 
 var RootCmd = &cobra.Command{
-	Use:   "bleve-server",
-	Short: "Bleve Server",
-	Long:  `The Bleve Server is a search server built on top of the Bleve.`,
+	Use:   "indigo_grpc",
+	Short: "Indigo gRPC Server",
+	Long:  `The Indigo gRPC Server is a search server built on top of the Bleve.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if len(args) < 1 {
 			return errors.New("must specify command or flags")

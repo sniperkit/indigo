@@ -2,10 +2,7 @@ syntax = "proto3";
 
 package proto;
 
-import "google/api/annotations.proto";
-
-
-service Bleve {
+service Indigo {
     rpc Mapping(MappingRequest) returns (MappingResponse) {}
     rpc Index(IndexRequest) returns (IndexResponse) {}
     rpc Delete(DeleteRequest) returns (IndexResponse) {}

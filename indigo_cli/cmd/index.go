@@ -3,7 +3,7 @@ package cmd
 import (
 	"errors"
 	"fmt"
-	"github.com/mosuka/bleve-server/proto"
+	"github.com/mosuka/indigo/proto"
 	"github.com/spf13/cobra"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
@@ -11,8 +11,8 @@ import (
 
 var indexCmd = &cobra.Command{
 	Use:   "index REQUEST",
-	Short: "indexes the documents to the Bleve Server",
-	Long:  `The index command indexes the JSON representation of the documents to the Bleve Server.`,
+	Short: "indexes the documents to the Indigo gRPC Server",
+	Long:  `The index command indexes the JSON representation of the documents to the Indigo gRPC Server.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if len(args) < 1 {
 			return errors.New("must specify DOCUMENTS")
@@ -24,7 +24,7 @@ var indexCmd = &cobra.Command{
 		}
 		defer conn.Close()
 
-		c := proto.NewBleveClient(conn)
+		c := proto.NewIndigoClient(conn)
 
 		var resp *proto.IndexResponse
 		if deleteFlag {
@@ -43,8 +43,8 @@ var indexCmd = &cobra.Command{
 }
 
 func init() {
-	indexCmd.Flags().StringVarP(&serverName, "server-name", "n", serverName, "sever name")
-	indexCmd.Flags().IntVarP(&serverPort, "server-port", "p", serverPort, "port number")
+	indexCmd.Flags().StringVarP(&serverName, "grpc-name", "n", serverName, "sever name")
+	indexCmd.Flags().IntVarP(&serverPort, "grpc-port", "p", serverPort, "port number")
 	indexCmd.Flags().Int32VarP(&batchSize, "batch-size", "b", batchSize, "port number")
 	indexCmd.Flags().BoolVarP(&deleteFlag, "delete", "d", deleteFlag, "delete documents")
 

@@ -6,9 +6,9 @@ import (
 )
 
 var RootCmd = &cobra.Command{
-	Use:   "bleve-cli",
-	Short: "Bleve Command Line Interface",
-	Long:  `The Bleve Command Line Interface is controlls the Bleve Server.`,
+	Use:   "indigo_cli",
+	Short: "Indigo Command Line Interface",
+	Long:  `The Indigo Command Line Interface is controlls the Indigo gRPC Server.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		return nil
 	},

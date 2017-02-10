@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"github.com/comail/colog"
-	"github.com/mosuka/bleve-server/server"
+	"github.com/mosuka/indigo/rest"
 	"github.com/spf13/cobra"
 	"log"
 	"os"
@@ -13,8 +13,8 @@ import (
 
 var startCmd = &cobra.Command{
 	Use:   "start",
-	Short: "start Bleve REST Server",
-	Long:  `The start command starts the Bleve REST Server.`,
+	Short: "start Indigo REST Server",
+	Long:  `The start command starts the Indigo REST Server.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		/*
 		 * set log file
@@ -71,12 +71,12 @@ var startCmd = &cobra.Command{
 		colog.Register()
 
 		/*
-		 * set server port number
+		 * set grpc port number
 		 */
 		serverName = config.GetString("server.name")
 
 		/*
-		 * set server port number
+		 * set grpc port number
 		 */
 		serverPort = config.GetInt("server.port")
 
@@ -91,7 +91,7 @@ var startCmd = &cobra.Command{
 		//
 		//gw := runtime.NewServeMux()
 		//opts := []grpc.DialOption{grpc.WithInsecure()}
-		//err = proto.RegisterBleveHandlerFromEndpoint(ctx, gw,fmt.Sprintf("%s:%d", bleveServerName, bleveServerPort), opts)
+		//err = proto.RegisterBleveHandlerFromEndpoint(ctx, gw,fmt.Sprintf("%s:%d", gRPCServerName, gRPCServerPort), opts)
 		//if err != nil {
 		//	return err
 		//}
@@ -105,12 +105,12 @@ var startCmd = &cobra.Command{
 		//}
 		//
 		//go func() {
-		//	log.Printf("info: start server name=%s port=%d\n", serverName, serverPort)
+		//	log.Printf("info: start grpc name=%s port=%d\n", serverName, serverPort)
 		//	http.Serve(listener, mux)
 		//	return
 		//}()
 
-		rs := server.NewBleveRESTServer(serverName, serverPort)
+		rs := rest.NewIndigoRESTServer(serverName, serverPort)
 		rs.Start()
 
 		/*
@@ -154,9 +154,9 @@ var startCmd = &cobra.Command{
 
 func initConfig() {
 	/*
-	 * bleve-rest.yaml
+	 * indigo_rest.yaml
 	 */
-	config.SetConfigName("bleve-rest")
+	config.SetConfigName("indigo_rest")
 	config.SetConfigType("yaml")
 	config.AddConfigPath(configDir)
 	err := config.ReadInConfig()
@@ -171,8 +171,8 @@ func initConfig() {
 	config.BindPFlag("server.name", startCmd.Flags().Lookup("server-name"))
 	config.BindPFlag("server.port", startCmd.Flags().Lookup("server-port"))
 
-	config.BindPFlag("bleve.server.name", startCmd.Flags().Lookup("bleve-server-name"))
-	config.BindPFlag("bleve.server.port", startCmd.Flags().Lookup("bleve-server-port"))
+	config.BindPFlag("grpc.server.name", startCmd.Flags().Lookup("grpc-server-name"))
+	config.BindPFlag("grpc.server.port", startCmd.Flags().Lookup("grpc-server-port"))
 }
 
 func init() {
@@ -184,11 +184,11 @@ func init() {
 	startCmd.Flags().StringVarP(&logLevel, "log-level", "l", logLevel, "log level")
 	startCmd.Flags().StringVarP(&logFormat, "log-format", "F", logFormat, "log format")
 
-	startCmd.Flags().StringVarP(&serverName, "server-name", "n", serverName, "name to run Bleve REST Server on")
-	startCmd.Flags().IntVarP(&serverPort, "server-port", "p", serverPort, "port to run Bleve REST Server on")
+	startCmd.Flags().StringVarP(&serverName, "server-name", "n", serverName, "name to run Indigo REST Server on")
+	startCmd.Flags().IntVarP(&serverPort, "server-port", "p", serverPort, "port to run Indigo REST Server on")
 
-	startCmd.Flags().StringVarP(&bleveServerName, "bleve-server-name", "N", bleveServerName, "name to run Bleve Server on")
-	startCmd.Flags().IntVarP(&bleveServerPort, "bleve-server-port", "P", bleveServerPort, "port to run Bleve Server on")
+	startCmd.Flags().StringVarP(&gRPCServerName, "grpc-server-name", "N", gRPCServerName, "name to run Indigo gRPC Server on")
+	startCmd.Flags().IntVarP(&gRPCServerPort, "grpc-server-port", "P", gRPCServerPort, "port to run Indigo gRPC Server on")
 
 	RootCmd.AddCommand(startCmd)
 }

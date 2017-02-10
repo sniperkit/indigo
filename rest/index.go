@@ -1,4 +1,4 @@
-package http_handler
+package rest
 
 import (
 	"fmt"
