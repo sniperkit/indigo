@@ -1,0 +1,22 @@
+#
+# Logging configuration
+#
+log:
+    file: ./bleve-rest.log
+    level: info
+    format: text
+
+#
+# REST Server configuration
+#
+server:
+    name: localhost
+    port: 20000
+
+#
+# Bleve Server configuration
+#
+bleve:
+    server:
+        name: localhot
+        port: 10000

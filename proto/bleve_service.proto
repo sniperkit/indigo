@@ -1,0 +1,37 @@
+syntax = "proto3";
+
+package proto;
+
+import "google/api/annotations.proto";
+
+
+service Bleve {
+    rpc Mapping(MappingRequest) returns (MappingResponse) {}
+    rpc Index(IndexRequest) returns (IndexResponse) {}
+    rpc Delete(DeleteRequest) returns (IndexResponse) {}
+    rpc Search(SearchRequest) returns (SearchResponse) {}
+}
+
+message MappingRequest {}
+message MappingResponse {
+    string mapping = 1;
+}
+
+message IndexRequest {
+    string documents = 1;
+    int32 batchSize = 2;
+}
+message DeleteRequest {
+    string ids = 1;
+    int32 batchSize = 2;
+}
+message IndexResponse {
+    int32 documentCount = 1;
+}
+
+message SearchRequest {
+    string request = 1;
+}
+message SearchResponse {
+    string result = 1;
+}

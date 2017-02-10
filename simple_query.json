@@ -1,0 +1,15 @@
+{
+  "query": {
+    "query": "description:Go"
+  },
+  "size": 10,
+  "from": 0,
+  "fields": [
+    "name",
+    "description",
+    "category",
+    "popularity",
+    "release",
+    "type"
+  ]
+}

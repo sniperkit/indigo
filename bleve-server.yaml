@@ -1,0 +1,23 @@
+#
+# Logging configuration
+#
+log:
+    file: ./bleve-server.log
+    level: info
+    format: text
+
+#
+# Blever Server configuration
+#
+server:
+    name: localhost
+    port: 10000
+
+#
+# Index configuration
+#
+index:
+    dir: ./index
+    type: "upside_down"
+    store: "boltdb"
+    mapping: ./mapping.json
