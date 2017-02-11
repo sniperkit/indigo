@@ -19,7 +19,7 @@ func NewGetMappingHandler(client proto.IndigoClient) *GetMappingHandler {
 }
 
 func (h *GetMappingHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
-	log.Printf("info: request=%s user_agent=%s\n", req.RequestURI, req.UserAgent())
+	log.Printf("info: request_uri=%s user_agent=%s\n", req.RequestURI, req.UserAgent())
 
 	resp, err := h.client.Mapping(context.Background(), &proto.MappingRequest{})
 	if err != nil {

@@ -23,7 +23,7 @@ func NewIndigoGRPCServer(serverName string, serverPort int, indexDir string, ind
 		return nil
 	}
 
-	log.Printf("info: create Indigo gRPC server name=%s port=%d\n", serverName, serverPort)
+	log.Printf("info: The Indigo gRPC Server created name=%s port=%d\n", serverName, serverPort)
 
 	return &indigoGRPCServer{
 		server:   server,
@@ -31,21 +31,19 @@ func NewIndigoGRPCServer(serverName string, serverPort int, indexDir string, ind
 	}
 }
 
-func (brs *indigoGRPCServer) Start() error {
+func (igs *indigoGRPCServer) Start() error {
 	go func() {
-		brs.server.Serve(brs.listener)
+		igs.server.Serve(igs.listener)
+		log.Print("info: The Indigo gRPC Server started\n")
 		return
 	}()
-
-	log.Printf("info: Indigo gRPC server started\n")
 
 	return nil
 }
 
-func (brs *indigoGRPCServer) Stop() error {
-	brs.server.GracefulStop()
-
-	log.Printf("info: Indigo gRPC server stopped\n")
+func (igs *indigoGRPCServer) Stop() error {
+	igs.server.GracefulStop()
+	log.Print("info: The Indigo gRPC Server stopped\n")
 
 	return nil
 }

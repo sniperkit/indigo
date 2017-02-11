@@ -12,6 +12,7 @@ log:
 server:
     name: localhost
     port: 20000
+    uripath: /api
 
 #
 # Indigo gRPC Server configuration

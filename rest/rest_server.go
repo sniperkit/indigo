@@ -17,7 +17,7 @@ type indigoRESTServer struct {
 	conn     *grpc.ClientConn
 }
 
-func NewIndigoRESTServer(serverName string, serverPort int, gRPCServerName string, gRPCServerPort int) *indigoRESTServer {
+func NewIndigoRESTServer(serverName string, serverPort int, serverPath, gRPCServerName string, gRPCServerPort int) *indigoRESTServer {
 
 	router := mux.NewRouter()
 	router.StrictSlash(true)
@@ -32,7 +32,10 @@ func NewIndigoRESTServer(serverName string, serverPort int, gRPCServerName strin
 	/*
 	 * set handlers
 	 */
-	router.Handle("/api/mapping", handler.NewGetMappingHandler(client)).Methods("GET")
+	router.Handle(fmt.Sprintf("%s/mapping", serverPath), handler.NewGetMappingHandler(client)).Methods("GET")
+	router.Handle(fmt.Sprintf("%s/search", serverPath), handler.NewPostSearchHandler(client)).Methods("POST")
+	router.Handle(fmt.Sprintf("%s/index", serverPath), handler.NewPostIndexHandler(client)).Methods("POST")
+	router.Handle(fmt.Sprintf("%s/index", serverPath), handler.NewDeleteIndexHandler(client)).Methods("DELETE")
 
 	listener, err := net.Listen("tcp", fmt.Sprintf(":%d", serverPort))
 	if err != nil {
@@ -40,7 +43,7 @@ func NewIndigoRESTServer(serverName string, serverPort int, gRPCServerName strin
 		return nil
 	}
 
-	log.Printf("info: create Indigo REST server name=%s port=%d\n", serverName, serverPort)
+	log.Printf("info: The Indigo REST Server created name=%s port=%d\n", serverName, serverPort)
 
 	return &indigoRESTServer{
 		router:   router,
@@ -49,27 +52,26 @@ func NewIndigoRESTServer(serverName string, serverPort int, gRPCServerName strin
 	}
 }
 
-func (brs *indigoRESTServer) Start() error {
+func (irs *indigoRESTServer) Start() error {
 	go func() {
-		http.Serve(brs.listener, brs.router)
+		http.Serve(irs.listener, irs.router)
+		log.Print("info: The Indigo REST Server started\n")
 		return
 	}()
-
-	log.Printf("info: Indigo REST server started\n")
 
 	return nil
 }
 
-func (brs *indigoRESTServer) Stop() error {
-	brs.conn.Close()
+func (irs *indigoRESTServer) Stop() error {
+	irs.conn.Close()
+	log.Print("info: The connection to the Indigo gRPC Server closed\n")
 
-	err := brs.listener.Close()
+	err := irs.listener.Close()
 	if err != nil {
 		log.Printf("error: %s\n", err.Error())
 		return err
 	}
-
-	log.Printf("info: Indigo REST server stopped\n")
+	log.Print("info: The Indigo REST Server stopped\n")
 
 	return nil
 }

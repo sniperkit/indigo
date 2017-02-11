@@ -71,7 +71,7 @@ var startCmd = &cobra.Command{
 		colog.Register()
 
 		/*
-		 * set server port number
+		 * set server name
 		 */
 		serverName = config.GetString("server.name")
 
@@ -79,6 +79,11 @@ var startCmd = &cobra.Command{
 		 * set server port number
 		 */
 		serverPort = config.GetInt("server.port")
+
+		/*
+		 * set server path
+		 */
+		serverURIPath = config.GetString("server.uripath")
 
 		/*
 		 * set gRPC server port number
@@ -93,7 +98,7 @@ var startCmd = &cobra.Command{
 		/*
 		 * start Indigo REST Server
 		 */
-		rs := rest.NewIndigoRESTServer(serverName, serverPort, gRPCServerName, gRPCServerPort)
+		rs := rest.NewIndigoRESTServer(serverName, serverPort, serverURIPath, gRPCServerName, gRPCServerPort)
 		rs.Start()
 
 		/*
@@ -153,6 +158,7 @@ func initConfig() {
 
 	config.BindPFlag("server.name", startCmd.Flags().Lookup("server-name"))
 	config.BindPFlag("server.port", startCmd.Flags().Lookup("server-port"))
+	config.BindPFlag("server.uripath", startCmd.Flags().Lookup("server-uripath"))
 
 	config.BindPFlag("grpc.server.name", startCmd.Flags().Lookup("grpc-server-name"))
 	config.BindPFlag("grpc.server.port", startCmd.Flags().Lookup("grpc-server-port"))
@@ -169,6 +175,7 @@ func init() {
 
 	startCmd.Flags().StringVarP(&serverName, "server-name", "n", serverName, "name to run Indigo REST Server on")
 	startCmd.Flags().IntVarP(&serverPort, "server-port", "p", serverPort, "port to run Indigo REST Server on")
+	startCmd.Flags().StringVarP(&serverURIPath, "server-uripath", "u", serverURIPath, "URI path to run Indigo REST Server on")
 
 	startCmd.Flags().StringVarP(&gRPCServerName, "grpc-server-name", "N", gRPCServerName, "name to run Indigo gRPC Server on")
 	startCmd.Flags().IntVarP(&gRPCServerPort, "grpc-server-port", "P", gRPCServerPort, "port to run Indigo gRPC Server on")

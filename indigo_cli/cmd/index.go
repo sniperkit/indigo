@@ -36,7 +36,7 @@ var indexCmd = &cobra.Command{
 			return err
 		}
 
-		fmt.Printf("Indexed document count: %d\n", resp.DocumentCount)
+		fmt.Printf("%s\n", resp.Result)
 
 		return nil
 	},

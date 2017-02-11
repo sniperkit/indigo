@@ -11,6 +11,7 @@ var logFormat string = "text"
 
 var serverName string = "localhost"
 var serverPort int = 20000
+var serverURIPath string = "/api"
 
 var gRPCServerName string = "localhost"
 var gRPCServerPort int = 10000

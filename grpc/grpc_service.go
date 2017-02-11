@@ -63,13 +63,13 @@ func NewIndigoGRPCService(indexDir string, indexMappingFile string, indexType st
 	}
 }
 
-func (bs *indigoGRPCService) Mapping(ctx context.Context, r *proto.MappingRequest) (*proto.MappingResponse, error) {
+func (igs *indigoGRPCService) Mapping(ctx context.Context, r *proto.MappingRequest) (*proto.MappingResponse, error) {
 	log.Print("info: Mapping")
 
 	/*
 	 * create response
 	 */
-	bytesResponse, err := json.Marshal(bs.index.Mapping())
+	bytesResponse, err := json.Marshal(igs.index.Mapping())
 	if err != nil {
 		log.Printf("error: %s", err.Error())
 		return &proto.MappingResponse{Mapping: ""}, nil
@@ -81,10 +81,14 @@ func (bs *indigoGRPCService) Mapping(ctx context.Context, r *proto.MappingReques
 	return &proto.MappingResponse{Mapping: string(bytesResponse)}, nil
 }
 
-func (bs *indigoGRPCService) Index(ctx context.Context, r *proto.IndexRequest) (*proto.IndexResponse, error) {
+type IndexResult struct {
+	DocumentCount int `json:"document_count"`
+}
+
+func (igs *indigoGRPCService) Index(ctx context.Context, r *proto.IndexRequest) (*proto.IndexResponse, error) {
 	log.Print("info: Index")
 
-	documentCount := 0
+	indexResult := IndexResult{DocumentCount: 0}
 
 	/*
 	 * create documents
@@ -93,33 +97,51 @@ func (bs *indigoGRPCService) Index(ctx context.Context, r *proto.IndexRequest) (
 	err := json.Unmarshal([]byte(r.Documents), &documents)
 	if err != nil {
 		log.Printf("error: a %s", err.Error())
-		return &proto.IndexResponse{DocumentCount: int32(documentCount)}, nil
+
+		bytesResponse, err := json.Marshal(&indexResult)
+		if err != nil {
+			log.Printf("error: %s", err.Error())
+		}
+
+		return &proto.IndexResponse{Result: string(bytesResponse)}, nil
 	}
 
 	/*
 	 * create batch
 	 */
-	batch := bs.index.NewBatch()
+	batch := igs.index.NewBatch()
 	for ID, doc := range documents.(map[string]interface{}) {
 		err = batch.Index(ID, doc)
 		if err != nil {
 			log.Printf("error: %s", err.Error())
-			return &proto.IndexResponse{DocumentCount: int32(documentCount)}, nil
-		}
 
-		documentCount++
-
-		if documentCount%int(r.BatchSize) == 0 {
-			err = bs.index.Batch(batch)
+			bytesResponse, err := json.Marshal(&indexResult)
 			if err != nil {
 				log.Printf("error: %s", err.Error())
-				return &proto.IndexResponse{DocumentCount: int32(documentCount)}, nil
+			}
+
+			return &proto.IndexResponse{Result: string(bytesResponse)}, nil
+		}
+
+		indexResult.DocumentCount++
+
+		if indexResult.DocumentCount%int(r.BatchSize) == 0 {
+			err = igs.index.Batch(batch)
+			if err != nil {
+				log.Printf("error: %s", err.Error())
+
+				bytesResponse, err := json.Marshal(&indexResult)
+				if err != nil {
+					log.Printf("error: %s", err.Error())
+				}
+
+				return &proto.IndexResponse{Result: string(bytesResponse)}, nil
 			}
 
 			/*
 			 * recreate batch
 			 */
-			batch = bs.index.NewBatch()
+			batch = igs.index.NewBatch()
 		}
 	}
 
@@ -127,24 +149,36 @@ func (bs *indigoGRPCService) Index(ctx context.Context, r *proto.IndexRequest) (
 		/*
 		 * index document
 		 */
-		err = bs.index.Batch(batch)
+		err = igs.index.Batch(batch)
 		if err != nil {
 			log.Printf("error: %s", err.Error())
-			return &proto.IndexResponse{DocumentCount: int32(documentCount)}, nil
+
+			bytesResponse, err := json.Marshal(&indexResult)
+			if err != nil {
+				log.Printf("error: %s", err.Error())
+			}
+
+			return &proto.IndexResponse{Result: string(bytesResponse)}, nil
 		}
 	}
 
 	/*
 	 * return response
 	 */
-	log.Printf("info: %d document(s) indexed", documentCount)
-	return &proto.IndexResponse{DocumentCount: int32(documentCount)}, nil
+	log.Printf("info: %d document(s) indexed", indexResult.DocumentCount)
+
+	bytesResponse, err := json.Marshal(indexResult)
+	if err != nil {
+		log.Printf("error: %s", err.Error())
+	}
+
+	return &proto.IndexResponse{Result: string(bytesResponse)}, nil
 }
 
-func (bs *indigoGRPCService) Delete(ctx context.Context, r *proto.DeleteRequest) (*proto.IndexResponse, error) {
+func (igs *indigoGRPCService) Delete(ctx context.Context, r *proto.DeleteRequest) (*proto.IndexResponse, error) {
 	log.Print("info: Delete")
 
-	documentCount := 0
+	indexResult := IndexResult{DocumentCount: 0}
 
 	/*
 	 * create document id list
@@ -153,36 +187,54 @@ func (bs *indigoGRPCService) Delete(ctx context.Context, r *proto.DeleteRequest)
 	err := json.Unmarshal([]byte(r.Ids), &ids)
 	if err != nil {
 		log.Printf("error: a %s", err.Error())
-		return &proto.IndexResponse{DocumentCount: int32(documentCount)}, nil
+
+		bytesResponse, err := json.Marshal(&indexResult)
+		if err != nil {
+			log.Printf("error: %s", err.Error())
+		}
+
+		return &proto.IndexResponse{Result: string(bytesResponse)}, nil
 	}
 
 	/*
 	 * create batch
 	 */
-	batch := bs.index.NewBatch()
+	batch := igs.index.NewBatch()
 	for i := range ids {
 		batch.Delete(ids[i])
 		if err != nil {
 			log.Printf("error: %s", err.Error())
-			return &proto.IndexResponse{DocumentCount: int32(documentCount)}, nil
+
+			bytesResponse, err := json.Marshal(&indexResult)
+			if err != nil {
+				log.Printf("error: %s", err.Error())
+			}
+
+			return &proto.IndexResponse{Result: string(bytesResponse)}, nil
 		}
 
-		documentCount++
+		indexResult.DocumentCount++
 
-		if documentCount%int(r.BatchSize) == 0 {
+		if indexResult.DocumentCount%int(r.BatchSize) == 0 {
 			/*
 			 * delete document
 			 */
-			err = bs.index.Batch(batch)
+			err = igs.index.Batch(batch)
 			if err != nil {
 				log.Printf("error: %s", err.Error())
-				return &proto.IndexResponse{DocumentCount: int32(documentCount)}, nil
+
+				bytesResponse, err := json.Marshal(&indexResult)
+				if err != nil {
+					log.Printf("error: %s", err.Error())
+				}
+
+				return &proto.IndexResponse{Result: string(bytesResponse)}, nil
 			}
 
 			/*
 			 * recreate batch
 			 */
-			batch = bs.index.NewBatch()
+			batch = igs.index.NewBatch()
 		}
 	}
 
@@ -190,21 +242,33 @@ func (bs *indigoGRPCService) Delete(ctx context.Context, r *proto.DeleteRequest)
 		/*
 		 * delete document
 		 */
-		err = bs.index.Batch(batch)
+		err = igs.index.Batch(batch)
 		if err != nil {
 			log.Printf("error: %s", err.Error())
-			return &proto.IndexResponse{DocumentCount: int32(documentCount)}, nil
+
+			bytesResponse, err := json.Marshal(&indexResult)
+			if err != nil {
+				log.Printf("error: %s", err.Error())
+			}
+
+			return &proto.IndexResponse{Result: string(bytesResponse)}, nil
 		}
 	}
 
 	/*
 	 * return response
 	 */
-	log.Printf("info: %d document(s) deleted", documentCount)
-	return &proto.IndexResponse{DocumentCount: int32(documentCount)}, nil
+	log.Printf("info: %d document(s) deleted", indexResult.DocumentCount)
+
+	bytesResponse, err := json.Marshal(&indexResult)
+	if err != nil {
+		log.Printf("error: %s", err.Error())
+	}
+
+	return &proto.IndexResponse{Result: string(bytesResponse)}, nil
 }
 
-func (bs *indigoGRPCService) Search(ctx context.Context, r *proto.SearchRequest) (*proto.SearchResponse, error) {
+func (igs *indigoGRPCService) Search(ctx context.Context, r *proto.SearchRequest) (*proto.SearchResponse, error) {
 	log.Print("info: Search")
 
 	var bytesResponse []byte
@@ -223,7 +287,7 @@ func (bs *indigoGRPCService) Search(ctx context.Context, r *proto.SearchRequest)
 	/*
 	 * create search result
 	 */
-	searchResult, err := bs.index.Search(searchRequest)
+	searchResult, err := igs.index.Search(searchRequest)
 	if err != nil {
 		log.Printf("error: %s", err.Error())
 		return &proto.SearchResponse{Result: ""}, nil
