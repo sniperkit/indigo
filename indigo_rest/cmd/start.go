@@ -81,9 +81,19 @@ var startCmd = &cobra.Command{
 		serverPort = config.GetInt("server.port")
 
 		/*
+		 * set gRPC server port number
+		 */
+		gRPCServerName = config.GetString("grpc.server.name")
+
+		/*
+		 * set server port number
+		 */
+		gRPCServerPort = config.GetInt("grpc.server.port")
+
+		/*
 		 * start Indigo REST Server
 		 */
-		rs := rest.NewIndigoRESTServer(serverName, serverPort)
+		rs := rest.NewIndigoRESTServer(serverName, serverPort, gRPCServerName, gRPCServerPort)
 		rs.Start()
 
 		/*

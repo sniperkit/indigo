@@ -3,6 +3,9 @@ package rest
 import (
 	"fmt"
 	"github.com/gorilla/mux"
+	"github.com/mosuka/indigo/proto"
+	"github.com/mosuka/indigo/rest/handler"
+	"google.golang.org/grpc"
 	"log"
 	"net"
 	"net/http"
@@ -11,14 +14,25 @@ import (
 type indigoRESTServer struct {
 	router   *mux.Router
 	listener net.Listener
+	conn     *grpc.ClientConn
 }
 
-func NewIndigoRESTServer(serverName string, serverPort int) *indigoRESTServer {
+func NewIndigoRESTServer(serverName string, serverPort int, gRPCServerName string, gRPCServerPort int) *indigoRESTServer {
 
 	router := mux.NewRouter()
 	router.StrictSlash(true)
 
-	router.Handle("/api/{indexName}", NewCreateIndexHandler("aaa")).Methods("GET")
+	conn, err := grpc.Dial(fmt.Sprintf("%s:%d", gRPCServerName, gRPCServerPort), grpc.WithInsecure())
+	if err != nil {
+		return nil
+	}
+
+	client := proto.NewIndigoClient(conn)
+
+	/*
+	 * set handlers
+	 */
+	router.Handle("/api/mapping", handler.NewGetMappingHandler(client)).Methods("GET")
 
 	listener, err := net.Listen("tcp", fmt.Sprintf(":%d", serverPort))
 	if err != nil {
@@ -31,6 +45,7 @@ func NewIndigoRESTServer(serverName string, serverPort int) *indigoRESTServer {
 	return &indigoRESTServer{
 		router:   router,
 		listener: listener,
+		conn:     conn,
 	}
 }
 
@@ -46,6 +61,8 @@ func (brs *indigoRESTServer) Start() error {
 }
 
 func (brs *indigoRESTServer) Stop() error {
+	brs.conn.Close()
+
 	err := brs.listener.Close()
 	if err != nil {
 		log.Printf("error: %s\n", err.Error())
