@@ -1,14 +1,10 @@
 package cmd
 
 import (
-	"fmt"
 	"github.com/comail/colog"
-	g "github.com/mosuka/indigo/grpc"
-	"github.com/mosuka/indigo/proto"
+	"github.com/mosuka/indigo/grpc"
 	"github.com/spf13/cobra"
-	"google.golang.org/grpc"
 	"log"
-	"net"
 	"os"
 	"os/signal"
 	"syscall"
@@ -75,12 +71,12 @@ var startCmd = &cobra.Command{
 		colog.Register()
 
 		/*
-		 * set grpc port number
+		 * set server port number
 		 */
 		serverName = config.GetString("server.name")
 
 		/*
-		 * set grpc port number
+		 * set server port number
 		 */
 		serverPort = config.GetInt("server.port")
 
@@ -105,21 +101,10 @@ var startCmd = &cobra.Command{
 		indexStore = config.GetString("index.store")
 
 		/*
-		 * start Bleve Server asynchronously
+		 * start Indigo gRPC Server
 		 */
-		server := grpc.NewServer()
-		proto.RegisterIndigoServer(server, g.NewIndigoGRPCServer(indexDir, indexMapping, indexType, indexStore))
-		listener, err := net.Listen("tcp", fmt.Sprintf(":%d", serverPort))
-		if err != nil {
-			log.Printf("error: %s\n", err.Error())
-			return err
-		}
-
-		go func() {
-			log.Printf("info: start server name=%s port=%d\n", serverName, serverPort)
-			server.Serve(listener)
-			return
-		}()
+		gs := grpc.NewIndigoGRPCServer(serverName, serverPort, indexDir, indexMapping, indexType, indexStore)
+		gs.Start()
 
 		/*
 		 * trap signals
@@ -134,24 +119,24 @@ var startCmd = &cobra.Command{
 			s := <-signal_chan
 			switch s {
 			case syscall.SIGHUP:
-				log.Printf("info: stop server name=%s port=%d trap=SIGHUP\n", serverName, serverPort)
-				server.GracefulStop()
+				log.Println("info: trap SIGHUP")
+				gs.Stop()
 				return nil
 			case syscall.SIGINT:
-				log.Printf("info: stop server name=%s port=%d trap=SIGINT\n", serverName, serverPort)
-				server.GracefulStop()
+				log.Println("info: trap SIGINT")
+				gs.Stop()
 				return nil
 			case syscall.SIGTERM:
-				log.Printf("info: stop server name=%s port=%d trap=SIGTERM\n", serverName, serverPort)
-				server.GracefulStop()
+				log.Println("info: trap SIGTERM")
+				gs.Stop()
 				return nil
 			case syscall.SIGQUIT:
-				log.Printf("info: stop server name=%s port=%d trap=SIGQUIT\n", serverName, serverPort)
-				server.GracefulStop()
+				log.Println("info: trap SIGQUIT")
+				gs.Stop()
 				return nil
 			default:
-				log.Printf("info: stop server name=%s port=%d trap=unknown\n", serverName, serverPort)
-				server.GracefulStop()
+				log.Println("info: trap unknown")
+				gs.Stop()
 				return nil
 			}
 		}

@@ -71,45 +71,18 @@ var startCmd = &cobra.Command{
 		colog.Register()
 
 		/*
-		 * set grpc port number
+		 * set server port number
 		 */
 		serverName = config.GetString("server.name")
 
 		/*
-		 * set grpc port number
+		 * set server port number
 		 */
 		serverPort = config.GetInt("server.port")
 
-		///*
-		// * start BleveRESTService asynchronously
-		// */
-		//ctx := context.Background()
-		//ctx, cancel := context.WithCancel(ctx)
-		//defer cancel()
-		//
-		//mux := http.NewServeMux()
-		//
-		//gw := runtime.NewServeMux()
-		//opts := []grpc.DialOption{grpc.WithInsecure()}
-		//err = proto.RegisterBleveHandlerFromEndpoint(ctx, gw,fmt.Sprintf("%s:%d", gRPCServerName, gRPCServerPort), opts)
-		//if err != nil {
-		//	return err
-		//}
-		//
-		//mux.Handle("/", gw)
-		//
-		//listener, err := net.Listen("tcp", fmt.Sprintf(":%d", serverPort))
-		//if err != nil {
-		//	log.Printf("%s\n", err.Error())
-		//	return err
-		//}
-		//
-		//go func() {
-		//	log.Printf("info: start grpc name=%s port=%d\n", serverName, serverPort)
-		//	http.Serve(listener, mux)
-		//	return
-		//}()
-
+		/*
+		 * start Indigo REST Server
+		 */
 		rs := rest.NewIndigoRESTServer(serverName, serverPort)
 		rs.Start()
 
