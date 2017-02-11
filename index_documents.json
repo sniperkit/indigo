@@ -32,7 +32,7 @@
     "type": "document"
   },
   "5": {
-    "name": "Bleve Server",
+    "name": "Indigo",
     "description": "Full-text search server built on Bleve.",
     "category": "Server",
     "popularity": 5.0,

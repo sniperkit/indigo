@@ -390,7 +390,7 @@ $ curl -XPOST http://localhost:20000/api/index -d '{
     "type": "document"
   },
   "5": {
-    "name": "Bleve Server",
+    "name": "Indigo",
     "description": "Full-text search server built on Bleve.",
     "category": "Server",
     "popularity": 5.0,
@@ -413,7 +413,7 @@ The result of the above index command is:
 
 ### Delete documents via HTTP
 
-The `-d` option deletes the documents from specified Bleve Server.
+The `-d` option deletes the documents from specified Indigo Server.
 
 ```
 $ curl -XDELETE http://localhost:20000/api/index -d '[
@@ -437,7 +437,7 @@ The result of the above delete command is:
 
 ### Search documents via HTTP
 
-The `search` command queries the documents to specified Bleve Server.
+The `search` command queries the documents to specified Indigo Server.
 See [Queries](http://www.blevesearch.com/docs/Query/), [Query String Query](http://www.blevesearch.com/docs/Query-String-Query/) and [type SearchRequest](https://godoc.org/github.com/blevesearch/bleve#SearchRequest) for more details.
 
 #### Simple query
