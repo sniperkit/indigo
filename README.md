@@ -1,6 +1,6 @@
 # Indigo gRPC Server
 
-Indigo gRPC Server is a search and indexing server built on top of [Bleve](http://www.blevesearch.com).
+The Indigo gRPC Server is a search and indexing server built on top of [Bleve](http://www.blevesearch.com).
 
 
 ## Start Indigo gRPC Server
@@ -13,7 +13,7 @@ $ indigo_grpc start
 
 ### indigo_grpc.yaml
 
-The indigo_grpc.yaml file is the configuration file with the parameters affecting Indigo gRPC Server itself.
+The indigo_grpc.yaml file is the configuration file with the parameters affecting the Indigo gRPC Server itself.
 
 ```
 #
@@ -174,6 +174,10 @@ See [Introduction to Index Mappings](http://www.blevesearch.com/docs/Index-Mappi
 }
 ```
 
+# Indigo REST Server
+
+The Indigo REST Server provides a RESTful JSON API into Indigo gRPC Server.
+
 ## Start Indigo REST Server
 
 The `indigo_rest start` command starts the Indigo REST Server.
@@ -184,7 +188,7 @@ $ indigo_rest start
 
 ### indigo_rest.yaml
 
-The indigo_rest.yaml file is the configuration file with the parameters affecting Indigo REST Server itself.
+The indigo_rest.yaml file is the configuration file with the parameters affecting the Indigo REST Server itself.
 
 ```
 #
@@ -226,18 +230,15 @@ grpc:
 | grpc.server.port | |
 
 
-### Get mapping via HTTP
+### Get mapping via Indigo REST Server
 
 ```
-$ curl -XGET http://localhost:20000/api/mapping | jq .
+$ curl -X GET -s http://localhost:20000/api/mapping | jq .
 ```
 
 The result of the above mapping command is:
 
 ```
-  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
-                                 Dload  Upload   Total   Spent    Left  Speed
-100  1392  100  1392    0     0   176k      0 --:--:-- --:--:-- --:--:--  194k
 {
   "types": {
     "document": {
@@ -353,10 +354,10 @@ The result of the above mapping command is:
 See [Introduction to Index Mappings](http://www.blevesearch.com/docs/Index-Mapping/) and [type IndexMappingImpl](https://godoc.org/github.com/blevesearch/bleve/mapping#IndexMappingImpl) for more details.
 
 
-### Index documents via HTTP
+### Index documents via Indigo REST Server
 
 ```
-$ curl -XPOST http://localhost:20000/api/index -d '{
+$ curl -X POST -s http://localhost:20000/api/index -d '{
   "1": {
     "name": "Bleve",
     "description": "Full-text search library written in Go.",
@@ -403,20 +404,15 @@ $ curl -XPOST http://localhost:20000/api/index -d '{
 The result of the above index command is:
 
 ```
-  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
-                                 Dload  Upload   Total   Spent    Left  Speed
-100  1087  100    21  100  1066   1128  57274 --:--:-- --:--:-- --:--:-- 59222
 {
   "document_count": 5
 }
 ```
 
-### Delete documents via HTTP
-
-The `-d` option deletes the documents from specified Indigo Server.
+### Delete documents via Indigo REST Server
 
 ```
-$ curl -XDELETE http://localhost:20000/api/index -d '[
+$ curl -X DELETE -s http://localhost:20000/api/index -d '[
   "2",
   "3",
   "4"
@@ -426,16 +422,13 @@ $ curl -XDELETE http://localhost:20000/api/index -d '[
 The result of the above delete command is:
 
 ```
-  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
-                                 Dload  Upload   Total   Spent    Left  Speed
-100    44  100    21  100    23   1767   1936 --:--:-- --:--:-- --:--:--  2090
 {
   "document_count": 3
 }
 ```
 
 
-### Search documents via HTTP
+### Search documents via Indigo REST Server
 
 The `search` command queries the documents to specified Indigo Server.
 See [Queries](http://www.blevesearch.com/docs/Query/), [Query String Query](http://www.blevesearch.com/docs/Query-String-Query/) and [type SearchRequest](https://godoc.org/github.com/blevesearch/bleve#SearchRequest) for more details.
@@ -443,7 +436,7 @@ See [Queries](http://www.blevesearch.com/docs/Query/), [Query String Query](http
 #### Simple query
 
 ```
-$ curl -XPOST http://localhost:20000/api/search -d '{
+$ curl -X POST -s http://localhost:20000/api/search -d '{
   "query": {
     "query": "description:Go"
   },
@@ -463,9 +456,6 @@ $ curl -XPOST http://localhost:20000/api/search -d '{
 The result of the above simple query command is:
 
 ```
-  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
-                                 Dload  Upload   Total   Spent    Left  Speed
-100   792  100   605  100   187  81701  25253 --:--:-- --:--:-- --:--:-- 86428
 {
   "status": {
     "total": 1,
@@ -522,7 +512,7 @@ The result of the above simple query command is:
 ### Faceted query
 
 ```
-$ curl -XPOST http://localhost:20000/api/search -d '{
+$ curl -X POST -s http://localhost:20000/api/search -d '{
   "query": {
     "query": "description:Go"
   },
@@ -598,9 +588,6 @@ $ curl -XPOST http://localhost:20000/api/search -d '{
 The result of the above faceted query command is:
 
 ```
-  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
-                                 Dload  Upload   Total   Spent    Left  Speed
-100  3105  100  1757  100  1348   172k   132k --:--:-- --:--:-- --:--:--  190k
 {
   "status": {
     "total": 1,
@@ -753,7 +740,7 @@ The result of the above faceted query command is:
 ### Highlighted query
 
 ```
-$ curl -XPOST http://localhost:20000/api/search -d '{
+$ curl -X POST -s http://localhost:20000/api/search -d '{
   "query": {
     "query": "description:Go"
   },
@@ -780,9 +767,6 @@ $ curl -XPOST http://localhost:20000/api/search -d '{
 The result of the above highlighted query command is:
 
 ```
-  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
-                                 Dload  Upload   Total   Spent    Left  Speed
-100  1126  100   861  100   265    99k  31435 --:--:-- --:--:-- --:--:--  105k
 {
   "status": {
     "total": 1,
@@ -865,7 +849,7 @@ The result of the above highlighted query command is:
 ### Faceted and highlighted query
 
 ```
-$ curl -XPOST http://localhost:20000/api/search -d '{
+$ curl -X POST -s http://localhost:20000/api/search -d '{
   "query": {
     "query": "description:Go"
   },
@@ -948,9 +932,6 @@ $ curl -XPOST http://localhost:20000/api/search -d '{
 The result of the above faceted and highlighted query command is:
 
 ```
-  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
-                                 Dload  Upload   Total   Spent    Left  Speed
-100  3452  100  2012  100  1440  52959  37903 --:--:-- --:--:-- --:--:-- 54378
 {
   "status": {
     "total": 1,
