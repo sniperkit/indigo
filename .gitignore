@@ -35,6 +35,6 @@ _testmain.go
 vendor/*
 !/vendor/manifest
 index/
-indigo_cli/indigo_cli
+indigo/indigo
 indigo_grpc/indigo_grpc
 indigo_rest/indigo_rest

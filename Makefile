@@ -12,16 +12,10 @@ protoc:
 #	cd ${CURDIR}; go test
 
 build:
-	cd ${CURDIR}/indigo_cli; go build ${LDFLAGS}
-	cd ${CURDIR}/indigo_grpc; go build ${LDFLAGS}
-	cd ${CURDIR}/indigo_rest; go build ${LDFLAGS}
+	cd ${CURDIR}/indigo; go build ${LDFLAGS}
 
 install:
-	cd ${CURDIR}/indigo_cli; go install ${LDFLAGS}
-	cd ${CURDIR}/indigo_grpc; go install ${LDFLAGS}
-	cd ${CURDIR}/indigo_rest; go install ${LDFLAGS}
+	cd ${CURDIR}/indigo; go install ${LDFLAGS}
 
 clean:
-	cd ${CURDIR}/indigo_cli; go clean
-	cd ${CURDIR}/indigo_grpc; go clean
-	cd ${CURDIR}/indigo_rest; go clean
+	cd ${CURDIR}/indigo; go clean

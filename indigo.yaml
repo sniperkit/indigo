@@ -1,0 +1,33 @@
+#
+# Indigo gRPC Server configuration
+#
+grpc:
+    server:
+        name: localhost
+        port: 10000
+    log:
+        file: ./indigo_grpc.log
+        level: info
+        format: text
+
+#
+# Indigo REST Server configuration
+#
+rest:
+    server:
+        name: localhost
+        port: 20000
+        uripath: /api
+    log:
+        file: ./indigo_rest.log
+        level: info
+        format: text
+
+#
+# Index configuration
+#
+index:
+    dir: ./index
+    type: "upside_down"
+    store: "boltdb"
+    mapping: ./mapping.json

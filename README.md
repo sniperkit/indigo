@@ -1,9 +1,11 @@
-# Indigo gRPC Server
+# Indigo
 
 The Indigo gRPC Server is a search and indexing server built on top of [Bleve](http://www.blevesearch.com).
 
 
-## Start Indigo gRPC Server
+## Indigo gRPC Server
+
+### Start Indigo gRPC Server
 
 The `indigo_grpc start` command starts the Indigo gRPC Server.
 
@@ -11,25 +13,22 @@ The `indigo_grpc start` command starts the Indigo gRPC Server.
 $ indigo_grpc start
 ```
 
-### indigo_grpc.yaml
+#### indigo.yaml
 
-The indigo_grpc.yaml file is the configuration file with the parameters affecting the Indigo gRPC Server itself.
+The indigo.yaml file is the configuration file with the parameters affecting the Indigo gRPC Server itself.
 
 ```
 #
-# Logging configuration
-#
-log:
-    file: ./indigo_grpc.log
-    level: info
-    format: text
-
-#
 # Indigo gRPC Server configuration
 #
-server:
-    name: localhost
-    port: 10000
+grpc:
+    log:
+        file: ./indigo_grpc.log
+        level: info
+        format: text
+    server:
+        name: localhost
+        port: 10000
 
 #
 # Index configuration
@@ -174,11 +173,291 @@ See [Introduction to Index Mappings](http://www.blevesearch.com/docs/Index-Mappi
 }
 ```
 
-# Indigo REST Server
+
+## Indigo Client
+
+
+### Get mapping
+
+```
+$ indigo client mapping | jq .
+```
+
+The result of the above mapping command is:
+
+```
+{
+  "types": {
+    "document": {
+      "enabled": true,
+      "dynamic": true,
+      "properties": {
+        "category": {
+          "enabled": true,
+          "dynamic": true,
+          "fields": [
+            {
+              "type": "text",
+              "analyzer": "keyword",
+              "store": true,
+              "index": true,
+              "include_term_vectors": true,
+              "include_in_all": true
+            }
+          ],
+          "default_analyzer": ""
+        },
+        "description": {
+          "enabled": true,
+          "dynamic": true,
+          "fields": [
+            {
+              "type": "text",
+              "analyzer": "en",
+              "store": true,
+              "index": true,
+              "include_term_vectors": true,
+              "include_in_all": true
+            }
+          ],
+          "default_analyzer": ""
+        },
+        "name": {
+          "enabled": true,
+          "dynamic": true,
+          "fields": [
+            {
+              "type": "text",
+              "analyzer": "en",
+              "store": true,
+              "index": true,
+              "include_term_vectors": true,
+              "include_in_all": true
+            }
+          ],
+          "default_analyzer": ""
+        },
+        "popularity": {
+          "enabled": true,
+          "dynamic": true,
+          "fields": [
+            {
+              "type": "number",
+              "store": true,
+              "index": true,
+              "include_in_all": true
+            }
+          ],
+          "default_analyzer": ""
+        },
+        "release": {
+          "enabled": true,
+          "dynamic": true,
+          "fields": [
+            {
+              "type": "datetime",
+              "store": true,
+              "index": true,
+              "include_in_all": true
+            }
+          ],
+          "default_analyzer": ""
+        },
+        "type": {
+          "enabled": true,
+          "dynamic": true,
+          "fields": [
+            {
+              "type": "text",
+              "analyzer": "keyword",
+              "store": true,
+              "index": true,
+              "include_term_vectors": true,
+              "include_in_all": true
+            }
+          ],
+          "default_analyzer": ""
+        }
+      },
+      "default_analyzer": ""
+    }
+  },
+  "default_mapping": {
+    "enabled": true,
+    "dynamic": true,
+    "default_analyzer": ""
+  },
+  "type_field": "type",
+  "default_type": "document",
+  "default_analyzer": "standard",
+  "default_datetime_parser": "dateTimeOptional",
+  "default_field": "_all",
+  "store_dynamic": true,
+  "index_dynamic": true,
+  "analysis": {}
+}
+```
+
+### Index documents
+
+```
+$ indigo client index `{
+  "1": {
+    "name": "Bleve",
+    "description": "Full-text search library written in Go.",
+    "category": "Library",
+    "popularity": 1.0,
+    "release": "2014-04-18T00:00:00Z",
+    "type": "document"
+  },
+  "2": {
+    "name": "Lucene",
+    "description": "Full-text search library written in Java.",
+    "category": "Library",
+    "popularity": 2.5,
+    "release": "2000-03-30T00:00:00Z",
+    "type": "document"
+  },
+  "3": {
+    "name": "Solr",
+    "description": "Full-text search server built on Lucene.",
+    "category": "Server",
+    "popularity": 4.5,
+    "release": "2006-12-22T00:00:00Z",
+    "type": "document"
+  },
+  "4": {
+    "name": "Elasticsearch",
+    "description": "Full-text search server built on Lucene.",
+    "category": "Server",
+    "popularity": 5.0,
+    "release": "2010-02-08T00:00:00Z",
+    "type": "document"
+  },
+  "5": {
+    "name": "Indigo",
+    "description": "Full-text search server built on Bleve.",
+    "category": "Server",
+    "popularity": 5.0,
+    "release": "2017-01-13T00:00:00Z",
+    "type": "document"
+  }
+}`| jq .
+```
+
+
+The result of the above index command is:
+
+```
+{
+  "document_count": 5
+}
+```
+
+
+### Delete documents
+
+```
+$ indigo client index -d '[
+  "2",
+  "3",
+  "4"
+]' | jq .
+```
+
+The result of the above delete command is:
+
+```
+{
+  "document_count": 3
+}
+```
+
+
+### Search documents
+
+#### Simple query
+
+```
+$ ./indigo/indigo client search '{
+  "query": {
+    "query": "description:Go"
+  },
+  "size": 10,
+  "from": 0,
+  "fields": [
+    "name",
+    "description",
+    "category",
+    "popularity",
+    "release",
+    "type"
+  ]
+}' | jq .
+```
+
+The result of the above simple query command is:
+
+```
+{
+  "status": {
+    "total": 1,
+    "failed": 0,
+    "successful": 1
+  },
+  "request": {
+    "query": {
+      "query": "description:Go"
+    },
+    "size": 10,
+    "from": 0,
+    "highlight": null,
+    "fields": [
+      "name",
+      "description",
+      "category",
+      "popularity",
+      "release",
+      "type"
+    ],
+    "facets": null,
+    "explain": false,
+    "sort": [
+      "-_score"
+    ],
+    "includeLocations": false
+  },
+  "hits": [
+    {
+      "index": "./index",
+      "id": "1",
+      "score": 0.40824830532073975,
+      "sort": [
+        "_score"
+      ],
+      "fields": {
+        "category": "Library",
+        "description": "Full-text search library written in Go.",
+        "name": "Bleve",
+        "popularity": 1,
+        "release": "2014-04-18T00:00:00Z",
+        "type": "document"
+      }
+    }
+  ],
+  "total_hits": 1,
+  "max_score": 0.40824830532073975,
+  "took": 220795,
+  "facets": {}
+}
+```
+
+
+## Indigo REST Server
 
 The Indigo REST Server provides a RESTful JSON API into Indigo gRPC Server.
 
-## Start Indigo REST Server
+### Start Indigo REST Server
 
 The `indigo_rest start` command starts the Indigo REST Server.
 
@@ -186,27 +465,11 @@ The `indigo_rest start` command starts the Indigo REST Server.
 $ indigo_rest start
 ```
 
-### indigo_rest.yaml
+#### indigo.yaml
 
 The indigo_rest.yaml file is the configuration file with the parameters affecting the Indigo REST Server itself.
 
 ```
-#
-# Logging configuration
-#
-log:
-    file: ./indigo_rest.log
-    level: info
-    format: text
-
-#
-# Indigo REST Server configuration
-#
-server:
-    name: localhost
-    port: 20000
-    uripath: /api
-
 #
 # Indigo gRPC Server configuration
 #
@@ -214,6 +477,23 @@ grpc:
     server:
         name: localhost
         port: 10000
+    log:
+        file: ./indigo_grpc.log
+        level: info
+        format: text
+
+#
+# Indigo REST Server configuration
+#
+rest:
+    server:
+        name: localhost
+        port: 20000
+        uripath: /api
+    log:
+        file: ./indigo_rest.log
+        level: info
+        format: text
 ```
 
 #### Configuration parameters

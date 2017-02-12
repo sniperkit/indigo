@@ -18,7 +18,7 @@ var searchCmd = &cobra.Command{
 			return errors.New("must specify QUERY")
 		}
 
-		conn, err := grpc.Dial(fmt.Sprintf("%s:%d", serverName, serverPort), grpc.WithInsecure())
+		conn, err := grpc.Dial(fmt.Sprintf("%s:%d", grpcServerName, grpcServerPort), grpc.WithInsecure())
 		if err != nil {
 			return err
 		}
@@ -38,8 +38,5 @@ var searchCmd = &cobra.Command{
 }
 
 func init() {
-	searchCmd.Flags().StringVarP(&serverName, "grpc-name", "n", serverName, "sever name")
-	searchCmd.Flags().IntVarP(&serverPort, "grpc-port", "p", serverPort, "port number")
-
-	RootCmd.AddCommand(searchCmd)
+	clientCmd.AddCommand(searchCmd)
 }

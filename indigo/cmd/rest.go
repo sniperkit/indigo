@@ -11,17 +11,17 @@ import (
 	"time"
 )
 
-var startCmd = &cobra.Command{
-	Use:   "start",
+var restCmd = &cobra.Command{
+	Use:   "rest",
 	Short: "start Indigo REST Server",
-	Long:  `The start command starts the Indigo REST Server.`,
+	Long:  `The rest command starts the Indigo REST Server.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		/*
 		 * set log file
 		 */
-		logFile = config.GetString("log.file")
+		restLogFile = config.GetString("rest.log.file")
 		f, err := os.OpenFile(
-			logFile,
+			restLogFile,
 			os.O_WRONLY|os.O_CREATE|os.O_TRUNC,
 			0644)
 		if err != nil {
@@ -34,8 +34,8 @@ var startCmd = &cobra.Command{
 		/*
 		 * set log level
 		 */
-		logLevel = config.GetString("log.level")
-		switch logLevel {
+		restLogLevel = config.GetString("rest.log.level")
+		switch restLogLevel {
 		case "trace":
 			colog.SetDefaultLevel(colog.LTrace)
 		case "debug":
@@ -55,7 +55,8 @@ var startCmd = &cobra.Command{
 		/*
 		 * set log format
 		 */
-		switch logFormat {
+		restLogFormat = config.GetString("rest.log.format")
+		switch restLogFormat {
 		case "text":
 			colog.SetFormatter(&colog.StdFormatter{
 				Colors: true,
@@ -73,32 +74,32 @@ var startCmd = &cobra.Command{
 		/*
 		 * set server name
 		 */
-		serverName = config.GetString("server.name")
+		restServerName = config.GetString("rest.server.name")
 
 		/*
 		 * set server port number
 		 */
-		serverPort = config.GetInt("server.port")
+		restServerPort = config.GetInt("rest.server.port")
 
 		/*
 		 * set server path
 		 */
-		serverURIPath = config.GetString("server.uripath")
+		restServerURIPath = config.GetString("rest.server.uripath")
 
 		/*
 		 * set gRPC server port number
 		 */
-		gRPCServerName = config.GetString("grpc.server.name")
+		grpcServerName = config.GetString("grpc.server.name")
 
 		/*
 		 * set server port number
 		 */
-		gRPCServerPort = config.GetInt("grpc.server.port")
+		grpcServerPort = config.GetInt("grpc.server.port")
 
 		/*
 		 * start Indigo REST Server
 		 */
-		rs := rest.NewIndigoRESTServer(serverName, serverPort, serverURIPath, gRPCServerName, gRPCServerPort)
+		rs := rest.NewIndigoRESTServer(restServerName, restServerPort, restServerURIPath, grpcServerName, grpcServerPort)
 		rs.Start()
 
 		/*
@@ -144,7 +145,7 @@ func initConfig() {
 	/*
 	 * indigo_rest.yaml
 	 */
-	config.SetConfigName("indigo_rest")
+	config.SetConfigName("indigo")
 	config.SetConfigType("yaml")
 	config.AddConfigPath(configDir)
 	err := config.ReadInConfig()
@@ -152,33 +153,33 @@ func initConfig() {
 		log.Printf("warn: %s\n", err.Error())
 	}
 
-	config.BindPFlag("log.file", startCmd.Flags().Lookup("log-file"))
-	config.BindPFlag("log.level", startCmd.Flags().Lookup("log-level"))
-	config.BindPFlag("log.format", startCmd.Flags().Lookup("log-format"))
+	config.BindPFlag("rest.log.file", restCmd.Flags().Lookup("log-file"))
+	config.BindPFlag("rest.log.level", restCmd.Flags().Lookup("log-level"))
+	config.BindPFlag("rest.log.format", restCmd.Flags().Lookup("log-format"))
 
-	config.BindPFlag("server.name", startCmd.Flags().Lookup("server-name"))
-	config.BindPFlag("server.port", startCmd.Flags().Lookup("server-port"))
-	config.BindPFlag("server.uripath", startCmd.Flags().Lookup("server-uripath"))
+	config.BindPFlag("rest.server.name", restCmd.Flags().Lookup("server-name"))
+	config.BindPFlag("rest.server.port", restCmd.Flags().Lookup("server-port"))
+	config.BindPFlag("rest.server.uripath", restCmd.Flags().Lookup("server-uripath"))
 
-	config.BindPFlag("grpc.server.name", startCmd.Flags().Lookup("grpc-server-name"))
-	config.BindPFlag("grpc.server.port", startCmd.Flags().Lookup("grpc-server-port"))
+	config.BindPFlag("grpc.server.name", restCmd.Flags().Lookup("grpc-server-name"))
+	config.BindPFlag("grpc.server.port", restCmd.Flags().Lookup("grpc-server-port"))
 }
 
 func init() {
 	cobra.OnInitialize(initConfig)
 
-	startCmd.Flags().StringVarP(&configDir, "conf-dir", "c", configDir, "config directory")
+	restCmd.Flags().StringVarP(&configDir, "conf-dir", "c", configDir, "config directory")
 
-	startCmd.Flags().StringVarP(&logFile, "log-file", "f", logFile, "log file")
-	startCmd.Flags().StringVarP(&logLevel, "log-level", "l", logLevel, "log level")
-	startCmd.Flags().StringVarP(&logFormat, "log-format", "F", logFormat, "log format")
+	restCmd.Flags().StringVarP(&restLogFile, "log-file", "f", restLogFile, "log file")
+	restCmd.Flags().StringVarP(&restLogLevel, "log-level", "l", restLogLevel, "log level")
+	restCmd.Flags().StringVarP(&restLogFormat, "log-format", "F", restLogFormat, "log format")
 
-	startCmd.Flags().StringVarP(&serverName, "server-name", "n", serverName, "name to run Indigo REST Server on")
-	startCmd.Flags().IntVarP(&serverPort, "server-port", "p", serverPort, "port to run Indigo REST Server on")
-	startCmd.Flags().StringVarP(&serverURIPath, "server-uripath", "u", serverURIPath, "URI path to run Indigo REST Server on")
+	restCmd.Flags().StringVarP(&restServerName, "server-name", "n", restServerName, "name to run Indigo REST Server on")
+	restCmd.Flags().IntVarP(&restServerPort, "server-port", "p", restServerPort, "port to run Indigo REST Server on")
+	restCmd.Flags().StringVarP(&restServerURIPath, "server-uripath", "u", restServerURIPath, "URI path to run Indigo REST Server on")
 
-	startCmd.Flags().StringVarP(&gRPCServerName, "grpc-server-name", "N", gRPCServerName, "name to run Indigo gRPC Server on")
-	startCmd.Flags().IntVarP(&gRPCServerPort, "grpc-server-port", "P", gRPCServerPort, "port to run Indigo gRPC Server on")
+	restCmd.Flags().StringVarP(&grpcServerName, "grpc-server-name", "N", grpcServerName, "name to run Indigo gRPC Server on")
+	restCmd.Flags().IntVarP(&grpcServerPort, "grpc-server-port", "P", grpcServerPort, "port to run Indigo gRPC Server on")
 
-	RootCmd.AddCommand(startCmd)
+	RootCmd.AddCommand(restCmd)
 }

@@ -13,7 +13,7 @@ var mappingCmd = &cobra.Command{
 	Short: "prints the index mapping used for the Indigo gRPC Server",
 	Long:  `The mapping command prints a JSON representation of the index mapping used for the Indigo gRPC Server.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		conn, err := grpc.Dial(fmt.Sprintf("%s:%d", serverName, serverPort), grpc.WithInsecure())
+		conn, err := grpc.Dial(fmt.Sprintf("%s:%d", grpcServerName, grpcServerPort), grpc.WithInsecure())
 		if err != nil {
 			return err
 		}
@@ -32,8 +32,5 @@ var mappingCmd = &cobra.Command{
 }
 
 func init() {
-	mappingCmd.Flags().StringVarP(&serverName, "grpc-name", "n", serverName, "sever name")
-	mappingCmd.Flags().IntVarP(&serverPort, "grpc-port", "p", serverPort, "port number")
-
-	RootCmd.AddCommand(mappingCmd)
+	clientCmd.AddCommand(mappingCmd)
 }

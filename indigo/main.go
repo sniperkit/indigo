@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/mosuka/indigo/indigo_grpc/cmd"
+	"github.com/mosuka/indigo/indigo/cmd"
 )
 
 func main() {

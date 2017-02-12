@@ -18,7 +18,7 @@ var indexCmd = &cobra.Command{
 			return errors.New("must specify DOCUMENTS")
 		}
 
-		conn, err := grpc.Dial(fmt.Sprintf("%s:%d", serverName, serverPort), grpc.WithInsecure())
+		conn, err := grpc.Dial(fmt.Sprintf("%s:%d", grpcServerName, grpcServerPort), grpc.WithInsecure())
 		if err != nil {
 			return err
 		}
@@ -43,10 +43,8 @@ var indexCmd = &cobra.Command{
 }
 
 func init() {
-	indexCmd.Flags().StringVarP(&serverName, "grpc-name", "n", serverName, "sever name")
-	indexCmd.Flags().IntVarP(&serverPort, "grpc-port", "p", serverPort, "port number")
 	indexCmd.Flags().Int32VarP(&batchSize, "batch-size", "b", batchSize, "port number")
 	indexCmd.Flags().BoolVarP(&deleteFlag, "delete", "d", deleteFlag, "delete documents")
 
-	RootCmd.AddCommand(indexCmd)
+	clientCmd.AddCommand(indexCmd)
 }

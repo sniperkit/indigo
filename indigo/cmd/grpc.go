@@ -11,17 +11,17 @@ import (
 	"time"
 )
 
-var startCmd = &cobra.Command{
-	Use:   "start",
+var grpcCmd = &cobra.Command{
+	Use:   "grpc",
 	Short: "start Indigo gRPC Server",
-	Long:  `The start command starts the Indigo gRPC Server.`,
+	Long:  `The grpc command starts the Indigo gRPC Server.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		/*
 		 * set log file
 		 */
-		logFile = config.GetString("log.file")
+		grpcLogFile = config.GetString("grpc.log.file")
 		f, err := os.OpenFile(
-			logFile,
+			grpcLogFile,
 			os.O_WRONLY|os.O_CREATE|os.O_TRUNC,
 			0644)
 		if err != nil {
@@ -34,8 +34,8 @@ var startCmd = &cobra.Command{
 		/*
 		 * set log level
 		 */
-		logLevel = config.GetString("log.level")
-		switch logLevel {
+		grpcLogLevel = config.GetString("grpc.log.level")
+		switch grpcLogLevel {
 		case "trace":
 			colog.SetDefaultLevel(colog.LTrace)
 		case "debug":
@@ -55,7 +55,8 @@ var startCmd = &cobra.Command{
 		/*
 		 * set log format
 		 */
-		switch logFormat {
+		grpcLogLevel = config.GetString("grpc.log.format")
+		switch grpcLogFormat {
 		case "text":
 			colog.SetFormatter(&colog.StdFormatter{
 				Colors: true,
@@ -73,12 +74,12 @@ var startCmd = &cobra.Command{
 		/*
 		 * set server port number
 		 */
-		serverName = config.GetString("server.name")
+		grpcServerName = config.GetString("grpc.server.name")
 
 		/*
 		 * set server port number
 		 */
-		serverPort = config.GetInt("server.port")
+		grpcServerPort = config.GetInt("grpc.server.port")
 
 		/*
 		 * set index directory
@@ -103,7 +104,7 @@ var startCmd = &cobra.Command{
 		/*
 		 * start Indigo gRPC Server
 		 */
-		gs := grpc.NewIndigoGRPCServer(serverName, serverPort, indexDir, indexMapping, indexType, indexStore)
+		gs := grpc.NewIndigoGRPCServer(grpcServerName, grpcServerPort, indexDir, indexMapping, indexType, indexStore)
 		gs.Start()
 
 		/*
@@ -145,11 +146,11 @@ var startCmd = &cobra.Command{
 	},
 }
 
-func initConfig() {
+func initGRPCCmd() {
 	/*
-	 * indigo_grpc.yaml
+	 * indigo.yaml
 	 */
-	config.SetConfigName("indigo_grpc")
+	config.SetConfigName("indigo")
 	config.SetConfigType("yaml")
 	config.AddConfigPath(configDir)
 	err := config.ReadInConfig()
@@ -157,35 +158,33 @@ func initConfig() {
 		log.Printf("warn: %s\n", err.Error())
 	}
 
-	config.BindPFlag("log.file", startCmd.Flags().Lookup("log-file"))
-	config.BindPFlag("log.level", startCmd.Flags().Lookup("log-level"))
-	config.BindPFlag("log.format", startCmd.Flags().Lookup("log-format"))
+	config.BindPFlag("grpc.server.name", grpcCmd.Flags().Lookup("grpc-name"))
+	config.BindPFlag("grpc.server.port", grpcCmd.Flags().Lookup("grpc-port"))
+	config.BindPFlag("grpc.log.file", grpcCmd.Flags().Lookup("log-file"))
+	config.BindPFlag("grpc.log.level", grpcCmd.Flags().Lookup("log-level"))
+	config.BindPFlag("grpc.log.format", grpcCmd.Flags().Lookup("log-format"))
 
-	config.BindPFlag("grpc.name", startCmd.Flags().Lookup("grpc-name"))
-	config.BindPFlag("grpc.port", startCmd.Flags().Lookup("grpc-port"))
-
-	config.BindPFlag("index.dir", startCmd.Flags().Lookup("index-dir"))
-	config.BindPFlag("index.type", startCmd.Flags().Lookup("index-type"))
-	config.BindPFlag("index.store", startCmd.Flags().Lookup("index-store"))
-	config.BindPFlag("index.mapping", startCmd.Flags().Lookup("index-mapping"))
+	config.BindPFlag("index.dir", grpcCmd.Flags().Lookup("index-dir"))
+	config.BindPFlag("index.type", grpcCmd.Flags().Lookup("index-type"))
+	config.BindPFlag("index.store", grpcCmd.Flags().Lookup("index-store"))
+	config.BindPFlag("index.mapping", grpcCmd.Flags().Lookup("index-mapping"))
 }
 
 func init() {
-	cobra.OnInitialize(initConfig)
+	cobra.OnInitialize(initGRPCCmd)
 
-	startCmd.Flags().StringVarP(&configDir, "conf-dir", "c", configDir, "config directory")
+	grpcCmd.Flags().StringVarP(&configDir, "conf-dir", "c", configDir, "grpcConfig directory")
 
-	startCmd.Flags().StringVarP(&logFile, "log-file", "f", logFile, "log file")
-	startCmd.Flags().StringVarP(&logLevel, "log-level", "l", logLevel, "log level")
-	startCmd.Flags().StringVarP(&logFormat, "log-format", "F", logFormat, "log format")
+	grpcCmd.Flags().StringVarP(&grpcServerName, "server-name", "n", grpcServerName, "name to run Indigo gRPC Server on")
+	grpcCmd.Flags().IntVarP(&grpcServerPort, "server-port", "p", grpcServerPort, "port to run Indigo gRPC Server on")
+	grpcCmd.Flags().StringVarP(&grpcLogFile, "log-file", "f", grpcLogFile, "log file")
+	grpcCmd.Flags().StringVarP(&grpcLogLevel, "log-level", "l", grpcLogLevel, "log level")
+	grpcCmd.Flags().StringVarP(&grpcLogFormat, "log-format", "F", grpcLogFormat, "log format")
 
-	startCmd.Flags().StringVarP(&serverName, "server-name", "n", serverName, "name to run Indigo Server on")
-	startCmd.Flags().IntVarP(&serverPort, "server-port", "p", serverPort, "port to run Indigo Server on")
+	grpcCmd.Flags().StringVarP(&indexDir, "index-dir", "d", indexDir, "index path")
+	grpcCmd.Flags().StringVarP(&indexMapping, "index-mapping", "m", indexMapping, "index mapping")
+	grpcCmd.Flags().StringVarP(&indexType, "index-type", "t", indexType, "index type")
+	grpcCmd.Flags().StringVarP(&indexStore, "index-store", "s", indexStore, "index store")
 
-	startCmd.Flags().StringVarP(&indexDir, "index-dir", "d", indexDir, "index path")
-	startCmd.Flags().StringVarP(&indexMapping, "index-mapping", "m", indexMapping, "index mapping")
-	startCmd.Flags().StringVarP(&indexType, "index-type", "t", indexType, "index type")
-	startCmd.Flags().StringVarP(&indexStore, "index-store", "s", indexStore, "index store")
-
-	RootCmd.AddCommand(startCmd)
+	RootCmd.AddCommand(grpcCmd)
 }
