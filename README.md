@@ -226,8 +226,8 @@ grpc:
 | server.name      | Server name |
 | server.port      | Server port |
 | server.uripath   | Server URI path |
-| grpc.server.name | |
-| grpc.server.port | |
+| grpc.server.name | Indigo gRPC Server name |
+| grpc.server.port | Indigo gRPC Server port |
 
 
 ### Get mapping via Indigo REST Server
