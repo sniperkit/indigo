@@ -36,5 +36,3 @@ vendor/*
 !/vendor/manifest
 index/
 indigo/indigo
-indigo_grpc/indigo_grpc
-indigo_rest/indigo_rest

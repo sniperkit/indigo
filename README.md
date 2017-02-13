@@ -1,16 +1,18 @@
 # Indigo
 
-The Indigo gRPC Server is a search and indexing server built on top of [Bleve](http://www.blevesearch.com).
+The Indigo is an index server written in [Go](https://golang.org), built on top of the [Bleve](http://www.blevesearch.com).
 
 
 ## Indigo gRPC Server
 
+*WIP:*
+
 ### Start Indigo gRPC Server
 
-The `indigo_grpc start` command starts the Indigo gRPC Server.
+The `indigo start grpc` command starts the Indigo gRPC Server.
 
 ```
-$ indigo_grpc start
+$ indigo start grpc
 ```
 
 #### indigo.yaml
@@ -29,31 +31,20 @@ grpc:
     server:
         name: localhost
         port: 10000
-
-#
-# Index configuration
-#
-index:
-    dir: ./index
-    type: "upside_down"
-    store: "boltdb"
-    mapping: ./mapping.json
+        data:
+            dir: ./data
 ```
 
 #### Configuration parameters
 
-| Name          | Description   |
-| ------------- | ------------- |
-| log.file      | Log file path |
-| log.level     | Log level. You can choose `trace`, `debug`, `info`, `warn`, `error`, `alert`. default is `info` |
-| log.format    | Log format. You can choose `text` or `json`. default is `text` |
-| server.name   | Server name |
-| server.port   | Server port |
-| index.dir     | Creates index at the specified path, if not exist |
-| index.type    | Index type. You can choose `smolder` or `upside_down`. Default is `upside_down` |
-| index.store   | Index store. You can choose `boltdb`, `goleveldb`, `gtreap`, `metrics` or `moss`. Default is `boltdb` |
-| index.mapping | IndexMapping file path |
-
+| Name            | Description   |
+| --------------- | ------------- |
+| log.file        | Log file path |
+| log.level       | Log level. You can choose `trace`, `debug`, `info`, `warn`, `error`, `alert`. default is `info` |
+| log.format      | Log format. You can choose `text` or `json`. default is `text` |
+| server.name     | Server name |
+| server.port     | Server port |
+| server.data.dir | Creates index at the specified path, if not exist |
 
 ### mapping.json
 
@@ -176,8 +167,9 @@ See [Introduction to Index Mappings](http://www.blevesearch.com/docs/Index-Mappi
 
 ## Indigo Client
 
+*WIP:*
 
-### Get mapping
+### Get index mapping
 
 ```
 $ indigo client mapping | jq .
@@ -301,7 +293,7 @@ The result of the above mapping command is:
 ### Index documents
 
 ```
-$ indigo client index `{
+$ indigo client index '{
   "1": {
     "name": "Bleve",
     "description": "Full-text search library written in Go.",
@@ -342,7 +334,7 @@ $ indigo client index `{
     "release": "2017-01-13T00:00:00Z",
     "type": "document"
   }
-}`| jq .
+}' | jq .
 ```
 
 
@@ -467,7 +459,7 @@ $ indigo_rest start
 
 #### indigo.yaml
 
-The indigo_rest.yaml file is the configuration file with the parameters affecting the Indigo REST Server itself.
+The indigo.yaml file is the configuration file with the parameters affecting the Indigo REST Server itself.
 
 ```
 #
@@ -477,35 +469,31 @@ grpc:
     server:
         name: localhost
         port: 10000
-    log:
-        file: ./indigo_grpc.log
-        level: info
-        format: text
 
 #
 # Indigo REST Server configuration
 #
 rest:
-    server:
-        name: localhost
-        port: 20000
-        uripath: /api
     log:
         file: ./indigo_rest.log
         level: info
         format: text
+    server:
+        name: localhost
+        port: 20000
+        base_path: /api
 ```
 
 #### Configuration parameters
 
 | Name             | Description   |
 | ---------------- | ------------- |
-| log.file         | Log file path |
-| log.level        | Log level. You can choose `trace`, `debug`, `info`, `warn`, `error`, `alert`. default is `info` |
-| log.format       | Log format. You can choose `text` or `json`. default is `text` |
-| server.name      | Server name |
-| server.port      | Server port |
-| server.uripath   | Server URI path |
+| rest.log.file         | Log file path |
+| rest.log.level        | Log level. You can choose `trace`, `debug`, `info`, `warn`, `error`, `alert`. default is `info` |
+| rest.log.format       | Log format. You can choose `text` or `json`. default is `text` |
+| rest.server.name      | Server name |
+| rest.server.port      | Server port |
+| rest.server.base_path   | Server URI path |
 | grpc.server.name | Indigo gRPC Server name |
 | grpc.server.port | Indigo gRPC Server port |
 
