@@ -11,8 +11,8 @@ import (
 
 var createIndexCmd = &cobra.Command{
 	Use:   "index INDEX_NAME INDEX_MAPPING",
-	Short: "prints the index mapping used for the Indigo gRPC Server",
-	Long:  `The mapping command prints a JSON representation of the index mapping used for the Indigo gRPC Server.`,
+	Short: "creates the index to the Indigo gRPC Server",
+	Long:  `The create index command creates the index to the Indigo gRPC Server.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if len(args) < 2 {
 			return errors.New("few arguments")

@@ -149,7 +149,6 @@ $ ./indigo/indigo create index example "$(cat mapping.json)" -s boltdb -t upside
 
 ```
 $ ./indigo/indigo get mapping example | jq .
-$ indigo client mapping | jq .
 ```
 
 The result of the above mapping command is:

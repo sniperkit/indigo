@@ -9,17 +9,16 @@ import (
 	"google.golang.org/grpc"
 )
 
-var deleteDocumentsCmd = &cobra.Command{
-	Use:   "documents INDEX_NAME DOCUMENT_IDS",
-	Short: "deletes the documents from the Indigo gRPC Server",
-	Long:  `The delete documents command deletes the documents from the Indigo gRPC Server.`,
+var deleteIndexCmd = &cobra.Command{
+	Use:   "index INDEX_NAME",
+	Short: "deletes the index from the Indigo gRPC Server",
+	Long:  `The delete index command deletes the index from the Indigo gRPC Server.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		if len(args) < 2 {
+		if len(args) < 1 {
 			return errors.New("few arguments")
 		}
 
 		indexName := args[0]
-		documentIds := args[1]
 
 		conn, err := grpc.Dial(fmt.Sprintf("%s:%d", grpcServerName, grpcServerPort), grpc.WithInsecure())
 		if err != nil {
@@ -28,7 +27,7 @@ var deleteDocumentsCmd = &cobra.Command{
 		defer conn.Close()
 
 		c := proto.NewIndigoClient(conn)
-		resp, err := c.DeleteDocuments(context.Background(), &proto.DeleteDocumentsRequest{IndexName: indexName, Ids: documentIds, BatchSize: batchSize})
+		resp, err := c.DeleteIndex(context.Background(), &proto.DeleteIndexRequest{IndexName: indexName})
 		if err != nil {
 			return err
 		}
@@ -40,7 +39,5 @@ var deleteDocumentsCmd = &cobra.Command{
 }
 
 func init() {
-	deleteDocumentsCmd.Flags().Int32VarP(&batchSize, "batch-size", "b", batchSize, "port number")
-
-	deleteCmd.AddCommand(deleteDocumentsCmd)
+	deleteCmd.AddCommand(deleteIndexCmd)
 }

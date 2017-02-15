@@ -13,8 +13,8 @@ var logOutput *os.File
 
 var startCmd = &cobra.Command{
 	Use:   "start",
-	Short: "client for the Indigo gRPC Server",
-	Long:  `The client command for the Indigo gRPC Server.`,
+	Short: "starts the Indigo Server",
+	Long:  `The start command starts the Indigo Server.`,
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 		/*
 		 * set log file
@@ -78,6 +78,7 @@ var startCmd = &cobra.Command{
 		if len(args) < 1 {
 			return errors.New("few arguments")
 		}
+
 		return nil
 	},
 	PersistentPostRunE: func(cmd *cobra.Command, args []string) error {

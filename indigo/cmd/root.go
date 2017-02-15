@@ -24,6 +24,7 @@ var RootCmd = &cobra.Command{
 		if len(args) < 1 {
 			return errors.New("few arguments")
 		}
+
 		return nil
 	},
 }

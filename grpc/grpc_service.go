@@ -63,8 +63,6 @@ func (igs *indigoGRPCService) CreateIndex(ctx context.Context, r *proto.CreateIn
 		log.Printf("error: index name exists (%s) index_name=%s\n", err.Error(), r.IndexName)
 	}
 
-	index.Stats()
-
 	return &proto.CreateIndexResponse{Result: indexPath}, nil
 }
 
