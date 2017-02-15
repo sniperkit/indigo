@@ -21,7 +21,7 @@ func NewGetMappingHandler(client proto.IndigoClient) *GetMappingHandler {
 func (h *GetMappingHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	log.Printf("info: request_uri=%s user_agent=%s\n", req.RequestURI, req.UserAgent())
 
-	resp, err := h.client.Mapping(context.Background(), &proto.MappingRequest{})
+	resp, err := h.client.GetMapping(context.Background(), &proto.GetMappingRequest{})
 	if err != nil {
 		w.WriteHeader(http.StatusServiceUnavailable)
 		log.Printf("error: %s", err.Error())

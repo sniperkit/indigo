@@ -36,7 +36,7 @@ func (h *PostIndexHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		batchSize = 1000
 	}
 
-	resp, err := h.client.Index(context.Background(), &proto.IndexRequest{Documents: string(requestBody), BatchSize: int32(batchSize)})
+	resp, err := h.client.IndexDocuments(context.Background(), &proto.IndexDocumentsRequest{Documents: string(requestBody), BatchSize: int32(batchSize)})
 	if err != nil {
 		w.WriteHeader(http.StatusServiceUnavailable)
 		log.Printf("error: %s", err.Error())

@@ -3,32 +3,79 @@ syntax = "proto3";
 package proto;
 
 service Indigo {
-    rpc Mapping(MappingRequest) returns (MappingResponse) {}
-    rpc Index(IndexRequest) returns (IndexResponse) {}
-    rpc Delete(DeleteRequest) returns (IndexResponse) {}
-    rpc Search(SearchRequest) returns (SearchResponse) {}
+    rpc CreateIndex(CreateIndexRequest) returns (CreateIndexResponse) {}
+    rpc DeleteIndex(DeleteIndexRequest) returns (DeleteIndexResponse) {}
+    rpc GetMapping(GetMappingRequest) returns (GetMappingResponse) {}
+    rpc IndexDocument(IndexDocumentRequest) returns (IndexDocumentResponse) {}
+    rpc DeleteDocument(DeleteDocumentRequest) returns (DeleteDocumentResponse) {}
+    rpc IndexDocuments(IndexDocumentsRequest) returns (IndexDocumentsResponse) {}
+    rpc DeleteDocuments(DeleteDocumentsRequest) returns (DeleteDocumentsResponse) {}
+    rpc SearchDocuments(SearchDocumentsRequest) returns (SearchDocumentsResponse) {}
 }
 
-message MappingRequest {}
-message MappingResponse {
+message CreateIndexRequest {
+    string indexName = 1;
+    string indexMapping = 2;
+    string indexType = 3;
+    string indexStore = 4;
+}
+message CreateIndexResponse {
+    string result = 1;
+}
+
+message DeleteIndexRequest {
+    string indexName = 1;
+}
+message DeleteIndexResponse {
+    string result = 1;
+}
+
+message GetMappingRequest {
+    string indexName = 1;
+}
+message GetMappingResponse {
     string mapping = 1;
 }
 
-message IndexRequest {
-    string documents = 1;
-    int32 batchSize = 2;
+message IndexDocumentRequest {
+    string indexName = 1;
+    string documentID = 2;
+    string document = 3;
 }
-message DeleteRequest {
-    string ids = 1;
-    int32 batchSize = 2;
-}
-message IndexResponse {
+message IndexDocumentResponse {
     string result = 1;
 }
 
-message SearchRequest {
-    string request = 1;
+message DeleteDocumentRequest {
+    string indexName = 1;
+    string documentID = 2;
 }
-message SearchResponse {
+message DeleteDocumentResponse {
     string result = 1;
+}
+
+message IndexDocumentsRequest {
+    string indexName = 1;
+    string documents = 2;
+    int32 batchSize = 3;
+}
+message IndexDocumentsResponse {
+    string result = 1;
+}
+
+message DeleteDocumentsRequest {
+    string indexName = 1;
+    string ids = 2;
+    int32 batchSize = 3;
+}
+message DeleteDocumentsResponse {
+    string result = 1;
+}
+
+message SearchDocumentsRequest {
+    string indexName = 1;
+    string searchRequest = 2;
+}
+message SearchDocumentsResponse {
+    string searchResult = 1;
 }

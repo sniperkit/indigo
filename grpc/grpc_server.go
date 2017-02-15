@@ -13,17 +13,17 @@ type indigoGRPCServer struct {
 	listener net.Listener
 }
 
-func NewIndigoGRPCServer(serverName string, serverPort int, indexDir string, indexMapping string, indexType string, indexStore string) *indigoGRPCServer {
+func NewIndigoGRPCServer(serverPort int, dataDir string) *indigoGRPCServer {
 	server := grpc.NewServer()
 
-	proto.RegisterIndigoServer(server, NewIndigoGRPCService(indexDir, indexMapping, indexType, indexStore))
+	proto.RegisterIndigoServer(server, NewIndigoGRPCService(dataDir))
 	listener, err := net.Listen("tcp", fmt.Sprintf(":%d", serverPort))
 	if err != nil {
-		log.Printf("error: %s\n", err.Error())
+		log.Printf("error: failed to create listener (%s) port=%d \n", err.Error(), serverPort)
 		return nil
 	}
 
-	log.Printf("info: The Indigo gRPC Server created name=%s port=%d\n", serverName, serverPort)
+	log.Printf("info: The Indigo gRPC Server created port=%d\n", serverPort)
 
 	return &indigoGRPCServer{
 		server:   server,
@@ -34,16 +34,18 @@ func NewIndigoGRPCServer(serverName string, serverPort int, indexDir string, ind
 func (igs *indigoGRPCServer) Start() error {
 	go func() {
 		igs.server.Serve(igs.listener)
-		log.Print("info: The Indigo gRPC Server started\n")
 		return
 	}()
+
+	log.Printf("info: The Indigo gRPC Server started addr=%s\n", igs.listener.Addr().String())
 
 	return nil
 }
 
 func (igs *indigoGRPCServer) Stop() error {
 	igs.server.GracefulStop()
-	log.Print("info: The Indigo gRPC Server stopped\n")
+
+	log.Printf("info: The Indigo gRPC Server stopped addr=%s\n", igs.listener.Addr().String())
 
 	return nil
 }

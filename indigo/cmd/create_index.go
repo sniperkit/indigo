@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
 	"github.com/mosuka/indigo/proto"
 	"github.com/spf13/cobra"
@@ -8,11 +9,18 @@ import (
 	"google.golang.org/grpc"
 )
 
-var mappingCmd = &cobra.Command{
-	Use:   "mapping",
+var createIndexCmd = &cobra.Command{
+	Use:   "index INDEX_NAME INDEX_MAPPING",
 	Short: "prints the index mapping used for the Indigo gRPC Server",
 	Long:  `The mapping command prints a JSON representation of the index mapping used for the Indigo gRPC Server.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
+		if len(args) < 2 {
+			return errors.New("few arguments")
+		}
+
+		indexName := args[0]
+		indexMapping := args[1]
+
 		conn, err := grpc.Dial(fmt.Sprintf("%s:%d", grpcServerName, grpcServerPort), grpc.WithInsecure())
 		if err != nil {
 			return err
@@ -20,17 +28,20 @@ var mappingCmd = &cobra.Command{
 		defer conn.Close()
 
 		c := proto.NewIndigoClient(conn)
-		resp, err := c.Mapping(context.Background(), &proto.MappingRequest{})
+		resp, err := c.CreateIndex(context.Background(), &proto.CreateIndexRequest{IndexName: indexName, IndexMapping: indexMapping, IndexType: indexType, IndexStore: indexStore})
 		if err != nil {
 			return err
 		}
 
-		fmt.Printf("%s\n", resp.Mapping)
+		fmt.Printf("%s\n", resp.Result)
 
 		return nil
 	},
 }
 
 func init() {
-	clientCmd.AddCommand(mappingCmd)
+	createIndexCmd.Flags().StringVarP(&indexType, "index-type", "t", indexType, "index type")
+	createIndexCmd.Flags().StringVarP(&indexStore, "index-store", "s", indexStore, "index store")
+
+	createCmd.AddCommand(createIndexCmd)
 }

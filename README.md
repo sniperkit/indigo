@@ -15,37 +15,6 @@ The `indigo start grpc` command starts the Indigo gRPC Server.
 $ indigo start grpc
 ```
 
-#### indigo.yaml
-
-The indigo.yaml file is the configuration file with the parameters affecting the Indigo gRPC Server itself.
-
-```
-#
-# Indigo gRPC Server configuration
-#
-grpc:
-    log:
-        file: ./indigo_grpc.log
-        level: info
-        format: text
-    server:
-        name: localhost
-        port: 10000
-        data:
-            dir: ./data
-```
-
-#### Configuration parameters
-
-| Name            | Description   |
-| --------------- | ------------- |
-| log.file        | Log file path |
-| log.level       | Log level. You can choose `trace`, `debug`, `info`, `warn`, `error`, `alert`. default is `info` |
-| log.format      | Log format. You can choose `text` or `json`. default is `text` |
-| server.name     | Server name |
-| server.port     | Server port |
-| server.data.dir | Creates index at the specified path, if not exist |
-
 ### mapping.json
 
 The mapping.json file contains all of the details about which fields your documents can contain, and how those fields should be dealt with when adding documents to the index, or when querying those fields.
@@ -169,9 +138,17 @@ See [Introduction to Index Mappings](http://www.blevesearch.com/docs/Index-Mappi
 
 *WIP:*
 
+### Create index
+
+```
+$ ./indigo/indigo create index example "$(cat mapping.json)" -s boltdb -t upside_down
+```
+
+
 ### Get index mapping
 
 ```
+$ ./indigo/indigo get mapping example | jq .
 $ indigo client mapping | jq .
 ```
 

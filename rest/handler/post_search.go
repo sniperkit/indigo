@@ -29,7 +29,7 @@ func (h *PostSearchHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) 
 		return
 	}
 
-	resp, err := h.client.Search(context.Background(), &proto.SearchRequest{Request: string(requestBody)})
+	resp, err := h.client.SearchDocuments(context.Background(), &proto.SearchDocumentsRequest{SearchRequest: string(requestBody)})
 	if err != nil {
 		w.WriteHeader(http.StatusServiceUnavailable)
 		log.Printf("error: %s", err.Error())
@@ -37,5 +37,5 @@ func (h *PostSearchHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) 
 	}
 
 	w.WriteHeader(http.StatusOK)
-	fmt.Fprintf(w, "%s\n", resp.Result)
+	fmt.Fprintf(w, "%s\n", resp.SearchResult)
 }

@@ -34,5 +34,5 @@ _testmain.go
 *.log
 vendor/*
 !/vendor/manifest
-index/
+/data
 indigo/indigo
