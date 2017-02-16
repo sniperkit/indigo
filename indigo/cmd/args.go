@@ -10,7 +10,8 @@ var logFormat string = "text"
 
 var dataDir string = "./data"
 
-var restServerURIPath string = "/api"
+var baseURI string = "/api"
+
 var grpcServerName string = "localhost"
 var grpcServerPort int = 10000
 
