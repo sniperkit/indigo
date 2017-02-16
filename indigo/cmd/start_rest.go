@@ -17,7 +17,7 @@ var startRESTCmd = &cobra.Command{
 		/*
 		 * start Indigo REST Server
 		 */
-		rs := rest.NewIndigoRESTServer(serverPort, baseURI, grpcServerName, grpcServerPort)
+		rs := rest.NewIndigoRESTServer(serverPort, baseURI, gRPCServerName, gRPCServerPort)
 		rs.Start()
 
 		/*

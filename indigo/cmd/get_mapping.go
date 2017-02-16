@@ -20,7 +20,7 @@ var getMappingCmd = &cobra.Command{
 
 		indexName := args[0]
 
-		conn, err := grpc.Dial(fmt.Sprintf("%s:%d", grpcServerName, grpcServerPort), grpc.WithInsecure())
+		conn, err := grpc.Dial(fmt.Sprintf("%s:%d", gRPCServerName, gRPCServerPort), grpc.WithInsecure())
 		if err != nil {
 			return err
 		}

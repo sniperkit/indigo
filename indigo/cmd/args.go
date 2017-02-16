@@ -12,8 +12,8 @@ var dataDir string = "./data"
 
 var baseURI string = "/api"
 
-var grpcServerName string = "localhost"
-var grpcServerPort int = 10000
+var gRPCServerName string = "localhost"
+var gRPCServerPort int = 10000
 
 var indexType string = "upside_down"
 var indexStore string = "boltdb"
