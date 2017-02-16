@@ -7,8 +7,8 @@ import (
 
 var getCmd = &cobra.Command{
 	Use:   "get",
-	Short: "client for the Indigo gRPC Server",
-	Long:  `The client command for the Indigo gRPC Server.`,
+	Short: "gets the object from the Indigo gRPC Server",
+	Long:  `The get command gets the object from the Indigo gRPC Server.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if len(args) < 1 {
 			return errors.New("few arguments")

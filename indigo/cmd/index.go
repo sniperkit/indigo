@@ -7,8 +7,8 @@ import (
 
 var indexCmd = &cobra.Command{
 	Use:   "index",
-	Short: "client for the Indigo gRPC Server",
-	Long:  `The client command for the Indigo gRPC Server.`,
+	Short: "indexes the document(s) to the Indigo gRPC Server",
+	Long:  `The index command indexes the document(s) to the Indigo gRPC Server.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if len(args) < 1 {
 			return errors.New("few arguments")

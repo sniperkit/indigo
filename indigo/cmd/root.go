@@ -11,7 +11,7 @@ import (
 var RootCmd = &cobra.Command{
 	Use:   "indigo",
 	Short: "Indigo Command Line Interface",
-	Long:  `The Indigo Command Line Interface is controlls the Indigo.`,
+	Long:  `The Indigo Command Line Interface controlls the Indigo Server.`,
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 		if versionFlag {
 			fmt.Printf("%s\n", version.Version)

@@ -12,7 +12,7 @@ import (
 var startGRPCCmd = &cobra.Command{
 	Use:   "grpc",
 	Short: "start Indigo gRPC Server",
-	Long:  `The grpc command starts the Indigo gRPC Server.`,
+	Long:  `The start grpc command starts the Indigo gRPC Server.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		/*
 		 * start Indigo gRPC Server

@@ -12,7 +12,7 @@ import (
 var startRESTCmd = &cobra.Command{
 	Use:   "rest",
 	Short: "start Indigo REST Server",
-	Long:  `The rest command starts the Indigo REST Server.`,
+	Long:  `The start rest command starts the Indigo REST Server.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		/*
 		 * start Indigo REST Server

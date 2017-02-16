@@ -12,7 +12,7 @@ import (
 var searchDocumentsCmd = &cobra.Command{
 	Use:   "documents SEARCH_REQUEST",
 	Short: "searches the Indigo gRPC Serve with the search request",
-	Long:  `The search command searches the Indigo gRPC Server with the JSON representation of the search request.`,
+	Long:  `The search documents command searches the documents from  the Indigo gRPC Server.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if len(args) < 1 {
 			return errors.New("few arguments")

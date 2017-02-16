@@ -7,8 +7,8 @@ import (
 
 var createCmd = &cobra.Command{
 	Use:   "create",
-	Short: "creates object by stdin to the Indigo gRPC Server",
-	Long:  `The create command creates object by stdin to the Indigo gRPC Server.`,
+	Short: "creates the object to the Indigo gRPC Server",
+	Long:  `The create command creates the object to the Indigo gRPC Server.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if len(args) < 1 {
 			return errors.New("few arguments")

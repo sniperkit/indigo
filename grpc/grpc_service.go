@@ -21,7 +21,19 @@ type indigoGRPCService struct {
 }
 
 func NewIndigoGRPCService(dataDir string) *indigoGRPCService {
-	indices := make(map[string]bleve.Index)
+	var indices map[string]bleve.Index = make(map[string]bleve.Index)
+	var err error
+
+	_, err = os.Stat(dataDir)
+	if os.IsNotExist(err) {
+		log.Printf("info: make data directory data_dir=%s\n", dataDir)
+		err = os.MkdirAll(dataDir, 0644)
+		if err != nil {
+			log.Printf("error: failed to make data directory (%s) data_dir=%s\n", err.Error(), dataDir)
+		}
+	} else {
+		log.Printf("info: data directory already exists data_dir=%s\n", dataDir)
+	}
 
 	return &indigoGRPCService{
 		dataDir: dataDir,

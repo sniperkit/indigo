@@ -7,8 +7,8 @@ import (
 
 var deleteCmd = &cobra.Command{
 	Use:   "delete",
-	Short: "deletes object by stdin to the Indigo gRPC Server",
-	Long:  `The delete command deletes object by stdin to the Indigo gRPC Server.`,
+	Short: "deletes the object to the Indigo gRPC Server",
+	Long:  `The delete command deletes the object to the Indigo gRPC Server.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if len(args) < 1 {
 			return errors.New("few arguments")
