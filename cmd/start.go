@@ -91,7 +91,6 @@ var startCmd = &cobra.Command{
 }
 
 func init() {
-	startCmd.PersistentFlags().IntVarP(&serverPort, "server-port", "p", serverPort, "port number")
 	startCmd.PersistentFlags().StringVarP(&logOutputFile, "log-output-file", "o", logOutputFile, "log file")
 	startCmd.PersistentFlags().StringVarP(&logLevel, "log-level", "l", logLevel, "log level")
 	startCmd.PersistentFlags().StringVarP(&logFormat, "log-format", "f", logFormat, "log format")
