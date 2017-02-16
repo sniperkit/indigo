@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/mosuka/indigo/indigo/cmd"
+	"github.com/mosuka/indigo/cmd"
 )
 
 func main() {

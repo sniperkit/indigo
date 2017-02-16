@@ -5,7 +5,7 @@ The Indigo is an index server written in [Go](https://golang.org), built on top 
 
 ## Indigo gRPC Server
 
-*WIP:*
+The Indigo gRPC Server is an index server over [gRPC](http://www.grpc.io).
 
 ### Start Indigo gRPC Server
 
@@ -20,7 +20,7 @@ $ indigo start grpc
 The mapping.json file contains all of the details about which fields your documents can contain, and how those fields should be dealt with when adding documents to the index, or when querying those fields.
 See [Introduction to Index Mappings](http://www.blevesearch.com/docs/Index-Mapping/) and [type IndexMappingImpl](https://godoc.org/github.com/blevesearch/bleve/mapping#IndexMappingImpl) for more details.
 
-```
+```json
 {
   "types": {
     "document": {
@@ -140,14 +140,14 @@ See [Introduction to Index Mappings](http://www.blevesearch.com/docs/Index-Mappi
 
 ### Create index
 
-```
-$ ./indigo/indigo create index example "$(cat mapping.json)" -s boltdb -t upside_down
+```sh
+$ ./indigo/indigo create index example "$(cat example/mapping.json)" -s boltdb -t upside_down
 ```
 
 
 ### Get index mapping
 
-```
+```sh
 $ ./indigo/indigo get mapping example | jq .
 ```
 
