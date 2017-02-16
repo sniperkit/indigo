@@ -8,6 +8,7 @@ import (
 	_ "github.com/mosuka/indigo/config"
 	"github.com/mosuka/indigo/proto"
 	"golang.org/x/net/context"
+	"io/ioutil"
 	"log"
 	"os"
 	"path"
@@ -27,12 +28,28 @@ func NewIndigoGRPCService(dataDir string) *indigoGRPCService {
 	_, err = os.Stat(dataDir)
 	if os.IsNotExist(err) {
 		log.Printf("info: make data directory data_dir=%s\n", dataDir)
-		err = os.MkdirAll(dataDir, 0644)
+		err = os.MkdirAll(dataDir, 0755)
 		if err != nil {
 			log.Printf("error: failed to make data directory (%s) data_dir=%s\n", err.Error(), dataDir)
 		}
 	} else {
 		log.Printf("info: data directory already exists data_dir=%s\n", dataDir)
+	}
+
+	list, err := ioutil.ReadDir(dataDir)
+	if err == nil {
+		for _, f := range list {
+			if f.IsDir() {
+				var indexPath = path.Join(dataDir, f.Name())
+				log.Printf("info: open index index_path=%s\n", indexPath)
+				index, err := bleve.Open(indexPath)
+				if err == nil {
+					indices[f.Name()] = index
+				}
+			}
+		}
+	} else {
+		log.Printf("error: failed to read data directory data_dir=%s\n", dataDir)
 	}
 
 	return &indigoGRPCService{
@@ -41,9 +58,12 @@ func NewIndigoGRPCService(dataDir string) *indigoGRPCService {
 	}
 }
 
-func (igs *indigoGRPCService) CreateIndex(ctx context.Context, r *proto.CreateIndexRequest) (*proto.CreateIndexResponse, error) {
-	log.Printf("info: create index index_name=%s\n", r.IndexName)
+type CreateIndexResponse struct {
+	IndexName string `json:"index_name,omitempty"`
+	IndexPath string `json:"index_path,omitempty"`
+}
 
+func (igs *indigoGRPCService) CreateIndex(ctx context.Context, r *proto.CreateIndexRequest) (*proto.CreateIndexResponse, error) {
 	igs.mutex.Lock()
 	defer igs.mutex.Unlock()
 
@@ -58,6 +78,7 @@ func (igs *indigoGRPCService) CreateIndex(ctx context.Context, r *proto.CreateIn
 		if os.IsNotExist(err) {
 			err = json.Unmarshal([]byte(r.IndexMapping), indexMapping)
 			if err == nil {
+				log.Printf("info: create index index_path=%s\n", indexPath)
 				index, err = bleve.NewUsing(indexPath, indexMapping, r.IndexType, r.IndexStore, nil)
 				if err != nil {
 					log.Printf("error: faild to create index (%s) index_name=%s\n", err.Error(), r.IndexName)
@@ -75,11 +96,20 @@ func (igs *indigoGRPCService) CreateIndex(ctx context.Context, r *proto.CreateIn
 		log.Printf("error: index name exists (%s) index_name=%s\n", err.Error(), r.IndexName)
 	}
 
-	return &proto.CreateIndexResponse{Result: indexPath}, nil
+	//a, _ := index.Stats().MarshalJSON()
+	//fmt.Println(string(a))
+	//fmt.Println(index.StatsMap())
+
+	response := CreateIndexResponse{IndexName: r.IndexName, IndexPath: indexPath}
+	byteResponse, err := json.Marshal(response)
+	if err != nil {
+		log.Printf("error: failed to create response (%s)\n", err.Error())
+	}
+
+	return &proto.CreateIndexResponse{Result: string(byteResponse)}, nil
 }
 
 func (igs *indigoGRPCService) DeleteIndex(ctx context.Context, r *proto.DeleteIndexRequest) (*proto.DeleteIndexResponse, error) {
-	log.Printf("info: delete index index_name=%s\n", r.IndexName)
 
 	igs.mutex.Lock()
 	defer igs.mutex.Unlock()
@@ -91,6 +121,8 @@ func (igs *indigoGRPCService) DeleteIndex(ctx context.Context, r *proto.DeleteIn
 	if ok == true {
 		_, err = os.Stat(indexPath)
 		if err == nil {
+			log.Printf("info: delete index index_name=%s\n", r.IndexName)
+
 			index := igs.indices[r.IndexName]
 
 			err = index.Close()

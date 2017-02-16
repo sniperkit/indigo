@@ -17,7 +17,7 @@ var startRESTCmd = &cobra.Command{
 		/*
 		 * start Indigo REST Server
 		 */
-		rs := rest.NewIndigoRESTServer(serverPort, baseURI, gRPCServerName, gRPCServerPort)
+		rs := rest.NewIndigoRESTServer(restServerPort, baseURI, gRPCServerName, gRPCServerPort)
 		rs.Start()
 
 		/*
@@ -60,7 +60,7 @@ var startRESTCmd = &cobra.Command{
 }
 
 func init() {
-	startRESTCmd.Flags().IntVarP(&serverPort, "server-port", "p", serverPort+1000, "port number")
+	startRESTCmd.Flags().IntVarP(&restServerPort, "server-port", "p", restServerPort, "port number")
 	startRESTCmd.Flags().StringVarP(&gRPCServerName, "grpc-server-name", "N", gRPCServerName, "Indigo gRPC Sever name")
 	startRESTCmd.Flags().IntVarP(&gRPCServerPort, "grpc-server-port", "P", gRPCServerPort, "Indigo gRPC Server port number")
 	startRESTCmd.Flags().StringVarP(&baseURI, "base-uri", "b", baseURI, "base URI to run Indigo REST Server on")

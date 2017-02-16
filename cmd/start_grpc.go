@@ -17,7 +17,7 @@ var startGRPCCmd = &cobra.Command{
 		/*
 		 * start Indigo gRPC Server
 		 */
-		gs := grpc.NewIndigoGRPCServer(serverPort, dataDir)
+		gs := grpc.NewIndigoGRPCServer(gRPCServerPort, dataDir)
 		gs.Start()
 
 		/*
@@ -60,7 +60,7 @@ var startGRPCCmd = &cobra.Command{
 }
 
 func init() {
-	startGRPCCmd.Flags().IntVarP(&serverPort, "server-port", "p", serverPort, "port number")
+	startGRPCCmd.Flags().IntVarP(&gRPCServerPort, "server-port", "p", gRPCServerPort, "port number")
 	startGRPCCmd.Flags().StringVarP(&dataDir, "data-dir", "d", dataDir, "data directory")
 
 	startCmd.AddCommand(startGRPCCmd)

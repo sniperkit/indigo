@@ -2,18 +2,17 @@ package cmd
 
 var versionFlag bool = false
 
-var serverPort int = 1289
-
 var logOutputFile string = ""
 var logLevel string = "info"
 var logFormat string = "text"
 
+var gRPCServerName string = "localhost"
+var gRPCServerPort int = 1289
+var restServerPort int = 2289
+
 var dataDir string = "./data"
 
 var baseURI string = "/api"
-
-var gRPCServerName string = "localhost"
-var gRPCServerPort int = 1289
 
 var indexType string = "upside_down"
 var indexStore string = "boltdb"
