@@ -1,16 +1,18 @@
 package cmd
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"github.com/mosuka/indigo/proto"
 	"github.com/spf13/cobra"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
+	"strings"
 )
 
 var createIndexCmd = &cobra.Command{
-	Use:   "index INDEX_NAME INDEX_MAPPING",
+	Use:   "index NAME MAPPING",
 	Short: "creates the index to the Indigo gRPC Server",
 	Long:  `The create index command creates the index to the Indigo gRPC Server.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
@@ -19,7 +21,9 @@ var createIndexCmd = &cobra.Command{
 		}
 
 		indexName := args[0]
-		indexMapping := args[1]
+		buf := new(bytes.Buffer)
+		buf.ReadFrom(strings.NewReader(args[1]))
+		indexMapping := buf.Bytes()
 
 		conn, err := grpc.Dial(fmt.Sprintf("%s:%d", gRPCServerName, gRPCServerPort), grpc.WithInsecure())
 		if err != nil {
@@ -27,13 +31,13 @@ var createIndexCmd = &cobra.Command{
 		}
 		defer conn.Close()
 
-		c := proto.NewIndigoClient(conn)
-		resp, err := c.CreateIndex(context.Background(), &proto.CreateIndexRequest{IndexName: indexName, IndexMapping: indexMapping, IndexType: indexType, IndexStore: indexStore})
+		client := proto.NewIndigoClient(conn)
+		resp, err := client.CreateIndex(context.Background(), &proto.CreateIndexRequest{Name: indexName, Mapping: indexMapping, Type: indexType, Store: indexStore})
 		if err != nil {
 			return err
 		}
 
-		fmt.Printf("%s\n", resp.Result)
+		fmt.Printf("%s created\n", resp.Name)
 
 		return nil
 	},

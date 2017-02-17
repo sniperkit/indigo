@@ -17,40 +17,40 @@ var startRESTCmd = &cobra.Command{
 		/*
 		 * start Indigo REST Server
 		 */
-		rs := rest.NewIndigoRESTServer(restServerPort, baseURI, gRPCServerName, gRPCServerPort)
-		rs.Start()
+		server := rest.NewIndigoRESTServer(restServerPort, baseURI, gRPCServerName, gRPCServerPort)
+		server.Start()
 
 		/*
 		 * trap signals
 		 */
-		signal_chan := make(chan os.Signal, 1)
-		signal.Notify(signal_chan,
+		signalChan := make(chan os.Signal, 1)
+		signal.Notify(signalChan,
 			syscall.SIGHUP,
 			syscall.SIGINT,
 			syscall.SIGTERM,
 			syscall.SIGQUIT)
 		for {
-			s := <-signal_chan
-			switch s {
+			sig := <-signalChan
+			switch sig {
 			case syscall.SIGHUP:
 				log.Println("info: trap SIGHUP")
-				rs.Stop()
+				server.Stop()
 				return nil
 			case syscall.SIGINT:
 				log.Println("info: trap SIGINT")
-				rs.Stop()
+				server.Stop()
 				return nil
 			case syscall.SIGTERM:
 				log.Println("info: trap SIGTERM")
-				rs.Stop()
+				server.Stop()
 				return nil
 			case syscall.SIGQUIT:
 				log.Println("info: trap SIGQUIT")
-				rs.Stop()
+				server.Stop()
 				return nil
 			default:
 				log.Println("info: trap unknown signal")
-				rs.Stop()
+				server.Stop()
 				return nil
 			}
 		}

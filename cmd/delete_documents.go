@@ -1,12 +1,14 @@
 package cmd
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"github.com/mosuka/indigo/proto"
 	"github.com/spf13/cobra"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
+	"strings"
 )
 
 var deleteDocumentsCmd = &cobra.Command{
@@ -19,7 +21,9 @@ var deleteDocumentsCmd = &cobra.Command{
 		}
 
 		indexName := args[0]
-		documentIds := args[1]
+		buf := new(bytes.Buffer)
+		buf.ReadFrom(strings.NewReader(args[1]))
+		ids := buf.Bytes()
 
 		conn, err := grpc.Dial(fmt.Sprintf("%s:%d", gRPCServerName, gRPCServerPort), grpc.WithInsecure())
 		if err != nil {
@@ -27,13 +31,13 @@ var deleteDocumentsCmd = &cobra.Command{
 		}
 		defer conn.Close()
 
-		c := proto.NewIndigoClient(conn)
-		resp, err := c.DeleteDocuments(context.Background(), &proto.DeleteDocumentsRequest{IndexName: indexName, Ids: documentIds, BatchSize: batchSize})
+		client := proto.NewIndigoClient(conn)
+		resp, err := client.DeleteDocuments(context.Background(), &proto.DeleteDocumentsRequest{Name: indexName, Ids: ids, BatchSize: batchSize})
 		if err != nil {
 			return err
 		}
 
-		fmt.Printf("%s\n", resp.Result)
+		fmt.Printf("%d documents indexed\n", resp.Count)
 
 		return nil
 	},

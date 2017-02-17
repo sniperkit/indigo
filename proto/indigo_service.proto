@@ -5,6 +5,7 @@ package proto;
 service Indigo {
     rpc CreateIndex(CreateIndexRequest) returns (CreateIndexResponse) {}
     rpc DeleteIndex(DeleteIndexRequest) returns (DeleteIndexResponse) {}
+    rpc GetStats(GetStatsRequest) returns (GetStatsResponse) {}
     rpc GetMapping(GetMappingRequest) returns (GetMappingResponse) {}
     rpc IndexDocument(IndexDocumentRequest) returns (IndexDocumentResponse) {}
     rpc DeleteDocument(DeleteDocumentRequest) returns (DeleteDocumentResponse) {}
@@ -14,68 +15,75 @@ service Indigo {
 }
 
 message CreateIndexRequest {
-    string indexName = 1;
-    string indexMapping = 2;
-    string indexType = 3;
-    string indexStore = 4;
+    string name = 1;
+    bytes mapping = 2;
+    string type = 3;
+    string store = 4;
 }
 message CreateIndexResponse {
-    string result = 1;
+    string name = 1;
 }
 
 message DeleteIndexRequest {
-    string indexName = 1;
+    string name = 1;
 }
 message DeleteIndexResponse {
-    string result = 1;
+    string name = 1;
+}
+
+message GetStatsRequest {
+    string name = 1;
+}
+message GetStatsResponse {
+    bytes stats = 1;
 }
 
 message GetMappingRequest {
-    string indexName = 1;
+    string name = 1;
 }
 message GetMappingResponse {
-    string mapping = 1;
+    bytes mapping = 1;
 }
 
 message IndexDocumentRequest {
-    string indexName = 1;
-    string documentID = 2;
-    string document = 3;
+    string name = 1;
+    string id = 2;
+    bytes document = 3;
 }
 message IndexDocumentResponse {
-    string result = 1;
+    int32 count = 1;
 }
 
 message DeleteDocumentRequest {
-    string indexName = 1;
-    string documentID = 2;
+    string name = 1;
+    string id = 2;
 }
 message DeleteDocumentResponse {
-    string result = 1;
+    int32 count = 1;
 }
 
 message IndexDocumentsRequest {
-    string indexName = 1;
-    string documents = 2;
+    string name = 1;
+    bytes documents = 2;
     int32 batchSize = 3;
 }
 message IndexDocumentsResponse {
-    string result = 1;
+    int32 count = 1;
 }
 
 message DeleteDocumentsRequest {
-    string indexName = 1;
-    string ids = 2;
+    string name = 1;
+    bytes ids = 2;
     int32 batchSize = 3;
 }
 message DeleteDocumentsResponse {
-    string result = 1;
+    int32 count = 1;
 }
 
 message SearchDocumentsRequest {
-    string indexName = 1;
-    string searchRequest = 2;
+    string name = 1;
+    bytes searchRequest = 2;
 }
 message SearchDocumentsResponse {
-    string searchResult = 1;
+    bytes searchResult = 1;
 }

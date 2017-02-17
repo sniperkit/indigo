@@ -290,7 +290,7 @@ The result of the above mapping command is:
 ### Index the documents to the Indigo gRPC Server via CLI
 
 ```sh
-$ indigo index documents example "$(cat example/index_documents.json)" | jq .
+$ indigo index documents example "$(cat example/index_documents.json)"
 ```
 
 The result of the above index command is:
@@ -304,7 +304,7 @@ The result of the above index command is:
 ### Delete the documents from the Indigo gRPC Server via CLI
 
 ```sh
-$ indigo delete documents example "$(cat example/delete_documents.json)" | jq .
+$ indigo delete documents example "$(cat example/delete_documents.json)"
 ```
 
 The result of the above delete command is:

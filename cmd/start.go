@@ -62,13 +62,14 @@ var startCmd = &cobra.Command{
 				TimeFormat: time.RFC3339,
 				Flag:       log.Lshortfile,
 			})
-			colog.ParseFields(true)
 		default:
 			colog.SetFormatter(&colog.StdFormatter{
 				Colors: true,
 				Flag:   log.Ldate | log.Ltime | log.Lshortfile,
 			})
 		}
+
+		colog.ParseFields(true)
 
 		colog.Register()
 

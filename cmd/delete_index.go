@@ -10,7 +10,7 @@ import (
 )
 
 var deleteIndexCmd = &cobra.Command{
-	Use:   "index INDEX_NAME",
+	Use:   "index NAME",
 	Short: "deletes the index from the Indigo gRPC Server",
 	Long:  `The delete index command deletes the index from the Indigo gRPC Server.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
@@ -26,13 +26,13 @@ var deleteIndexCmd = &cobra.Command{
 		}
 		defer conn.Close()
 
-		c := proto.NewIndigoClient(conn)
-		resp, err := c.DeleteIndex(context.Background(), &proto.DeleteIndexRequest{IndexName: indexName})
+		client := proto.NewIndigoClient(conn)
+		resp, err := client.DeleteIndex(context.Background(), &proto.DeleteIndexRequest{Name: indexName})
 		if err != nil {
 			return err
 		}
 
-		fmt.Printf("%s\n", resp.Result)
+		fmt.Printf("%s deleted\n", resp.Name)
 
 		return nil
 	},

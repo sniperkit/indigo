@@ -13,6 +13,8 @@ It has these top-level messages:
 	CreateIndexResponse
 	DeleteIndexRequest
 	DeleteIndexResponse
+	GetStatsRequest
+	GetStatsResponse
 	GetMappingRequest
 	GetMappingResponse
 	IndexDocumentRequest
@@ -49,10 +51,10 @@ var _ = math.Inf
 const _ = proto1.ProtoPackageIsVersion2 // please upgrade the proto package
 
 type CreateIndexRequest struct {
-	IndexName    string `protobuf:"bytes,1,opt,name=indexName" json:"indexName,omitempty"`
-	IndexMapping string `protobuf:"bytes,2,opt,name=indexMapping" json:"indexMapping,omitempty"`
-	IndexType    string `protobuf:"bytes,3,opt,name=indexType" json:"indexType,omitempty"`
-	IndexStore   string `protobuf:"bytes,4,opt,name=indexStore" json:"indexStore,omitempty"`
+	Name    string `protobuf:"bytes,1,opt,name=name" json:"name,omitempty"`
+	Mapping []byte `protobuf:"bytes,2,opt,name=mapping,proto3" json:"mapping,omitempty"`
+	Type    string `protobuf:"bytes,3,opt,name=type" json:"type,omitempty"`
+	Store   string `protobuf:"bytes,4,opt,name=store" json:"store,omitempty"`
 }
 
 func (m *CreateIndexRequest) Reset()                    { *m = CreateIndexRequest{} }
@@ -60,36 +62,36 @@ func (m *CreateIndexRequest) String() string            { return proto1.CompactT
 func (*CreateIndexRequest) ProtoMessage()               {}
 func (*CreateIndexRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{0} }
 
-func (m *CreateIndexRequest) GetIndexName() string {
+func (m *CreateIndexRequest) GetName() string {
 	if m != nil {
-		return m.IndexName
+		return m.Name
 	}
 	return ""
 }
 
-func (m *CreateIndexRequest) GetIndexMapping() string {
+func (m *CreateIndexRequest) GetMapping() []byte {
 	if m != nil {
-		return m.IndexMapping
+		return m.Mapping
+	}
+	return nil
+}
+
+func (m *CreateIndexRequest) GetType() string {
+	if m != nil {
+		return m.Type
 	}
 	return ""
 }
 
-func (m *CreateIndexRequest) GetIndexType() string {
+func (m *CreateIndexRequest) GetStore() string {
 	if m != nil {
-		return m.IndexType
-	}
-	return ""
-}
-
-func (m *CreateIndexRequest) GetIndexStore() string {
-	if m != nil {
-		return m.IndexStore
+		return m.Store
 	}
 	return ""
 }
 
 type CreateIndexResponse struct {
-	Result string `protobuf:"bytes,1,opt,name=result" json:"result,omitempty"`
+	Name string `protobuf:"bytes,1,opt,name=name" json:"name,omitempty"`
 }
 
 func (m *CreateIndexResponse) Reset()                    { *m = CreateIndexResponse{} }
@@ -97,15 +99,15 @@ func (m *CreateIndexResponse) String() string            { return proto1.Compact
 func (*CreateIndexResponse) ProtoMessage()               {}
 func (*CreateIndexResponse) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{1} }
 
-func (m *CreateIndexResponse) GetResult() string {
+func (m *CreateIndexResponse) GetName() string {
 	if m != nil {
-		return m.Result
+		return m.Name
 	}
 	return ""
 }
 
 type DeleteIndexRequest struct {
-	IndexName string `protobuf:"bytes,1,opt,name=indexName" json:"indexName,omitempty"`
+	Name string `protobuf:"bytes,1,opt,name=name" json:"name,omitempty"`
 }
 
 func (m *DeleteIndexRequest) Reset()                    { *m = DeleteIndexRequest{} }
@@ -113,15 +115,15 @@ func (m *DeleteIndexRequest) String() string            { return proto1.CompactT
 func (*DeleteIndexRequest) ProtoMessage()               {}
 func (*DeleteIndexRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{2} }
 
-func (m *DeleteIndexRequest) GetIndexName() string {
+func (m *DeleteIndexRequest) GetName() string {
 	if m != nil {
-		return m.IndexName
+		return m.Name
 	}
 	return ""
 }
 
 type DeleteIndexResponse struct {
-	Result string `protobuf:"bytes,1,opt,name=result" json:"result,omitempty"`
+	Name string `protobuf:"bytes,1,opt,name=name" json:"name,omitempty"`
 }
 
 func (m *DeleteIndexResponse) Reset()                    { *m = DeleteIndexResponse{} }
@@ -129,156 +131,188 @@ func (m *DeleteIndexResponse) String() string            { return proto1.Compact
 func (*DeleteIndexResponse) ProtoMessage()               {}
 func (*DeleteIndexResponse) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{3} }
 
-func (m *DeleteIndexResponse) GetResult() string {
+func (m *DeleteIndexResponse) GetName() string {
 	if m != nil {
-		return m.Result
+		return m.Name
 	}
 	return ""
 }
 
+type GetStatsRequest struct {
+	Name string `protobuf:"bytes,1,opt,name=name" json:"name,omitempty"`
+}
+
+func (m *GetStatsRequest) Reset()                    { *m = GetStatsRequest{} }
+func (m *GetStatsRequest) String() string            { return proto1.CompactTextString(m) }
+func (*GetStatsRequest) ProtoMessage()               {}
+func (*GetStatsRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{4} }
+
+func (m *GetStatsRequest) GetName() string {
+	if m != nil {
+		return m.Name
+	}
+	return ""
+}
+
+type GetStatsResponse struct {
+	Stats []byte `protobuf:"bytes,1,opt,name=stats,proto3" json:"stats,omitempty"`
+}
+
+func (m *GetStatsResponse) Reset()                    { *m = GetStatsResponse{} }
+func (m *GetStatsResponse) String() string            { return proto1.CompactTextString(m) }
+func (*GetStatsResponse) ProtoMessage()               {}
+func (*GetStatsResponse) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{5} }
+
+func (m *GetStatsResponse) GetStats() []byte {
+	if m != nil {
+		return m.Stats
+	}
+	return nil
+}
+
 type GetMappingRequest struct {
-	IndexName string `protobuf:"bytes,1,opt,name=indexName" json:"indexName,omitempty"`
+	Name string `protobuf:"bytes,1,opt,name=name" json:"name,omitempty"`
 }
 
 func (m *GetMappingRequest) Reset()                    { *m = GetMappingRequest{} }
 func (m *GetMappingRequest) String() string            { return proto1.CompactTextString(m) }
 func (*GetMappingRequest) ProtoMessage()               {}
-func (*GetMappingRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{4} }
+func (*GetMappingRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{6} }
 
-func (m *GetMappingRequest) GetIndexName() string {
+func (m *GetMappingRequest) GetName() string {
 	if m != nil {
-		return m.IndexName
+		return m.Name
 	}
 	return ""
 }
 
 type GetMappingResponse struct {
-	Mapping string `protobuf:"bytes,1,opt,name=mapping" json:"mapping,omitempty"`
+	Mapping []byte `protobuf:"bytes,1,opt,name=mapping,proto3" json:"mapping,omitempty"`
 }
 
 func (m *GetMappingResponse) Reset()                    { *m = GetMappingResponse{} }
 func (m *GetMappingResponse) String() string            { return proto1.CompactTextString(m) }
 func (*GetMappingResponse) ProtoMessage()               {}
-func (*GetMappingResponse) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{5} }
+func (*GetMappingResponse) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{7} }
 
-func (m *GetMappingResponse) GetMapping() string {
+func (m *GetMappingResponse) GetMapping() []byte {
 	if m != nil {
 		return m.Mapping
 	}
-	return ""
+	return nil
 }
 
 type IndexDocumentRequest struct {
-	IndexName  string `protobuf:"bytes,1,opt,name=indexName" json:"indexName,omitempty"`
-	DocumentID string `protobuf:"bytes,2,opt,name=documentID" json:"documentID,omitempty"`
-	Document   string `protobuf:"bytes,3,opt,name=document" json:"document,omitempty"`
+	Name     string `protobuf:"bytes,1,opt,name=name" json:"name,omitempty"`
+	Id       string `protobuf:"bytes,2,opt,name=id" json:"id,omitempty"`
+	Document []byte `protobuf:"bytes,3,opt,name=document,proto3" json:"document,omitempty"`
 }
 
 func (m *IndexDocumentRequest) Reset()                    { *m = IndexDocumentRequest{} }
 func (m *IndexDocumentRequest) String() string            { return proto1.CompactTextString(m) }
 func (*IndexDocumentRequest) ProtoMessage()               {}
-func (*IndexDocumentRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{6} }
+func (*IndexDocumentRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{8} }
 
-func (m *IndexDocumentRequest) GetIndexName() string {
+func (m *IndexDocumentRequest) GetName() string {
 	if m != nil {
-		return m.IndexName
+		return m.Name
 	}
 	return ""
 }
 
-func (m *IndexDocumentRequest) GetDocumentID() string {
+func (m *IndexDocumentRequest) GetId() string {
 	if m != nil {
-		return m.DocumentID
+		return m.Id
 	}
 	return ""
 }
 
-func (m *IndexDocumentRequest) GetDocument() string {
+func (m *IndexDocumentRequest) GetDocument() []byte {
 	if m != nil {
 		return m.Document
 	}
-	return ""
+	return nil
 }
 
 type IndexDocumentResponse struct {
-	Result string `protobuf:"bytes,1,opt,name=result" json:"result,omitempty"`
+	Count int32 `protobuf:"varint,1,opt,name=count" json:"count,omitempty"`
 }
 
 func (m *IndexDocumentResponse) Reset()                    { *m = IndexDocumentResponse{} }
 func (m *IndexDocumentResponse) String() string            { return proto1.CompactTextString(m) }
 func (*IndexDocumentResponse) ProtoMessage()               {}
-func (*IndexDocumentResponse) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{7} }
+func (*IndexDocumentResponse) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{9} }
 
-func (m *IndexDocumentResponse) GetResult() string {
+func (m *IndexDocumentResponse) GetCount() int32 {
 	if m != nil {
-		return m.Result
+		return m.Count
 	}
-	return ""
+	return 0
 }
 
 type DeleteDocumentRequest struct {
-	IndexName  string `protobuf:"bytes,1,opt,name=indexName" json:"indexName,omitempty"`
-	DocumentID string `protobuf:"bytes,2,opt,name=documentID" json:"documentID,omitempty"`
+	Name string `protobuf:"bytes,1,opt,name=name" json:"name,omitempty"`
+	Id   string `protobuf:"bytes,2,opt,name=id" json:"id,omitempty"`
 }
 
 func (m *DeleteDocumentRequest) Reset()                    { *m = DeleteDocumentRequest{} }
 func (m *DeleteDocumentRequest) String() string            { return proto1.CompactTextString(m) }
 func (*DeleteDocumentRequest) ProtoMessage()               {}
-func (*DeleteDocumentRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{8} }
+func (*DeleteDocumentRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{10} }
 
-func (m *DeleteDocumentRequest) GetIndexName() string {
+func (m *DeleteDocumentRequest) GetName() string {
 	if m != nil {
-		return m.IndexName
+		return m.Name
 	}
 	return ""
 }
 
-func (m *DeleteDocumentRequest) GetDocumentID() string {
+func (m *DeleteDocumentRequest) GetId() string {
 	if m != nil {
-		return m.DocumentID
+		return m.Id
 	}
 	return ""
 }
 
 type DeleteDocumentResponse struct {
-	Result string `protobuf:"bytes,1,opt,name=result" json:"result,omitempty"`
+	Count int32 `protobuf:"varint,1,opt,name=count" json:"count,omitempty"`
 }
 
 func (m *DeleteDocumentResponse) Reset()                    { *m = DeleteDocumentResponse{} }
 func (m *DeleteDocumentResponse) String() string            { return proto1.CompactTextString(m) }
 func (*DeleteDocumentResponse) ProtoMessage()               {}
-func (*DeleteDocumentResponse) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{9} }
+func (*DeleteDocumentResponse) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{11} }
 
-func (m *DeleteDocumentResponse) GetResult() string {
+func (m *DeleteDocumentResponse) GetCount() int32 {
 	if m != nil {
-		return m.Result
+		return m.Count
 	}
-	return ""
+	return 0
 }
 
 type IndexDocumentsRequest struct {
-	IndexName string `protobuf:"bytes,1,opt,name=indexName" json:"indexName,omitempty"`
-	Documents string `protobuf:"bytes,2,opt,name=documents" json:"documents,omitempty"`
+	Name      string `protobuf:"bytes,1,opt,name=name" json:"name,omitempty"`
+	Documents []byte `protobuf:"bytes,2,opt,name=documents,proto3" json:"documents,omitempty"`
 	BatchSize int32  `protobuf:"varint,3,opt,name=batchSize" json:"batchSize,omitempty"`
 }
 
 func (m *IndexDocumentsRequest) Reset()                    { *m = IndexDocumentsRequest{} }
 func (m *IndexDocumentsRequest) String() string            { return proto1.CompactTextString(m) }
 func (*IndexDocumentsRequest) ProtoMessage()               {}
-func (*IndexDocumentsRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{10} }
+func (*IndexDocumentsRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{12} }
 
-func (m *IndexDocumentsRequest) GetIndexName() string {
+func (m *IndexDocumentsRequest) GetName() string {
 	if m != nil {
-		return m.IndexName
+		return m.Name
 	}
 	return ""
 }
 
-func (m *IndexDocumentsRequest) GetDocuments() string {
+func (m *IndexDocumentsRequest) GetDocuments() []byte {
 	if m != nil {
 		return m.Documents
 	}
-	return ""
+	return nil
 }
 
 func (m *IndexDocumentsRequest) GetBatchSize() int32 {
@@ -289,44 +323,44 @@ func (m *IndexDocumentsRequest) GetBatchSize() int32 {
 }
 
 type IndexDocumentsResponse struct {
-	Result string `protobuf:"bytes,1,opt,name=result" json:"result,omitempty"`
+	Count int32 `protobuf:"varint,1,opt,name=count" json:"count,omitempty"`
 }
 
 func (m *IndexDocumentsResponse) Reset()                    { *m = IndexDocumentsResponse{} }
 func (m *IndexDocumentsResponse) String() string            { return proto1.CompactTextString(m) }
 func (*IndexDocumentsResponse) ProtoMessage()               {}
-func (*IndexDocumentsResponse) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{11} }
+func (*IndexDocumentsResponse) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{13} }
 
-func (m *IndexDocumentsResponse) GetResult() string {
+func (m *IndexDocumentsResponse) GetCount() int32 {
 	if m != nil {
-		return m.Result
+		return m.Count
 	}
-	return ""
+	return 0
 }
 
 type DeleteDocumentsRequest struct {
-	IndexName string `protobuf:"bytes,1,opt,name=indexName" json:"indexName,omitempty"`
-	Ids       string `protobuf:"bytes,2,opt,name=ids" json:"ids,omitempty"`
+	Name      string `protobuf:"bytes,1,opt,name=name" json:"name,omitempty"`
+	Ids       []byte `protobuf:"bytes,2,opt,name=ids,proto3" json:"ids,omitempty"`
 	BatchSize int32  `protobuf:"varint,3,opt,name=batchSize" json:"batchSize,omitempty"`
 }
 
 func (m *DeleteDocumentsRequest) Reset()                    { *m = DeleteDocumentsRequest{} }
 func (m *DeleteDocumentsRequest) String() string            { return proto1.CompactTextString(m) }
 func (*DeleteDocumentsRequest) ProtoMessage()               {}
-func (*DeleteDocumentsRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{12} }
+func (*DeleteDocumentsRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{14} }
 
-func (m *DeleteDocumentsRequest) GetIndexName() string {
+func (m *DeleteDocumentsRequest) GetName() string {
 	if m != nil {
-		return m.IndexName
+		return m.Name
 	}
 	return ""
 }
 
-func (m *DeleteDocumentsRequest) GetIds() string {
+func (m *DeleteDocumentsRequest) GetIds() []byte {
 	if m != nil {
 		return m.Ids
 	}
-	return ""
+	return nil
 }
 
 func (m *DeleteDocumentsRequest) GetBatchSize() int32 {
@@ -337,59 +371,59 @@ func (m *DeleteDocumentsRequest) GetBatchSize() int32 {
 }
 
 type DeleteDocumentsResponse struct {
-	Result string `protobuf:"bytes,1,opt,name=result" json:"result,omitempty"`
+	Count int32 `protobuf:"varint,1,opt,name=count" json:"count,omitempty"`
 }
 
 func (m *DeleteDocumentsResponse) Reset()                    { *m = DeleteDocumentsResponse{} }
 func (m *DeleteDocumentsResponse) String() string            { return proto1.CompactTextString(m) }
 func (*DeleteDocumentsResponse) ProtoMessage()               {}
-func (*DeleteDocumentsResponse) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{13} }
+func (*DeleteDocumentsResponse) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{15} }
 
-func (m *DeleteDocumentsResponse) GetResult() string {
+func (m *DeleteDocumentsResponse) GetCount() int32 {
 	if m != nil {
-		return m.Result
+		return m.Count
 	}
-	return ""
+	return 0
 }
 
 type SearchDocumentsRequest struct {
-	IndexName     string `protobuf:"bytes,1,opt,name=indexName" json:"indexName,omitempty"`
-	SearchRequest string `protobuf:"bytes,2,opt,name=searchRequest" json:"searchRequest,omitempty"`
+	Name          string `protobuf:"bytes,1,opt,name=name" json:"name,omitempty"`
+	SearchRequest []byte `protobuf:"bytes,2,opt,name=searchRequest,proto3" json:"searchRequest,omitempty"`
 }
 
 func (m *SearchDocumentsRequest) Reset()                    { *m = SearchDocumentsRequest{} }
 func (m *SearchDocumentsRequest) String() string            { return proto1.CompactTextString(m) }
 func (*SearchDocumentsRequest) ProtoMessage()               {}
-func (*SearchDocumentsRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{14} }
+func (*SearchDocumentsRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{16} }
 
-func (m *SearchDocumentsRequest) GetIndexName() string {
+func (m *SearchDocumentsRequest) GetName() string {
 	if m != nil {
-		return m.IndexName
+		return m.Name
 	}
 	return ""
 }
 
-func (m *SearchDocumentsRequest) GetSearchRequest() string {
+func (m *SearchDocumentsRequest) GetSearchRequest() []byte {
 	if m != nil {
 		return m.SearchRequest
 	}
-	return ""
+	return nil
 }
 
 type SearchDocumentsResponse struct {
-	SearchResult string `protobuf:"bytes,1,opt,name=searchResult" json:"searchResult,omitempty"`
+	SearchResult []byte `protobuf:"bytes,1,opt,name=searchResult,proto3" json:"searchResult,omitempty"`
 }
 
 func (m *SearchDocumentsResponse) Reset()                    { *m = SearchDocumentsResponse{} }
 func (m *SearchDocumentsResponse) String() string            { return proto1.CompactTextString(m) }
 func (*SearchDocumentsResponse) ProtoMessage()               {}
-func (*SearchDocumentsResponse) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{15} }
+func (*SearchDocumentsResponse) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{17} }
 
-func (m *SearchDocumentsResponse) GetSearchResult() string {
+func (m *SearchDocumentsResponse) GetSearchResult() []byte {
 	if m != nil {
 		return m.SearchResult
 	}
-	return ""
+	return nil
 }
 
 func init() {
@@ -397,6 +431,8 @@ func init() {
 	proto1.RegisterType((*CreateIndexResponse)(nil), "proto.CreateIndexResponse")
 	proto1.RegisterType((*DeleteIndexRequest)(nil), "proto.DeleteIndexRequest")
 	proto1.RegisterType((*DeleteIndexResponse)(nil), "proto.DeleteIndexResponse")
+	proto1.RegisterType((*GetStatsRequest)(nil), "proto.GetStatsRequest")
+	proto1.RegisterType((*GetStatsResponse)(nil), "proto.GetStatsResponse")
 	proto1.RegisterType((*GetMappingRequest)(nil), "proto.GetMappingRequest")
 	proto1.RegisterType((*GetMappingResponse)(nil), "proto.GetMappingResponse")
 	proto1.RegisterType((*IndexDocumentRequest)(nil), "proto.IndexDocumentRequest")
@@ -424,6 +460,7 @@ const _ = grpc.SupportPackageIsVersion4
 type IndigoClient interface {
 	CreateIndex(ctx context.Context, in *CreateIndexRequest, opts ...grpc.CallOption) (*CreateIndexResponse, error)
 	DeleteIndex(ctx context.Context, in *DeleteIndexRequest, opts ...grpc.CallOption) (*DeleteIndexResponse, error)
+	GetStats(ctx context.Context, in *GetStatsRequest, opts ...grpc.CallOption) (*GetStatsResponse, error)
 	GetMapping(ctx context.Context, in *GetMappingRequest, opts ...grpc.CallOption) (*GetMappingResponse, error)
 	IndexDocument(ctx context.Context, in *IndexDocumentRequest, opts ...grpc.CallOption) (*IndexDocumentResponse, error)
 	DeleteDocument(ctx context.Context, in *DeleteDocumentRequest, opts ...grpc.CallOption) (*DeleteDocumentResponse, error)
@@ -452,6 +489,15 @@ func (c *indigoClient) CreateIndex(ctx context.Context, in *CreateIndexRequest, 
 func (c *indigoClient) DeleteIndex(ctx context.Context, in *DeleteIndexRequest, opts ...grpc.CallOption) (*DeleteIndexResponse, error) {
 	out := new(DeleteIndexResponse)
 	err := grpc.Invoke(ctx, "/proto.Indigo/DeleteIndex", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *indigoClient) GetStats(ctx context.Context, in *GetStatsRequest, opts ...grpc.CallOption) (*GetStatsResponse, error) {
+	out := new(GetStatsResponse)
+	err := grpc.Invoke(ctx, "/proto.Indigo/GetStats", in, out, c.cc, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -517,6 +563,7 @@ func (c *indigoClient) SearchDocuments(ctx context.Context, in *SearchDocumentsR
 type IndigoServer interface {
 	CreateIndex(context.Context, *CreateIndexRequest) (*CreateIndexResponse, error)
 	DeleteIndex(context.Context, *DeleteIndexRequest) (*DeleteIndexResponse, error)
+	GetStats(context.Context, *GetStatsRequest) (*GetStatsResponse, error)
 	GetMapping(context.Context, *GetMappingRequest) (*GetMappingResponse, error)
 	IndexDocument(context.Context, *IndexDocumentRequest) (*IndexDocumentResponse, error)
 	DeleteDocument(context.Context, *DeleteDocumentRequest) (*DeleteDocumentResponse, error)
@@ -561,6 +608,24 @@ func _Indigo_DeleteIndex_Handler(srv interface{}, ctx context.Context, dec func(
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(IndigoServer).DeleteIndex(ctx, req.(*DeleteIndexRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Indigo_GetStats_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetStatsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(IndigoServer).GetStats(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/proto.Indigo/GetStats",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(IndigoServer).GetStats(ctx, req.(*GetStatsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -686,6 +751,10 @@ var _Indigo_serviceDesc = grpc.ServiceDesc{
 			Handler:    _Indigo_DeleteIndex_Handler,
 		},
 		{
+			MethodName: "GetStats",
+			Handler:    _Indigo_GetStats_Handler,
+		},
+		{
 			MethodName: "GetMapping",
 			Handler:    _Indigo_GetMapping_Handler,
 		},
@@ -717,37 +786,40 @@ var _Indigo_serviceDesc = grpc.ServiceDesc{
 func init() { proto1.RegisterFile("proto/indigo_service.proto", fileDescriptor0) }
 
 var fileDescriptor0 = []byte{
-	// 512 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x09, 0x6e, 0x88, 0x02, 0xff, 0xac, 0x94, 0x4b, 0x6f, 0xd3, 0x40,
-	0x10, 0xc7, 0x13, 0xda, 0x06, 0x32, 0xb4, 0x3c, 0x06, 0x9a, 0xba, 0x26, 0x44, 0x68, 0xc5, 0x81,
-	0x0b, 0x29, 0x2d, 0x67, 0x4e, 0x8d, 0x40, 0x91, 0x78, 0x48, 0x09, 0xdc, 0x90, 0x90, 0x9b, 0x0c,
-	0xad, 0xa5, 0xc6, 0x76, 0xbd, 0x1b, 0x04, 0x7c, 0x0e, 0xbe, 0x2a, 0x77, 0xe4, 0xf5, 0x7a, 0xb3,
-	0xbb, 0xde, 0xc8, 0x89, 0xc4, 0x29, 0x99, 0xd7, 0x7f, 0x7e, 0xeb, 0x9d, 0x1d, 0x08, 0xb3, 0x3c,
-	0x15, 0xe9, 0x49, 0x9c, 0xcc, 0xe3, 0xcb, 0xf4, 0x1b, 0xa7, 0xfc, 0x47, 0x3c, 0xa3, 0xa1, 0x74,
-	0xe2, 0x9e, 0xfc, 0x61, 0x7f, 0xda, 0x80, 0xe7, 0x39, 0x45, 0x82, 0xc6, 0xc9, 0x9c, 0x7e, 0x4e,
-	0xe8, 0x66, 0x49, 0x5c, 0x60, 0x1f, 0xba, 0x71, 0x61, 0x7f, 0x8c, 0x16, 0x14, 0xb4, 0x9f, 0xb5,
-	0x5f, 0x74, 0x27, 0x2b, 0x07, 0x32, 0xd8, 0x97, 0xc6, 0x87, 0x28, 0xcb, 0xe2, 0xe4, 0x32, 0xb8,
-	0x25, 0x13, 0x2c, 0x9f, 0x56, 0xf8, 0xfc, 0x2b, 0xa3, 0x60, 0xc7, 0x50, 0x28, 0x1c, 0x38, 0x00,
-	0x90, 0xc6, 0x54, 0xa4, 0x39, 0x05, 0xbb, 0x32, 0x6c, 0x78, 0xd8, 0x4b, 0x78, 0x64, 0x51, 0xf1,
-	0x2c, 0x4d, 0x38, 0x61, 0x0f, 0x3a, 0x39, 0xf1, 0xe5, 0xb5, 0x50, 0x4c, 0xca, 0x62, 0x67, 0x80,
-	0x23, 0xba, 0xa6, 0x6d, 0x0e, 0x51, 0xb4, 0xb0, 0x6a, 0x1a, 0x5a, 0x9c, 0xc2, 0xc3, 0x77, 0x24,
-	0xd4, 0xe9, 0x36, 0xeb, 0x30, 0x04, 0x34, 0x4b, 0x54, 0x83, 0x00, 0x6e, 0x2f, 0xd4, 0x77, 0x2b,
-	0x2b, 0x2a, 0x93, 0x65, 0xf0, 0x58, 0xb2, 0x8c, 0xd2, 0xd9, 0x72, 0x41, 0x89, 0xd8, 0xec, 0x32,
-	0x06, 0x00, 0x73, 0x55, 0x30, 0x1e, 0xa9, 0xab, 0x30, 0x3c, 0x18, 0xc2, 0x9d, 0xca, 0x52, 0xf7,
-	0xa0, 0x6d, 0x76, 0x02, 0x87, 0x4e, 0xc7, 0x86, 0xaf, 0xf0, 0x05, 0x0e, 0xcb, 0x8f, 0xf6, 0x5f,
-	0x19, 0xd9, 0x2b, 0xe8, 0xb9, 0xb2, 0x0d, 0x20, 0x37, 0x0e, 0x39, 0xdf, 0x0c, 0xa4, 0x0f, 0xdd,
-	0xaa, 0x2d, 0x57, 0x1c, 0x2b, 0x47, 0x11, 0xbd, 0x88, 0xc4, 0xec, 0x6a, 0x1a, 0xff, 0x2e, 0x67,
-	0x76, 0x6f, 0xb2, 0x72, 0x14, 0x90, 0x6e, 0xcb, 0x06, 0xc8, 0xef, 0xee, 0xb1, 0x36, 0xa4, 0x7c,
-	0x00, 0x3b, 0xf1, 0xbc, 0xe2, 0x2b, 0xfe, 0x36, 0x90, 0x9d, 0xc2, 0x51, 0xad, 0x4f, 0x03, 0xda,
-	0x57, 0xe8, 0x4d, 0x29, 0xca, 0x67, 0x57, 0x5b, 0xa2, 0x3d, 0x87, 0x03, 0x2e, 0xeb, 0x54, 0xba,
-	0x82, 0xb4, 0x9d, 0xec, 0x0d, 0x1c, 0xd5, 0xd4, 0x15, 0x10, 0x83, 0xfd, 0x2a, 0xd7, 0xc0, 0xb2,
-	0x7c, 0x67, 0x7f, 0x77, 0xa1, 0x33, 0x96, 0x4b, 0x0b, 0xdf, 0xc2, 0x5d, 0x63, 0x11, 0xe0, 0x71,
-	0xb9, 0xbd, 0x86, 0xf5, 0x95, 0x15, 0x86, 0xbe, 0x50, 0xd9, 0x94, 0xb5, 0x0a, 0x1d, 0xe3, 0xb5,
-	0x6b, 0x9d, 0xfa, 0xd6, 0xd0, 0x3a, 0x9e, 0xe5, 0xc0, 0x5a, 0x78, 0x0e, 0xb0, 0x7a, 0xd3, 0x18,
-	0xa8, 0xdc, 0xda, 0x66, 0x08, 0x8f, 0x3d, 0x11, 0x2d, 0xf2, 0x1e, 0x0e, 0xac, 0x49, 0xc2, 0x27,
-	0x2a, 0xdb, 0xf7, 0xfc, 0xc3, 0xbe, 0x3f, 0xa8, 0xd5, 0x3e, 0xc1, 0x3d, 0xfb, 0xf6, 0xb1, 0x6f,
-	0x1d, 0xc1, 0xd5, 0x7b, 0xba, 0x26, 0x6a, 0x0a, 0xda, 0x83, 0x8e, 0x5e, 0x04, 0xee, 0x0a, 0xfa,
-	0x5f, 0x07, 0x6b, 0xe1, 0x04, 0xee, 0x3b, 0xf3, 0x89, 0x7e, 0x08, 0x2d, 0x39, 0x58, 0x17, 0x36,
-	0x35, 0x9d, 0x11, 0xd3, 0x9a, 0xfe, 0xc1, 0xd6, 0x9a, 0x6b, 0x26, 0x93, 0xb5, 0x2e, 0x3a, 0x32,
-	0xe1, 0xf5, 0xbf, 0x00, 0x00, 0x00, 0xff, 0xff, 0x43, 0xdf, 0x36, 0x78, 0x38, 0x07, 0x00, 0x00,
+	// 552 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x09, 0x6e, 0x88, 0x02, 0xff, 0x9c, 0x94, 0x5d, 0x6f, 0xd3, 0x3c,
+	0x14, 0xc7, 0xdb, 0x6e, 0xd9, 0xb3, 0x9e, 0xa7, 0x7b, 0xe1, 0xb0, 0xb5, 0x59, 0x28, 0x68, 0xb2,
+	0x40, 0x94, 0x0b, 0x3a, 0x09, 0x2e, 0xd1, 0xae, 0x36, 0x31, 0x4d, 0x02, 0x21, 0xb9, 0x12, 0x57,
+	0x48, 0x28, 0x4b, 0xac, 0x2e, 0x52, 0x9b, 0x84, 0xd8, 0x45, 0xc0, 0xe7, 0xe2, 0x03, 0xa2, 0x38,
+	0xce, 0x8b, 0x1d, 0x37, 0x43, 0x5c, 0x25, 0x3e, 0xfe, 0xfb, 0xe7, 0xbf, 0xed, 0x73, 0x0e, 0x78,
+	0x69, 0x96, 0x88, 0xe4, 0x22, 0x8a, 0xc3, 0x68, 0x99, 0x7c, 0xe5, 0x2c, 0xfb, 0x1e, 0x05, 0x6c,
+	0x2e, 0x83, 0xe8, 0xc8, 0x0f, 0x59, 0x01, 0x5e, 0x65, 0xcc, 0x17, 0xec, 0x36, 0x0e, 0xd9, 0x0f,
+	0xca, 0xbe, 0x6d, 0x18, 0x17, 0x88, 0xb0, 0x1b, 0xfb, 0x6b, 0xe6, 0xf6, 0xcf, 0xfb, 0xb3, 0x21,
+	0x95, 0xff, 0xe8, 0xc2, 0x7f, 0x6b, 0x3f, 0x4d, 0xa3, 0x78, 0xe9, 0x0e, 0xce, 0xfb, 0xb3, 0x11,
+	0x2d, 0x87, 0xb9, 0x5a, 0xfc, 0x4c, 0x99, 0xbb, 0x53, 0xa8, 0xf3, 0x7f, 0x3c, 0x01, 0x87, 0x8b,
+	0x24, 0x63, 0xee, 0xae, 0x0c, 0x16, 0x03, 0xf2, 0x0a, 0x1e, 0x6b, 0xbb, 0xf1, 0x34, 0x89, 0x39,
+	0xb3, 0x6d, 0x47, 0x66, 0x80, 0xd7, 0x6c, 0xc5, 0x1e, 0x36, 0x96, 0x43, 0x35, 0x65, 0x07, 0xf4,
+	0x05, 0x1c, 0xdd, 0x30, 0xb1, 0x10, 0xbe, 0xe0, 0x5d, 0xc4, 0x19, 0x1c, 0xd7, 0x32, 0x85, 0x93,
+	0x07, 0xf2, 0x05, 0x97, 0xc2, 0x11, 0x2d, 0x06, 0xe4, 0x25, 0x3c, 0xba, 0x61, 0xe2, 0x63, 0x71,
+	0x11, 0x5d, 0xc8, 0x39, 0x60, 0x53, 0xa8, 0xa0, 0x8d, 0x3b, 0xed, 0x6b, 0x77, 0x4a, 0x3e, 0xc3,
+	0x89, 0x3c, 0xce, 0x75, 0x12, 0x6c, 0xd6, 0x2c, 0x16, 0x5d, 0x2f, 0x73, 0x08, 0x83, 0x28, 0x94,
+	0x8f, 0x32, 0xa4, 0x83, 0x28, 0x44, 0x0f, 0xf6, 0x43, 0xb5, 0x4c, 0xbe, 0xc9, 0x88, 0x56, 0x63,
+	0xf2, 0x1a, 0x4e, 0x0d, 0x6e, 0x7d, 0xbe, 0x20, 0xd9, 0xc4, 0x42, 0x92, 0x1d, 0x5a, 0x0c, 0xc8,
+	0x3b, 0x38, 0x2d, 0xee, 0xf6, 0x1f, 0x7c, 0x90, 0x39, 0x8c, 0xcd, 0xc5, 0x9d, 0x9b, 0x2d, 0x0d,
+	0x6f, 0x5d, 0x6f, 0x84, 0x53, 0x18, 0x96, 0x87, 0xe2, 0x2a, 0x21, 0xeb, 0x40, 0x3e, 0x7b, 0xe7,
+	0x8b, 0xe0, 0x7e, 0x11, 0xfd, 0x2a, 0xf2, 0xd2, 0xa1, 0x75, 0x20, 0x37, 0x66, 0x6e, 0xd4, 0x69,
+	0xec, 0x8b, 0x79, 0x90, 0x4e, 0x67, 0xc7, 0xb0, 0x13, 0x85, 0xa5, 0xa7, 0xfc, 0xf7, 0x01, 0x37,
+	0x17, 0x30, 0x69, 0xd1, 0x3b, 0xed, 0x50, 0x18, 0x2f, 0x98, 0x9f, 0x05, 0xf7, 0x7f, 0x65, 0xe7,
+	0x39, 0x1c, 0x70, 0xa9, 0x56, 0x22, 0x65, 0x4c, 0x0f, 0x92, 0x4b, 0x98, 0xb4, 0x98, 0xca, 0x04,
+	0x81, 0x51, 0xa9, 0xe5, 0x9b, 0x95, 0x50, 0x99, 0xaa, 0xc5, 0xde, 0xfc, 0x76, 0x60, 0xef, 0x56,
+	0xb6, 0x19, 0x7c, 0x0f, 0xff, 0x37, 0x6a, 0x1c, 0xcf, 0x8a, 0x7e, 0x33, 0x6f, 0x77, 0x19, 0xcf,
+	0xb3, 0x4d, 0x15, 0x9b, 0x92, 0x5e, 0xce, 0x69, 0x94, 0x75, 0xc5, 0x69, 0x37, 0x85, 0x8a, 0x63,
+	0xe9, 0x02, 0xa4, 0x87, 0x97, 0xb0, 0x5f, 0x16, 0x33, 0x8e, 0x95, 0xd2, 0x68, 0x02, 0xde, 0xa4,
+	0x15, 0xaf, 0x96, 0x5f, 0x01, 0xd4, 0x85, 0x8b, 0x6e, 0x2d, 0xd4, 0x8b, 0xde, 0x3b, 0xb3, 0xcc,
+	0x54, 0x90, 0x0f, 0x70, 0xa0, 0x25, 0x1c, 0x3e, 0x51, 0x6a, 0x5b, 0x8d, 0x7b, 0x53, 0xfb, 0x64,
+	0x45, 0xfb, 0x04, 0x87, 0x7a, 0xc2, 0xe0, 0x54, 0xbb, 0x01, 0x93, 0xf7, 0x74, 0xcb, 0x6c, 0x13,
+	0xa8, 0xd7, 0x03, 0x5a, 0x2d, 0x70, 0x13, 0x68, 0x2f, 0x22, 0xd2, 0x43, 0x0a, 0x47, 0x46, 0x4a,
+	0xa3, 0xdd, 0x44, 0x85, 0x7c, 0xb6, 0x6d, 0xba, 0xc9, 0x34, 0x32, 0xb4, 0x62, 0xda, 0xab, 0xa1,
+	0x62, 0x6e, 0x49, 0x6c, 0xd2, 0xbb, 0xdb, 0x93, 0x82, 0xb7, 0x7f, 0x02, 0x00, 0x00, 0xff, 0xff,
+	0x5f, 0x33, 0xc6, 0x73, 0x29, 0x07, 0x00, 0x00,
 }

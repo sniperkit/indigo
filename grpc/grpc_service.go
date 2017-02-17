@@ -27,29 +27,32 @@ func NewIndigoGRPCService(dataDir string) *indigoGRPCService {
 
 	_, err = os.Stat(dataDir)
 	if os.IsNotExist(err) {
-		log.Printf("info: make data directory data_dir=%s\n", dataDir)
 		err = os.MkdirAll(dataDir, 0755)
-		if err != nil {
-			log.Printf("error: failed to make data directory (%s) data_dir=%s\n", err.Error(), dataDir)
+		if err == nil {
+			log.Printf("info: make data directory dir=%s\n", dataDir)
+		} else {
+			log.Printf("error: failed to make data directory (%s) dir=%s\n", err.Error(), dataDir)
 		}
 	} else {
-		log.Printf("info: data directory already exists data_dir=%s\n", dataDir)
+		log.Printf("info: data directory already exists dir=\"%s\"\n", dataDir)
 	}
 
 	list, err := ioutil.ReadDir(dataDir)
 	if err == nil {
 		for _, f := range list {
 			if f.IsDir() {
-				var indexPath = path.Join(dataDir, f.Name())
-				log.Printf("info: open index index_path=%s\n", indexPath)
-				index, err := bleve.Open(indexPath)
+				var indexDir = path.Join(dataDir, f.Name())
+				index, err := bleve.Open(indexDir)
 				if err == nil {
+					log.Printf("info: open existing index name=\"%s\"\n", f.Name())
 					indices[f.Name()] = index
+				} else {
+					log.Printf("error: failed to open index dir=%s\n", indexDir)
 				}
 			}
 		}
 	} else {
-		log.Printf("error: failed to read data directory data_dir=%s\n", dataDir)
+		log.Printf("error: failed to read data directory dir=%s\n", dataDir)
 	}
 
 	return &indigoGRPCService{
@@ -58,313 +61,325 @@ func NewIndigoGRPCService(dataDir string) *indigoGRPCService {
 	}
 }
 
-type CreateIndexResponse struct {
-	IndexName string `json:"index_name,omitempty"`
-	IndexPath string `json:"index_path,omitempty"`
-}
-
-func (igs *indigoGRPCService) CreateIndex(ctx context.Context, r *proto.CreateIndexRequest) (*proto.CreateIndexResponse, error) {
+func (igs *indigoGRPCService) CreateIndex(ctx context.Context, req *proto.CreateIndexRequest) (*proto.CreateIndexResponse, error) {
 	igs.mutex.Lock()
 	defer igs.mutex.Unlock()
 
-	var indexPath = path.Join(igs.dataDir, r.IndexName)
-	var index bleve.Index
+	var indexPath = path.Join(igs.dataDir, req.Name)
+	var index bleve.Index = nil
 	var indexMapping = bleve.NewIndexMapping()
-	var err error
+	var err error = nil
 
-	_, ok := igs.indices[r.IndexName]
+	_, ok := igs.indices[req.Name]
 	if ok == false {
 		_, err = os.Stat(indexPath)
 		if os.IsNotExist(err) {
-			err = json.Unmarshal([]byte(r.IndexMapping), indexMapping)
+			err = json.Unmarshal(req.Mapping, indexMapping)
 			if err == nil {
-				log.Printf("info: create index index_path=%s\n", indexPath)
-				index, err = bleve.NewUsing(indexPath, indexMapping, r.IndexType, r.IndexStore, nil)
-				if err != nil {
-					log.Printf("error: faild to create index (%s) index_name=%s\n", err.Error(), r.IndexName)
+				log.Printf("info: create index mapping name=%s\n", req.Name)
+
+				index, err = bleve.NewUsing(indexPath, indexMapping, req.Type, req.Store, nil)
+				if err == nil {
+					log.Printf("info: create index name=%s\n", req.Name)
+				} else {
+					log.Printf("error: faild to create index (%s) name=%s\n", err.Error(), req.Name)
 				}
 			} else {
-				log.Printf("error: faild to create index mapping (%s) index_name=%s\n", err.Error(), r.IndexName)
+				log.Printf("error: faild to create index mapping (%s) name=%s\n", err.Error(), req.Name)
 			}
 		} else {
-			log.Printf("error: index directory exists (%s) index_name=%s\n", err.Error(), r.IndexName)
+			log.Printf("error: index directory exists (%s) name=%s\n", err.Error(), req.Name)
 		}
 
-		igs.indices[r.IndexName] = index
+		igs.indices[req.Name] = index
 	} else {
-		err = errors.New(fmt.Sprintf("%s exists", r.IndexName))
-		log.Printf("error: index name exists (%s) index_name=%s\n", err.Error(), r.IndexName)
+		err = errors.New(fmt.Sprintf("%s exists", req.Name))
+		log.Printf("error: index exists (%s) name=%s\n", err.Error(), req.Name)
 	}
 
-	//a, _ := index.Stats().MarshalJSON()
-	//fmt.Println(string(a))
-	//fmt.Println(index.StatsMap())
-
-	response := CreateIndexResponse{IndexName: r.IndexName, IndexPath: indexPath}
-	byteResponse, err := json.Marshal(response)
-	if err != nil {
-		log.Printf("error: failed to create response (%s)\n", err.Error())
-	}
-
-	return &proto.CreateIndexResponse{Result: string(byteResponse)}, nil
+	return &proto.CreateIndexResponse{Name: req.Name}, nil
 }
 
-func (igs *indigoGRPCService) DeleteIndex(ctx context.Context, r *proto.DeleteIndexRequest) (*proto.DeleteIndexResponse, error) {
-
+func (igs *indigoGRPCService) DeleteIndex(ctx context.Context, req *proto.DeleteIndexRequest) (*proto.DeleteIndexResponse, error) {
 	igs.mutex.Lock()
 	defer igs.mutex.Unlock()
-
-	var indexPath = path.Join(igs.dataDir, r.IndexName)
+ぎt
+	var indexPath = path.Join(igs.dataDir, req.Name)
 	var err error
 
-	_, ok := igs.indices[r.IndexName]
+	_, ok := igs.indices[req.Name]
 	if ok == true {
 		_, err = os.Stat(indexPath)
 		if err == nil {
-			log.Printf("info: delete index index_name=%s\n", r.IndexName)
-
-			index := igs.indices[r.IndexName]
+			index := igs.indices[req.Name]
 
 			err = index.Close()
-			if err != nil {
-				log.Printf("error: failed to close index (%s) index_name=%s\n", err.Error(), r.IndexName)
+			if err == nil {
+				log.Printf("info: close index name=%s\n", req.Name)
+			} else {
+				log.Printf("error: failed to close index (%s) name=%s\n", err.Error(), req.Name)
 			}
-			err = os.RemoveAll(path.Join(igs.dataDir, r.IndexName))
-			if err != nil {
-				log.Printf("error: failed to delete index (%s) index_name=%s\n", err.Error(), r.IndexName)
+
+			err = os.RemoveAll(path.Join(igs.dataDir, req.Name))
+			if err == nil {
+				log.Printf("info: delete index name=%s\n", req.Name)
+			} else {
+				log.Printf("error: failed to delete index (%s) name=%s\n", err.Error(), req.Name)
 			}
 		} else {
-			log.Printf("error: index directory does not exist (%s) index_name=%s\n", err.Error(), r.IndexName)
+			log.Printf("error: index directory does not exist (%s) name=%s\n", err.Error(), req.Name)
 		}
 
-		delete(igs.indices, r.IndexName)
+		delete(igs.indices, req.Name)
 	} else {
-		err = errors.New(fmt.Sprintf("%s does not exist", r.IndexName))
-		log.Printf("error: index name does not exist (%s) index_name=%s\n", err.Error(), r.IndexName)
+		err = errors.New(fmt.Sprintf("%s does not exist", req.Name))
+		log.Printf("error: index does not exist (%s) name=%s\n", err.Error(), req.Name)
 	}
 
-	return &proto.DeleteIndexResponse{Result: ""}, nil
+	return &proto.DeleteIndexResponse{Name: req.Name}, nil
 }
 
-func (igs *indigoGRPCService) GetMapping(ctx context.Context, r *proto.GetMappingRequest) (*proto.GetMappingResponse, error) {
-	log.Printf("info: get index mapping index_name=%s\n", r.IndexName)
-
-	var bytesResp []byte
+func (igs *indigoGRPCService) GetStats(ctx context.Context, req *proto.GetStatsRequest) (*proto.GetStatsResponse, error) {
+	var indexStat []byte
 	var err error
 
-	_, ok := igs.indices[r.IndexName]
+	_, ok := igs.indices[req.Name]
 	if ok == true {
-		index := igs.indices[r.IndexName]
+		index := igs.indices[req.Name]
+		indexStat, err = index.Stats().MarshalJSON()
+		if err == nil {
+			log.Printf("info: create index stats name=%s\n", req.Name)
+		} else {
+			log.Printf("error: faild to create index stats (%s) name=%s\n", err.Error(), req.Name)
+		}
+	} else {
+		err = errors.New(fmt.Sprintf("%s does not exist", req.Name))
+		log.Printf("error: index does not exist (%s) name=%s\n", err.Error(), req.Name)
+	}
 
-		bytesResp, err = json.Marshal(index.Mapping())
-		if err != nil {
+	return &proto.GetStatsResponse{Stats: indexStat}, nil
+}
+
+func (igs *indigoGRPCService) GetMapping(ctx context.Context, req *proto.GetMappingRequest) (*proto.GetMappingResponse, error) {
+	var indexMapping []byte
+	var err error
+
+	index, ok := igs.indices[req.Name]
+	if ok == true {
+		indexMapping, err = json.Marshal(index.Mapping())
+		if err == nil {
+			log.Printf("info: create index mapping name=%s\n", req.Name)
+		} else {
 			log.Printf("error: failed to create index mapping (%s)\n", err.Error())
 		}
 	} else {
-		err = errors.New(fmt.Sprintf("%s does not exist", r.IndexName))
+		err = errors.New(fmt.Sprintf("%s does not exist", req.Name))
 		log.Printf("error: index name does not exist (%s)\n", err.Error())
 	}
 
-	return &proto.GetMappingResponse{Mapping: string(bytesResp)}, nil
+	return &proto.GetMappingResponse{Mapping: indexMapping}, nil
 }
 
-func (igs *indigoGRPCService) IndexDocument(ctx context.Context, r *proto.IndexDocumentRequest) (*proto.IndexDocumentResponse, error) {
-	log.Printf("info: index document index_name=%s document_id=%s\n", r.IndexName, r.DocumentID)
-
+func (igs *indigoGRPCService) IndexDocument(ctx context.Context, req *proto.IndexDocumentRequest) (*proto.IndexDocumentResponse, error) {
 	var document interface{}
 	var err error
 
-	_, ok := igs.indices[r.IndexName]
-	if ok == true {
-		err = json.Unmarshal([]byte(r.Document), &document)
-		if err == nil {
-			index := igs.indices[r.IndexName]
+	var count int32 = 0
 
-			err = index.Index(r.DocumentID, document)
-			if err != nil {
-				log.Printf("error: failed to index document (%s) index_name=%s document_id=%s\n", err.Error(), r.IndexName, r.DocumentID)
+	index, ok := igs.indices[req.Name]
+	if ok == true {
+		err = json.Unmarshal(req.Document, &document)
+		if err == nil {
+			log.Printf("info: create document name=%s id=%s\n", req.Name, req.Id)
+
+			err = index.Index(req.Id, document)
+			if err == nil {
+				count++
+				log.Printf("info: index document name=%s id=%s\n", req.Name, req.Id)
+			} else {
+				log.Printf("error: failed to index document (%s) name=%s id=%s\n", err.Error(), req.Name, req.Id)
 			}
 		} else {
-			log.Printf("error: failed to create document (%s) index_name=%s document_id=%s\n", err.Error(), r.IndexName, r.DocumentID)
+			log.Printf("error: failed to create document (%s) name=%s id=%s\n", err.Error(), req.Name, req.Id)
 		}
 	} else {
-		err = errors.New(fmt.Sprintf("%s does not exist", r.IndexName))
-		log.Printf("error: index name does not exist (%s) index_name=%s document_id=%s\n", err.Error(), r.IndexName, r.DocumentID)
-	}
-
-	return &proto.IndexDocumentResponse{Result: ""}, nil
-}
-
-func (igs *indigoGRPCService) DeleteDocument(ctx context.Context, r *proto.DeleteDocumentRequest) (*proto.DeleteDocumentResponse, error) {
-	log.Printf("info: delete document IndexName=%s DocumentID=%s\n", r.IndexName, r.DocumentID)
-
-	var err error
-
-	_, ok := igs.indices[r.IndexName]
-	if ok == true {
-		index := igs.indices[r.IndexName]
-
-		err = index.Delete(r.DocumentID)
-		if err != nil {
-			log.Printf("error: failed to delete document (%s)\n", err.Error())
-		}
-	} else {
-		err = errors.New(fmt.Sprintf("%s does not exist", r.IndexName))
+		err = errors.New(fmt.Sprintf("%s does not exist", req.Name))
 		log.Printf("error: index name does not exist (%s)\n", err.Error())
 	}
 
-	return &proto.DeleteDocumentResponse{Result: ""}, nil
+	return &proto.IndexDocumentResponse{Count: count}, nil
+}
+
+func (igs *indigoGRPCService) DeleteDocument(ctx context.Context, req *proto.DeleteDocumentRequest) (*proto.DeleteDocumentResponse, error) {
+	var err error
+
+	var count int32 = 0
+
+	_, ok := igs.indices[req.Name]
+	if ok == true {
+		index := igs.indices[req.Name]
+
+		err = index.Delete(req.Id)
+		if err == nil {
+			count++
+			log.Printf("info: delete document name=%s id=%s\n", req.Name, req.Id)
+		} else {
+			log.Printf("error: failed to delete document (%s) name=%s id=%\n", err.Error(), req.Name, req.Id)
+		}
+	} else {
+		err = errors.New(fmt.Sprintf("%s does not exist", req.Name))
+		log.Printf("error: index name does not exist (%s)\n", err.Error())
+	}
+
+	return &proto.DeleteDocumentResponse{Count: count}, nil
 }
 
 type IndexResult struct {
 	DocumentCount int `json:"document_count"`
 }
 
-func (igs *indigoGRPCService) IndexDocuments(ctx context.Context, r *proto.IndexDocumentsRequest) (*proto.IndexDocumentsResponse, error) {
-	log.Printf("info: index documents in bulk IndexName=%s\n", r.IndexName)
-
+func (igs *indigoGRPCService) IndexDocuments(ctx context.Context, req *proto.IndexDocumentsRequest) (*proto.IndexDocumentsResponse, error) {
 	var documents interface{}
 	var err error
-	var cnt int
+	var count int32 = 0
+	var batchCount int32 = 0
 
-	_, ok := igs.indices[r.IndexName]
+	_, ok := igs.indices[req.Name]
 	if ok == true {
-		index := igs.indices[r.IndexName]
+		index := igs.indices[req.Name]
 
-		err = json.Unmarshal([]byte(r.Documents), &documents)
+		err = json.Unmarshal(req.Documents, &documents)
 		if err == nil {
-			/*
-			 * create batch
-			 */
+			log.Printf("info: create documents name=%s\n", req.Name)
+
 			batch := index.NewBatch()
-			for ID, doc := range documents.(map[string]interface{}) {
-				err = batch.Index(ID, doc)
-				if err != nil {
-					log.Printf("error: failed to index document IndexName=%s DocumentID=%s (%s)\n", r.IndexName, ID, err.Error())
+			for id, doc := range documents.(map[string]interface{}) {
+				err = batch.Index(id, doc)
+				if err == nil {
+					count++
+					log.Printf("info: index document name=%s id=%s\n", req.Name, id)
+				} else {
+					log.Printf("error: failed to index document (%s) name=%s id=%s\n", err.Error(), req.Name, id)
 				}
 
-				cnt++
+				batchCount++
 
-				if cnt%int(r.BatchSize) == 0 {
+				if batchCount%req.BatchSize == 0 {
 					err = index.Batch(batch)
-					if err != nil {
-						log.Printf("error: failed to index documents in bulk IndexName=%s (%s)\n", r.IndexName, err.Error())
+					if err == nil {
+						log.Printf("info: index documents in bulk name=%s\n", req.Name)
+					} else {
+						log.Printf("error: failed to index documents in bulk (%s) name=%s\n", err.Error(), req.Name)
 					}
 
-					/*
-					 * recreate batch
-					 */
 					batch = index.NewBatch()
 				}
 			}
 
 			if batch.Size() > 0 {
-				/*
-				 * index document
-				 */
 				err = index.Batch(batch)
-				if err != nil {
-					log.Printf("error: failed to index documents in bulk IndexName=%s (%s)\n", r.IndexName, err.Error())
+				if err == nil {
+					log.Printf("info: index documents in bulk name=%s\n", req.Name)
+				} else {
+					log.Printf("error: failed to index documents in bulk (%s) name=%s\n", err.Error(), req.Name)
 				}
 			}
 		} else {
-			log.Printf("error: failed to create documents %s", err.Error())
+			log.Printf("error: failed to create documents (%s) name=%s\n", err.Error(), req.Name)
 		}
 	} else {
-		err = errors.New(fmt.Sprintf("%s does not exist", r.IndexName))
+		err = errors.New(fmt.Sprintf("%s does not exist", req.Name))
 		log.Printf("error: index name does not exist (%s)\n", err.Error())
 	}
 
-	return &proto.IndexDocumentsResponse{Result: ""}, nil
+	return &proto.IndexDocumentsResponse{Count: count}, nil
 }
 
-func (igs *indigoGRPCService) DeleteDocuments(ctx context.Context, r *proto.DeleteDocumentsRequest) (*proto.DeleteDocumentsResponse, error) {
-	log.Printf("info: delete documents in bulk IndexName=%s\n", r.IndexName)
-
+func (igs *indigoGRPCService) DeleteDocuments(ctx context.Context, req *proto.DeleteDocumentsRequest) (*proto.DeleteDocumentsResponse, error) {
 	var ids []string
 	var err error
-	var cnt int
 
-	_, ok := igs.indices[r.IndexName]
+	var count int32 = 0
+
+	index, ok := igs.indices[req.Name]
 	if ok == true {
-		index := igs.indices[r.IndexName]
-
-		err = json.Unmarshal([]byte(r.Ids), &ids)
+		err = json.Unmarshal(req.Ids, &ids)
 		if err == nil {
-			/*
-			 * create batch
-			 */
+			log.Printf("info: create document ids name=%s\n", req.Name)
+
 			batch := index.NewBatch()
 			for i := range ids {
-				batch.Delete(ids[i])
+				id := ids[i]
 
-				cnt++
+				batch.Delete(id)
+				log.Printf("info: delete document name=%s id=%s\n", req.Name, id)
 
-				if cnt%int(r.BatchSize) == 0 {
+				count++
+
+				if count%req.BatchSize == 0 {
 					err = index.Batch(batch)
-					if err != nil {
-						log.Printf("error: failed to delete documents in bulk IndexName=%s (%s)\n", r.IndexName, err.Error())
+					if err == nil {
+						log.Printf("info: delete documents in bulk name=%s\n", req.Name)
+					} else {
+						log.Printf("error: failed to delete documents in bulk (%s) name=%s\n", err.Error(), req.Name)
 					}
 
-					/*
-					 * recreate batch
-					 */
 					batch = index.NewBatch()
 				}
 			}
 
 			if batch.Size() > 0 {
-				/*
-				 * index document
-				 */
 				err = index.Batch(batch)
-				if err != nil {
-					log.Printf("error: failed to delete documents in bulk IndexName=%s (%s)\n", r.IndexName, err.Error())
+				if err == nil {
+					log.Printf("info: delete documents in bulk name=%s\n", req.Name)
+				} else {
+					log.Printf("error: failed to delete documents in bulk (%s) name=%s\n", err.Error(), req.Name)
 				}
 			}
 		} else {
-			log.Printf("error: failed to create documents %s", err.Error())
+			log.Printf("error: failed to create document ids (%s)", err.Error())
 		}
 	} else {
-		err = errors.New(fmt.Sprintf("%s does not exist", r.IndexName))
+		err = errors.New(fmt.Sprintf("%s does not exist", req.Name))
 		log.Printf("error: index name does not exist (%s)\n", err.Error())
 	}
 
-	return &proto.DeleteDocumentsResponse{Result: ""}, nil
+	return &proto.DeleteDocumentsResponse{Count: count}, nil
 }
 
-func (igs *indigoGRPCService) SearchDocuments(ctx context.Context, r *proto.SearchDocumentsRequest) (*proto.SearchDocumentsResponse, error) {
-	log.Printf("info: search documents IndexName=%s\n", r.IndexName)
+func (igs *indigoGRPCService) SearchDocuments(ctx context.Context, req *proto.SearchDocumentsRequest) (*proto.SearchDocumentsResponse, error) {
+	log.Printf("info: search documents IndexName=%s\n", req.Name)
 
 	var bytesResp []byte
 	var err error
 
-	_, ok := igs.indices[r.IndexName]
+	index, ok := igs.indices[req.Name]
 	if ok == true {
-		index := igs.indices[r.IndexName]
-
 		searchRequest := bleve.NewSearchRequest(nil)
-		err = json.Unmarshal([]byte(r.SearchRequest), searchRequest)
+		err = json.Unmarshal(req.SearchRequest, searchRequest)
 		if err == nil {
+			log.Printf("info: create search request name=%s\n", req.Name)
+
 			searchResult, err := index.Search(searchRequest)
 			if err == nil {
-				/*
-				 * create response
-				 */
+				log.Printf("info: search documents name=%s\n", req.Name)
+
 				bytesResp, err = json.Marshal(&searchResult)
-				if err != nil {
-					log.Printf("error: %s", err.Error())
+				if err == nil {
+					log.Printf("info: create search result name=%s\n", req.Name)
+				} else {
+					log.Printf("error: failed to create search result (%s) name=%s\n", err.Error(), req.Name)
 				}
 			} else {
-				log.Printf("error: failed to search documents (%s)\n", err.Error())
+				log.Printf("error: failed to search documents (%s) name=%s \n", err.Error(), req.Name)
 			}
 		} else {
-			log.Printf("error: failed to create search request (%s)\n", err.Error())
+			log.Printf("error: failed to create search request (%s) name=%s \n", err.Error(), req.Name)
 		}
 	} else {
-		err = errors.New(fmt.Sprintf("%s does not exist", r.IndexName))
+		err = errors.New(fmt.Sprintf("%s does not exist", req.Name))
 		log.Printf("error: index name does not exist (%s)\n", err.Error())
 	}
 
-	return &proto.SearchDocumentsResponse{SearchResult: string(bytesResp)}, nil
+	return &proto.SearchDocumentsResponse{SearchResult: bytesResp}, nil
 }

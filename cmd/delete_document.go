@@ -9,16 +9,17 @@ import (
 	"google.golang.org/grpc"
 )
 
-var getMappingCmd = &cobra.Command{
-	Use:   "mapping INDEX_NAME",
-	Short: "gets the index mapping from the Indigo gRPC Server",
-	Long:  `The get mapping command gets the index mapping from the Indigo gRPC Server.`,
+var deleteDocumentCmd = &cobra.Command{
+	Use:   "document INDEX_NAME DOCUMENT_IDS",
+	Short: "deletes the document from the Indigo gRPC Server",
+	Long:  `The delete document command deletes the document from the Indigo gRPC Server.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		if len(args) < 1 {
+		if len(args) < 2 {
 			return errors.New("few arguments")
 		}
 
 		indexName := args[0]
+		id := args[1]
 
 		conn, err := grpc.Dial(fmt.Sprintf("%s:%d", gRPCServerName, gRPCServerPort), grpc.WithInsecure())
 		if err != nil {
@@ -27,17 +28,17 @@ var getMappingCmd = &cobra.Command{
 		defer conn.Close()
 
 		client := proto.NewIndigoClient(conn)
-		resp, err := client.GetMapping(context.Background(), &proto.GetMappingRequest{Name: indexName})
+		resp, err := client.DeleteDocument(context.Background(), &proto.DeleteDocumentRequest{Name: indexName, Id: id})
 		if err != nil {
 			return err
 		}
 
-		fmt.Printf("%s\n", resp.Mapping)
+		fmt.Printf("%d document deleted\n", resp.Count)
 
 		return nil
 	},
 }
 
 func init() {
-	getCmd.AddCommand(getMappingCmd)
+	deleteCmd.AddCommand(deleteDocumentCmd)
 }

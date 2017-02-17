@@ -36,7 +36,7 @@ func (h *DeleteIndexHandler) ServeHTTP(w http.ResponseWriter, req *http.Request)
 		batchSize = 1000
 	}
 
-	resp, err := h.client.DeleteDocuments(context.Background(), &proto.DeleteDocumentsRequest{Ids: string(requestBody), BatchSize: int32(batchSize)})
+	resp, err := h.client.DeleteDocuments(context.Background(), &proto.DeleteDocumentsRequest{Ids: requestBody, BatchSize: int32(batchSize)})
 	if err != nil {
 		w.WriteHeader(http.StatusServiceUnavailable)
 		log.Printf("error: %s", err.Error())
@@ -44,5 +44,5 @@ func (h *DeleteIndexHandler) ServeHTTP(w http.ResponseWriter, req *http.Request)
 	}
 
 	w.WriteHeader(http.StatusOK)
-	fmt.Fprintf(w, "%s\n", resp.Result)
+	fmt.Fprintf(w, "%s\n", resp.Count)
 }

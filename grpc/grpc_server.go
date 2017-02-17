@@ -37,7 +37,7 @@ func (igs *indigoGRPCServer) Start() error {
 		return
 	}()
 
-	log.Printf("info: The Indigo gRPC Server started addr=%s\n", igs.listener.Addr().String())
+	log.Printf("info: The Indigo gRPC Server started addr=\"%s\"\n", igs.listener.Addr().String())
 
 	return nil
 }
@@ -45,7 +45,7 @@ func (igs *indigoGRPCServer) Start() error {
 func (igs *indigoGRPCServer) Stop() error {
 	igs.server.GracefulStop()
 
-	log.Printf("info: The Indigo gRPC Server stopped addr=%s\n", igs.listener.Addr().String())
+	log.Printf("info: The Indigo gRPC Server stopped addr=\"%s\"\n", igs.listener.Addr().String())
 
 	return nil
 }

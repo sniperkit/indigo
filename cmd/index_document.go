@@ -11,19 +11,20 @@ import (
 	"strings"
 )
 
-var searchDocumentsCmd = &cobra.Command{
-	Use:   "documents INDEX_NAME SEARCH_REQUEST",
-	Short: "searches the Indigo gRPC Serve with the search request",
-	Long:  `The search documents command searches the documents from the Indigo gRPC Server.`,
+var indexDocumentCmd = &cobra.Command{
+	Use:   "documents INDEX_NAME ID DOCUMENT",
+	Short: "indexes the document to the Indigo gRPC Server",
+	Long:  `The index document command indexes the document to the Indigo gRPC Server.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		if len(args) < 1 {
+		if len(args) < 3 {
 			return errors.New("few arguments")
 		}
 
 		indexName := args[0]
+		id := args[1]
 		buf := new(bytes.Buffer)
-		buf.ReadFrom(strings.NewReader(args[1]))
-		searchRequest := buf.Bytes()
+		buf.ReadFrom(strings.NewReader(args[2]))
+		document := buf.Bytes()
 
 		conn, err := grpc.Dial(fmt.Sprintf("%s:%d", gRPCServerName, gRPCServerPort), grpc.WithInsecure())
 		if err != nil {
@@ -32,18 +33,17 @@ var searchDocumentsCmd = &cobra.Command{
 		defer conn.Close()
 
 		client := proto.NewIndigoClient(conn)
-
-		resp, err := client.SearchDocuments(context.Background(), &proto.SearchDocumentsRequest{Name: indexName, SearchRequest: searchRequest})
+		resp, err := client.IndexDocument(context.Background(), &proto.IndexDocumentRequest{Name: indexName, Id: id, Document: document})
 		if err != nil {
 			return err
 		}
 
-		fmt.Printf("%s\n", resp.SearchResult)
+		fmt.Printf("%d document indexed\n", resp.Count)
 
 		return nil
 	},
 }
 
 func init() {
-	searchCmd.AddCommand(searchDocumentsCmd)
+	indexCmd.AddCommand(indexDocumentCmd)
 }

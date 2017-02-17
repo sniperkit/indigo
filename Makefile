@@ -1,6 +1,6 @@
 VERSION=0.1.0
 
-LDFLAGS=-ldflags "-X \"github.com/mosuka/indigo/version.Version=${VERSION}\""
+LDFLAGS=-ldflags "-X \"github.com/mosuka/indigo/version.Ver=${VERSION}\""
 
 vendor:
 	gvt restore

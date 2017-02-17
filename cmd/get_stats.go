@@ -9,10 +9,10 @@ import (
 	"google.golang.org/grpc"
 )
 
-var getMappingCmd = &cobra.Command{
-	Use:   "mapping INDEX_NAME",
-	Short: "gets the index mapping from the Indigo gRPC Server",
-	Long:  `The get mapping command gets the index mapping from the Indigo gRPC Server.`,
+var getStatsCmd = &cobra.Command{
+	Use:   "stats INDEX_NAME",
+	Short: "gets the index stats from the Indigo gRPC Server",
+	Long:  `The get stats command gets the index stats from the Indigo gRPC Server.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if len(args) < 1 {
 			return errors.New("few arguments")
@@ -27,17 +27,17 @@ var getMappingCmd = &cobra.Command{
 		defer conn.Close()
 
 		client := proto.NewIndigoClient(conn)
-		resp, err := client.GetMapping(context.Background(), &proto.GetMappingRequest{Name: indexName})
+		resp, err := client.GetStats(context.Background(), &proto.GetStatsRequest{Name: indexName})
 		if err != nil {
 			return err
 		}
 
-		fmt.Printf("%s\n", resp.Mapping)
+		fmt.Printf("%s\n", resp.Stats)
 
 		return nil
 	},
 }
 
 func init() {
-	getCmd.AddCommand(getMappingCmd)
+	getCmd.AddCommand(getStatsCmd)
 }
