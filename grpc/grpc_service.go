@@ -103,7 +103,7 @@ func (igs *indigoGRPCService) CreateIndex(ctx context.Context, req *proto.Create
 func (igs *indigoGRPCService) DeleteIndex(ctx context.Context, req *proto.DeleteIndexRequest) (*proto.DeleteIndexResponse, error) {
 	igs.mutex.Lock()
 	defer igs.mutex.Unlock()
-ぎt
+
 	var indexPath = path.Join(igs.dataDir, req.Name)
 	var err error
 
