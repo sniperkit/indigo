@@ -160,10 +160,48 @@ See [Introduction to Index Mappings](http://www.blevesearch.com/docs/Index-Mappi
 $ indigo create index example "$(cat example/mapping.json)" -s boltdb -t upside_down
 ```
 
+The result of the above `create index` command is:
+
+```text
+example created
+```
+
 ### Delete the index from the Indigo gRPC Server via CLI
 
 ```sh
 $ indigo delete index example
+```
+
+The result of the above `delete index` command is:
+
+```text
+example deleted
+```
+
+### Get the index stats from the Indigo gRPC Server via CLI
+
+```sh
+$ indigo get stats example | jq .
+```
+
+The result of the above `get stats` command is:
+
+```json
+{
+  "index": {
+    "analysis_time": 0,
+    "batches": 0,
+    "deletes": 0,
+    "errors": 0,
+    "index_time": 0,
+    "num_plain_text_bytes_indexed": 0,
+    "term_searchers_finished": 0,
+    "term_searchers_started": 0,
+    "updates": 0
+  },
+  "search_time": 0,
+  "searches": 0
+}
 ```
 
 ### Get the index mapping from the Indigo gRPC Server via CLI
@@ -172,7 +210,7 @@ $ indigo delete index example
 $ indigo get mapping example | jq .
 ```
 
-The result of the above mapping command is:
+The result of the above `get mapping` command is:
 
 ```json
 {
@@ -287,32 +325,54 @@ The result of the above mapping command is:
 }
 ```
 
-### Index the documents to the Indigo gRPC Server via CLI
+### Index the document to the Indigo gRPC Server via CLI
 
 ```sh
-$ indigo index documents example "$(cat example/index_documents.json)"
+$ indigo index document example "1" "$(cat example/index_document.json)"
 ```
 
-The result of the above index command is:
+The result of the above `index document` command is:
 
-```json
-{
-  "document_count": 5
-}
+```text
+1 document indexed
 ```
 
-### Delete the documents from the Indigo gRPC Server via CLI
+
+### Delete the document from the Indigo gRPC Server via CLI
 
 ```sh
-$ indigo delete documents example "$(cat example/delete_documents.json)"
+$ indigo delete document example "1"
 ```
 
-The result of the above delete command is:
+The result of the above `delete document` command is:
 
-```json
-{
-  "document_count": 3
-}
+```text
+1 document deleted
+```
+
+
+### Index the documents in bulk to the Indigo gRPC Server via CLI
+
+```sh
+$ indigo index bulk example "$(cat example/index_bulk.json)"
+```
+
+The result of the above `index bulk` command is:
+
+```text
+5 documents indexed in bulk
+```
+
+### Delete the documents in bulk from the Indigo gRPC Server via CLI
+
+```sh
+$ indigo delete bulk example "$(cat example/delete_documents.json)"
+```
+
+The result of the above `delete bulk` command is:
+
+```text
+3 documents deleted in bulk
 ```
 
 
@@ -323,10 +383,10 @@ See [Queries](http://www.blevesearch.com/docs/Query/), [Query String Query](http
 #### Simple query
 
 ```sh
-$ indigo search document example "$(cat example/simple_query.json)" | jq .
+$ indigo search documents example "$(cat example/simple_query.json)" | jq .
 ```
 
-The result of the above simple query command is:
+The result of the above `search documents` command is:
 
 ```json
 {
@@ -337,7 +397,7 @@ The result of the above simple query command is:
   },
   "request": {
     "query": {
-      "query": "description:Go"
+      "query": "description:*"
     },
     "size": 10,
     "from": 0,
@@ -359,9 +419,9 @@ The result of the above simple query command is:
   },
   "hits": [
     {
-      "index": "./index",
+      "index": "data/example",
       "id": "1",
-      "score": 0.40824830532073975,
+      "score": 0.2527852661670985,
       "sort": [
         "_score"
       ],
@@ -373,11 +433,27 @@ The result of the above simple query command is:
         "release": "2014-04-18T00:00:00Z",
         "type": "document"
       }
+    },
+    {
+      "index": "data/example",
+      "id": "5",
+      "score": 0.2527852661670985,
+      "sort": [
+        "_score"
+      ],
+      "fields": {
+        "category": "Server",
+        "description": "Full-text search server built on Bleve.",
+        "name": "Indigo",
+        "popularity": 5,
+        "release": "2017-01-13T00:00:00Z",
+        "type": "document"
+      }
     }
   ],
-  "total_hits": 1,
-  "max_score": 0.40824830532073975,
-  "took": 220795,
+  "total_hits": 2,
+  "max_score": 0.2527852661670985,
+  "took": 1991761,
   "facets": {}
 }
 ```

@@ -9,8 +9,8 @@ service Indigo {
     rpc GetMapping(GetMappingRequest) returns (GetMappingResponse) {}
     rpc IndexDocument(IndexDocumentRequest) returns (IndexDocumentResponse) {}
     rpc DeleteDocument(DeleteDocumentRequest) returns (DeleteDocumentResponse) {}
-    rpc IndexDocuments(IndexDocumentsRequest) returns (IndexDocumentsResponse) {}
-    rpc DeleteDocuments(DeleteDocumentsRequest) returns (DeleteDocumentsResponse) {}
+    rpc IndexBulk(IndexBulkRequest) returns (IndexBulkResponse) {}
+    rpc DeleteBulk(DeleteBulkRequest) returns (DeleteBulkResponse) {}
     rpc SearchDocuments(SearchDocumentsRequest) returns (SearchDocumentsResponse) {}
 }
 
@@ -62,21 +62,21 @@ message DeleteDocumentResponse {
     int32 count = 1;
 }
 
-message IndexDocumentsRequest {
+message IndexBulkRequest {
     string name = 1;
     bytes documents = 2;
     int32 batchSize = 3;
 }
-message IndexDocumentsResponse {
+message IndexBulkResponse {
     int32 count = 1;
 }
 
-message DeleteDocumentsRequest {
+message DeleteBulkRequest {
     string name = 1;
     bytes ids = 2;
     int32 batchSize = 3;
 }
-message DeleteDocumentsResponse {
+message DeleteBulkResponse {
     int32 count = 1;
 }
 

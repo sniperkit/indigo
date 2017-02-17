@@ -11,10 +11,10 @@ import (
 	"strings"
 )
 
-var deleteDocumentsCmd = &cobra.Command{
-	Use:   "documents INDEX_NAME DOCUMENT_IDS",
-	Short: "deletes the documents from the Indigo gRPC Server",
-	Long:  `The delete documents command deletes the documents from the Indigo gRPC Server.`,
+var indexBulkCmd = &cobra.Command{
+	Use:   "bulk INDEX_NAME DOCUMENTS",
+	Short: "indexes the documents in bulk to the Indigo gRPC Server",
+	Long:  `The index documents command indexes the documents in bulk to the Indigo gRPC Server.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if len(args) < 2 {
 			return errors.New("few arguments")
@@ -23,7 +23,7 @@ var deleteDocumentsCmd = &cobra.Command{
 		indexName := args[0]
 		buf := new(bytes.Buffer)
 		buf.ReadFrom(strings.NewReader(args[1]))
-		ids := buf.Bytes()
+		documents := buf.Bytes()
 
 		conn, err := grpc.Dial(fmt.Sprintf("%s:%d", gRPCServerName, gRPCServerPort), grpc.WithInsecure())
 		if err != nil {
@@ -32,19 +32,19 @@ var deleteDocumentsCmd = &cobra.Command{
 		defer conn.Close()
 
 		client := proto.NewIndigoClient(conn)
-		resp, err := client.DeleteDocuments(context.Background(), &proto.DeleteDocumentsRequest{Name: indexName, Ids: ids, BatchSize: batchSize})
+		resp, err := client.IndexBulk(context.Background(), &proto.IndexBulkRequest{Name: indexName, Documents: documents, BatchSize: batchSize})
 		if err != nil {
 			return err
 		}
 
-		fmt.Printf("%d documents indexed\n", resp.Count)
+		fmt.Printf("%d documents indexed in bulk\n", resp.Count)
 
 		return nil
 	},
 }
 
 func init() {
-	deleteDocumentsCmd.Flags().Int32VarP(&batchSize, "batch-size", "b", batchSize, "port number")
+	indexBulkCmd.Flags().Int32VarP(&batchSize, "batch-size", "b", batchSize, "port number")
 
-	deleteCmd.AddCommand(deleteDocumentsCmd)
+	indexCmd.AddCommand(indexBulkCmd)
 }

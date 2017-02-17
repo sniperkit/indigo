@@ -1,0 +1,8 @@
+{
+  "name": "Bleve",
+  "description": "Full-text search library written in Go.",
+  "category": "Library",
+  "popularity" 1.0,
+  "release": "2014-04-18T00:00:00Z",
+  "type": "document"
+}

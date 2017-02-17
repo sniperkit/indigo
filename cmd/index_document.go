@@ -12,7 +12,7 @@ import (
 )
 
 var indexDocumentCmd = &cobra.Command{
-	Use:   "documents INDEX_NAME ID DOCUMENT",
+	Use:   "document INDEX_NAME ID DOCUMENT",
 	Short: "indexes the document to the Indigo gRPC Server",
 	Long:  `The index document command indexes the document to the Indigo gRPC Server.`,
 	RunE: func(cmd *cobra.Command, args []string) error {

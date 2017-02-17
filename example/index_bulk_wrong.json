@@ -1,0 +1,42 @@
+{
+  "1": {
+    "name": "Bleve",
+    "description": "Full-text search library written in Go.",
+    "category": "Library",
+    "popularity": 1.0,
+    "release": "2014-04-18T00:00:00Z",
+    "type": "document"
+  },
+  "2": {
+    "name": "Lucene",
+    "description": "Full-text search library written in Java.",
+    "category": "Library",
+    "popularity": 2.5,
+    "release": "2000-03-30T00:00:00Z",
+    "type": "document"
+  },
+  "3": {
+    "name": "Solr",
+    "description": "Full-text search server built on Lucene.",
+    "category": "Server",
+    "popularity": 4.5,
+    "release": "2006-12-22T00:00:00Z",
+    "type": "document"
+  },
+  "4": {
+    "name": "Elasticsearch",
+    "description": "Full-text search server built on Lucene.",
+    "category": "Server",
+    "popularity": 5.0,
+    "release": "2010-02-08T00:00:00Z",
+    "type": "document"
+  },
+  "5": {
+    "name": "Indigo",
+    "description": "Full-text search server built on Bleve.",
+    "category": "Server",
+    "popularity": 5.0,
+    "release": "2017-01-13T00:00:00Z",
+    "type": "document"
+  }
+}
