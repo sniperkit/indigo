@@ -11,31 +11,32 @@ import (
 	"net/http"
 )
 
-type DeleteIndexHandler struct {
+type DeleteDocumentHandler struct {
 	client proto.IndigoClient
 }
 
-func NewDeleteIndexHandler(client proto.IndigoClient) *DeleteIndexHandler {
-	return &DeleteIndexHandler{
+func NewDeleteDocumentHandler(client proto.IndigoClient) *DeleteDocumentHandler {
+	return &DeleteDocumentHandler{
 		client: client,
 	}
 }
 
-func (h *DeleteIndexHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
+func (h *DeleteDocumentHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	log.Printf("info: host=\"%s\" request_uri=\"%s\" method=\"%s\" remote_addr=\"%s\" user_agent=\"%s\"\n", req.Host, req.RequestURI, req.Method, req.RemoteAddr, req.UserAgent())
 
 	vars := mux.Vars(req)
 
 	indexName := vars["indexName"]
+	id := vars["id"]
 
 	response := make(map[string]interface{})
 
-	resp, err := h.client.DeleteIndex(context.Background(), &proto.DeleteIndexRequest{Name: indexName})
+	resp, err := h.client.DeleteDocument(context.Background(), &proto.DeleteDocumentRequest{Name: indexName, Id: id})
 	if err == nil {
 		log.Print("info: request to Indigo gRPC Server was successful\n")
 
 		w.WriteHeader(http.StatusOK)
-		response["name"] = resp.Name
+		response["count"] = resp.Count
 	} else {
 		log.Printf("error: failed to request to the Indigo gRPC Server (%s)\n", err.Error())
 

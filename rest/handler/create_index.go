@@ -5,32 +5,51 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gorilla/mux"
+	"github.com/mosuka/indigo/constant"
 	"github.com/mosuka/indigo/proto"
 	"golang.org/x/net/context"
+	"io/ioutil"
 	"log"
 	"net/http"
 )
 
-type DeleteIndexHandler struct {
+type CreateIndexHandler struct {
 	client proto.IndigoClient
 }
 
-func NewDeleteIndexHandler(client proto.IndigoClient) *DeleteIndexHandler {
-	return &DeleteIndexHandler{
+func NewCreateIndexHandler(client proto.IndigoClient) *CreateIndexHandler {
+	return &CreateIndexHandler{
 		client: client,
 	}
 }
 
-func (h *DeleteIndexHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
+func (h *CreateIndexHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	log.Printf("info: host=\"%s\" request_uri=\"%s\" method=\"%s\" remote_addr=\"%s\" user_agent=\"%s\"\n", req.Host, req.RequestURI, req.Method, req.RemoteAddr, req.UserAgent())
 
 	vars := mux.Vars(req)
 
 	indexName := vars["indexName"]
 
+	indexMapping, err := ioutil.ReadAll(req.Body)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		log.Printf("error: %s", err.Error())
+		return
+	}
+
+	indexType := req.URL.Query().Get("indexType")
+	if indexType == "" {
+		indexType = constant.DefaultIndexType
+	}
+
+	indexStore := req.URL.Query().Get("indexStore")
+	if indexStore == "" {
+		indexStore = constant.DefaultIndexStore
+	}
+
 	response := make(map[string]interface{})
 
-	resp, err := h.client.DeleteIndex(context.Background(), &proto.DeleteIndexRequest{Name: indexName})
+	resp, err := h.client.CreateIndex(context.Background(), &proto.CreateIndexRequest{Name: indexName, Mapping: indexMapping, Type: indexType, Store: indexStore})
 	if err == nil {
 		log.Print("info: request to Indigo gRPC Server was successful\n")
 

@@ -32,10 +32,19 @@ func NewIndigoRESTServer(serverPort int, serverPath, gRPCServerName string, gRPC
 	/*
 	 * set handlers
 	 */
-	router.Handle(fmt.Sprintf("%s/mapping", serverPath), handler.NewGetMappingHandler(client)).Methods("GET")
-	router.Handle(fmt.Sprintf("%s/search", serverPath), handler.NewPostSearchHandler(client)).Methods("POST")
-	router.Handle(fmt.Sprintf("%s/index", serverPath), handler.NewPostIndexHandler(client)).Methods("POST")
-	router.Handle(fmt.Sprintf("%s/index", serverPath), handler.NewDeleteIndexHandler(client)).Methods("DELETE")
+	router.Handle(fmt.Sprintf("%s/{indexName}", serverPath), handler.NewCreateIndexHandler(client)).Methods("PUT")
+	router.Handle(fmt.Sprintf("%s/{indexName}", serverPath), handler.NewDeleteIndexHandler(client)).Methods("DELETE")
+
+	router.Handle(fmt.Sprintf("%s/{indexName}/_mapping", serverPath), handler.NewGetMappingHandler(client)).Methods("GET")
+	router.Handle(fmt.Sprintf("%s/{indexName}/_stats", serverPath), handler.NewGetStatsHandler(client)).Methods("GET")
+
+	router.Handle(fmt.Sprintf("%s/{indexName}/{id}", serverPath), handler.NewIndexDocumentHandler(client)).Methods("PUT")
+	router.Handle(fmt.Sprintf("%s/{indexName}/{id}", serverPath), handler.NewDeleteDocumentHandler(client)).Methods("DELETE")
+
+	router.Handle(fmt.Sprintf("%s/{indexName}/_bulk", serverPath), handler.NewIndexBulkHandler(client)).Methods("POST")
+	router.Handle(fmt.Sprintf("%s/{indexName}/_bulk", serverPath), handler.NewDeleteBulkHandler(client)).Methods("DELETE")
+
+	router.Handle(fmt.Sprintf("%s/{indexName}/_search", serverPath), handler.NewSearchHandler(client)).Methods("POST")
 
 	listener, err := net.Listen("tcp", fmt.Sprintf(":%d", serverPort))
 	if err != nil {

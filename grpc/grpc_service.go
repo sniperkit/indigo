@@ -93,11 +93,11 @@ func (igs *indigoGRPCService) CreateIndex(ctx context.Context, req *proto.Create
 
 		igs.indices[req.Name] = index
 	} else {
-		err = errors.New(fmt.Sprintf("%s exists", req.Name))
+		err = errors.New(fmt.Sprintf("%s already exists", req.Name))
 		log.Printf("error: index exists (%s) name=\"%s\"\n", err.Error(), req.Name)
 	}
 
-	return &proto.CreateIndexResponse{Name: req.Name}, nil
+	return &proto.CreateIndexResponse{Name: req.Name}, err
 }
 
 func (igs *indigoGRPCService) DeleteIndex(ctx context.Context, req *proto.DeleteIndexRequest) (*proto.DeleteIndexResponse, error) {
@@ -134,7 +134,7 @@ func (igs *indigoGRPCService) DeleteIndex(ctx context.Context, req *proto.Delete
 		log.Printf("error: index does not exist (%s) name=\"%s\"\n", err.Error(), req.Name)
 	}
 
-	return &proto.DeleteIndexResponse{Name: req.Name}, nil
+	return &proto.DeleteIndexResponse{Name: req.Name}, err
 }
 
 func (igs *indigoGRPCService) GetStats(ctx context.Context, req *proto.GetStatsRequest) (*proto.GetStatsResponse, error) {
@@ -154,7 +154,7 @@ func (igs *indigoGRPCService) GetStats(ctx context.Context, req *proto.GetStatsR
 		log.Printf("error: index does not exist (%s) name=\"%s\"\n", err.Error(), req.Name)
 	}
 
-	return &proto.GetStatsResponse{Stats: indexStat}, nil
+	return &proto.GetStatsResponse{Stats: indexStat}, err
 }
 
 func (igs *indigoGRPCService) GetMapping(ctx context.Context, req *proto.GetMappingRequest) (*proto.GetMappingResponse, error) {
@@ -174,7 +174,7 @@ func (igs *indigoGRPCService) GetMapping(ctx context.Context, req *proto.GetMapp
 		log.Printf("error: index name does not exist (%s)\n", err.Error())
 	}
 
-	return &proto.GetMappingResponse{Mapping: indexMapping}, nil
+	return &proto.GetMappingResponse{Mapping: indexMapping}, err
 }
 
 func (igs *indigoGRPCService) IndexDocument(ctx context.Context, req *proto.IndexDocumentRequest) (*proto.IndexDocumentResponse, error) {
@@ -203,7 +203,7 @@ func (igs *indigoGRPCService) IndexDocument(ctx context.Context, req *proto.Inde
 		log.Printf("error: index name does not exist (%s)\n", err.Error())
 	}
 
-	return &proto.IndexDocumentResponse{Count: int32(count)}, nil
+	return &proto.IndexDocumentResponse{Count: int32(count)}, err
 }
 
 func (igs *indigoGRPCService) DeleteDocument(ctx context.Context, req *proto.DeleteDocumentRequest) (*proto.DeleteDocumentResponse, error) {
@@ -224,7 +224,7 @@ func (igs *indigoGRPCService) DeleteDocument(ctx context.Context, req *proto.Del
 		log.Printf("error: index name does not exist (%s)\n", err.Error())
 	}
 
-	return &proto.DeleteDocumentResponse{Count: int32(count)}, nil
+	return &proto.DeleteDocumentResponse{Count: int32(count)}, err
 }
 
 func (igs *indigoGRPCService) IndexBulk(ctx context.Context, req *proto.IndexBulkRequest) (*proto.IndexBulkResponse, error) {
@@ -286,7 +286,7 @@ func (igs *indigoGRPCService) IndexBulk(ctx context.Context, req *proto.IndexBul
 		log.Printf("error: index name does not exist (%s)\n", err.Error())
 	}
 
-	return &proto.IndexBulkResponse{Count: int32(count)}, nil
+	return &proto.IndexBulkResponse{Count: int32(count)}, err
 }
 
 func (igs *indigoGRPCService) DeleteBulk(ctx context.Context, req *proto.DeleteBulkRequest) (*proto.DeleteBulkResponse, error) {
@@ -336,7 +336,7 @@ func (igs *indigoGRPCService) DeleteBulk(ctx context.Context, req *proto.DeleteB
 		log.Printf("error: index name does not exist (%s)\n", err.Error())
 	}
 
-	return &proto.DeleteBulkResponse{Count: int32(count)}, nil
+	return &proto.DeleteBulkResponse{Count: int32(count)}, err
 }
 
 func (igs *indigoGRPCService) SearchDocuments(ctx context.Context, req *proto.SearchDocumentsRequest) (*proto.SearchDocumentsResponse, error) {
@@ -371,5 +371,5 @@ func (igs *indigoGRPCService) SearchDocuments(ctx context.Context, req *proto.Se
 		log.Printf("error: index name does not exist (%s)\n", err.Error())
 	}
 
-	return &proto.SearchDocumentsResponse{SearchResult: bytesResp}, nil
+	return &proto.SearchDocumentsResponse{SearchResult: bytesResp}, err
 }
