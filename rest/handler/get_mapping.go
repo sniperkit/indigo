@@ -30,15 +30,15 @@ func (h *GetMappingHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) 
 
 	response := make(map[string]interface{})
 
-	resp, err := h.client.GetMapping(context.Background(), &proto.GetMappingRequest{Name: indexName})
+	resp, err := h.client.GetMapping(context.Background(), &proto.GetMappingRequest{IndexName: indexName})
 	if err == nil {
-		log.Print("info: request to Indigo gRPC Server was successful\n")
+		log.Print("debug: request to the Indigo gRPC Server\n")
 
 		indexMapping := bleve.NewIndexMapping()
 
-		err = json.Unmarshal(resp.Mapping, indexMapping)
+		err = json.Unmarshal(resp.IndexMapping, indexMapping)
 		if err == nil {
-			log.Print("info: index mapping created\n")
+			log.Print("debug: index mapping created\n")
 
 			w.WriteHeader(http.StatusOK)
 			response["mapping"] = indexMapping
@@ -56,9 +56,12 @@ func (h *GetMappingHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) 
 	}
 
 	bytesResponse, err := json.Marshal(response)
-	if err != nil {
+	if err == nil {
+		log.Print("debug: create response\n")
+	} else {
+		log.Printf("error: failed to create response (%s)\n", err.Error())
+
 		w.WriteHeader(http.StatusServiceUnavailable)
-		log.Printf("error: %s", err.Error())
 	}
 
 	buf := new(bytes.Buffer)

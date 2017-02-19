@@ -1,5 +1,9 @@
 package cmd
 
+import (
+	"github.com/mosuka/indigo/constant"
+)
+
 var versionFlag bool = false
 
 var logOutputFile string = ""
@@ -14,8 +18,8 @@ var dataDir string = "./data"
 
 var baseURI string = "/api"
 
-var indexType string = "upside_down"
-var indexStore string = "boltdb"
+var indexType string = constant.DefaultIndexType
+var indexStore string = constant.DefaultIndexStore
 var kvConfig map[string]interface{} = nil
 
-var batchSize int32 = 1000
+var batchSize int32 = constant.DefaultBatchSize

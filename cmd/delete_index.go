@@ -27,12 +27,12 @@ var deleteIndexCmd = &cobra.Command{
 		defer conn.Close()
 
 		client := proto.NewIndigoClient(conn)
-		resp, err := client.DeleteIndex(context.Background(), &proto.DeleteIndexRequest{Name: indexName})
+		resp, err := client.DeleteIndex(context.Background(), &proto.DeleteIndexRequest{IndexName: indexName})
 		if err != nil {
 			return err
 		}
 
-		fmt.Printf("%s deleted\n", resp.Name)
+		fmt.Printf("%s deleted\n", resp.IndexName)
 
 		return nil
 	},

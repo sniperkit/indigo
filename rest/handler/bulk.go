@@ -32,29 +32,34 @@ func (h *BulkHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	indexName := vars["indexName"]
 
 	bulkRequest, err := ioutil.ReadAll(req.Body)
-	if err != nil {
+	if err == nil {
+		log.Print("debug: read request body")
+	} else {
+		log.Printf("error: failed to read request body (%s)\n", err.Error())
+
 		w.WriteHeader(http.StatusBadRequest)
-		log.Printf("error: %s", err.Error())
 		return
 	}
 
 	batchSize := constant.DefaultBatchSize
 	bs, err := strconv.Atoi(req.URL.Query().Get("batchSize"))
 	if err == nil {
+		log.Printf("debug: convert string to int batchSize=\"%s\"\n", batchSize)
 		if bs > 0 {
+			log.Printf("debug: batch size batchSize=%d\n", bs)
 			batchSize = int32(bs)
 		} else {
-			log.Printf("warn: unexpected batchSize (%d)\n", bs)
+			log.Printf("warn: unexpected batch size batchSize=%d\n", bs)
 		}
 	} else {
-		log.Printf("warn: failed to convert batchSize to int (%s)\n", err.Error())
+		log.Printf("warn: failed to convert string to int (%s) batchSize=\"%s\"\n", err.Error(), batchSize)
 	}
 
 	response := make(map[string]interface{})
 
-	resp, err := h.client.Bulk(context.Background(), &proto.BulkRequest{Name: indexName, BulkRequest: bulkRequest, BatchSize: batchSize})
+	resp, err := h.client.Bulk(context.Background(), &proto.BulkRequest{IndexName: indexName, BulkRequest: bulkRequest, BatchSize: batchSize})
 	if err == nil {
-		log.Print("info: request to Indigo gRPC Server was successful\n")
+		log.Print("debug: request to the Indigo gRPC Server\n")
 
 		w.WriteHeader(http.StatusOK)
 		response["put_count"] = resp.PutCount
@@ -68,9 +73,12 @@ func (h *BulkHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	}
 
 	bytesResponse, err := json.Marshal(response)
-	if err != nil {
+	if err == nil {
+		log.Print("debug: create response\n")
+	} else {
+		log.Printf("error: failed to create response (%s)\n", err.Error())
+
 		w.WriteHeader(http.StatusServiceUnavailable)
-		log.Printf("error: %s", err.Error())
 	}
 
 	buf := new(bytes.Buffer)

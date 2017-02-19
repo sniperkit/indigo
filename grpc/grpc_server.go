@@ -18,12 +18,12 @@ func NewIndigoGRPCServer(serverPort int, dataDir string) *indigoGRPCServer {
 
 	proto.RegisterIndigoServer(server, NewIndigoGRPCService(dataDir))
 	listener, err := net.Listen("tcp", fmt.Sprintf(":%d", serverPort))
-	if err != nil {
+	if err == nil {
+		log.Printf("info: create listener port=%d \n", serverPort)
+	} else {
 		log.Printf("error: failed to create listener (%s) port=%d \n", err.Error(), serverPort)
 		return nil
 	}
-
-	log.Printf("info: The Indigo gRPC Server created port=%d\n", serverPort)
 
 	return &indigoGRPCServer{
 		server:   server,

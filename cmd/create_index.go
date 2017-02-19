@@ -32,12 +32,12 @@ var createIndexCmd = &cobra.Command{
 		defer conn.Close()
 
 		client := proto.NewIndigoClient(conn)
-		resp, err := client.CreateIndex(context.Background(), &proto.CreateIndexRequest{Name: indexName, Mapping: indexMapping, Type: indexType, Store: indexStore})
+		resp, err := client.CreateIndex(context.Background(), &proto.CreateIndexRequest{IndexName: indexName, IndexMapping: indexMapping, IndexType: indexType, IndexStore: indexStore})
 		if err != nil {
 			return err
 		}
 
-		fmt.Printf("%s created\n", resp.Name)
+		fmt.Printf("%s created\n", resp.IndexName)
 
 		return nil
 	},

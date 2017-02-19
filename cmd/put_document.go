@@ -33,12 +33,13 @@ var putDocumentCmd = &cobra.Command{
 		defer conn.Close()
 
 		client := proto.NewIndigoClient(conn)
-		resp, err := client.PutDocument(context.Background(), &proto.PutDocumentRequest{Name: indexName, Id: id, Document: document})
+		resp, err := client.PutDocument(context.Background(), &proto.PutDocumentRequest{IndexName: indexName, DocumentID: id, Document: document})
 		if err != nil {
 			return err
 		}
 
-		fmt.Printf("%d document indexed\n", resp.Count)
+		fmt.Printf("%d document put\n", resp.PutCount)
+		fmt.Printf("%d error document occurred\n", resp.PutErrorCount)
 
 		return nil
 	},

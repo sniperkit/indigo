@@ -31,9 +31,12 @@ func (h *CreateIndexHandler) ServeHTTP(w http.ResponseWriter, req *http.Request)
 	indexName := vars["indexName"]
 
 	indexMapping, err := ioutil.ReadAll(req.Body)
-	if err != nil {
+	if err == nil {
+		log.Print("debug: read request body")
+	} else {
+		log.Printf("error: failed to read request body (%s)\n", err.Error())
+
 		w.WriteHeader(http.StatusBadRequest)
-		log.Printf("error: %s", err.Error())
 		return
 	}
 
@@ -49,12 +52,12 @@ func (h *CreateIndexHandler) ServeHTTP(w http.ResponseWriter, req *http.Request)
 
 	response := make(map[string]interface{})
 
-	resp, err := h.client.CreateIndex(context.Background(), &proto.CreateIndexRequest{Name: indexName, Mapping: indexMapping, Type: indexType, Store: indexStore})
+	resp, err := h.client.CreateIndex(context.Background(), &proto.CreateIndexRequest{IndexName: indexName, IndexMapping: indexMapping, IndexType: indexType, IndexStore: indexStore})
 	if err == nil {
-		log.Print("info: request to Indigo gRPC Server was successful\n")
+		log.Print("debug: request to the Indigo gRPC Server\n")
 
 		w.WriteHeader(http.StatusOK)
-		response["name"] = resp.Name
+		response["index_name"] = resp.IndexName
 	} else {
 		log.Printf("error: failed to request to the Indigo gRPC Server (%s)\n", err.Error())
 
@@ -63,9 +66,12 @@ func (h *CreateIndexHandler) ServeHTTP(w http.ResponseWriter, req *http.Request)
 	}
 
 	bytesResponse, err := json.Marshal(response)
-	if err != nil {
+	if err == nil {
+		log.Print("debug: create response\n")
+	} else {
+		log.Printf("error: failed to create response (%s)\n", err.Error())
+
 		w.WriteHeader(http.StatusServiceUnavailable)
-		log.Printf("error: %s", err.Error())
 	}
 
 	buf := new(bytes.Buffer)

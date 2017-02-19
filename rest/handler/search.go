@@ -30,17 +30,20 @@ func (h *SearchHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	indexName := vars["indexName"]
 
 	searchRequest, err := ioutil.ReadAll(req.Body)
-	if err != nil {
+	if err == nil {
+		log.Print("debug: read request body")
+	} else {
+		log.Printf("error: failed to read request body (%s)\n", err.Error())
+
 		w.WriteHeader(http.StatusBadRequest)
-		log.Printf("error: %s", err.Error())
 		return
 	}
 
 	response := make(map[string]interface{})
 
-	resp, err := h.client.Search(context.Background(), &proto.SearchRequest{Name: indexName, SearchRequest: searchRequest})
+	resp, err := h.client.Search(context.Background(), &proto.SearchRequest{IndexName: indexName, SearchRequest: searchRequest})
 	if err == nil {
-		log.Print("info: request to Indigo gRPC Server was successful\n")
+		log.Print("debug: request to the Indigo gRPC Server\n")
 
 		searchResult := make(map[string]interface{})
 
@@ -64,9 +67,12 @@ func (h *SearchHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	}
 
 	bytesResponse, err := json.Marshal(response)
-	if err != nil {
+	if err == nil {
+		log.Print("debug: create response\n")
+	} else {
+		log.Printf("error: failed to create response (%s)\n", err.Error())
+
 		w.WriteHeader(http.StatusServiceUnavailable)
-		log.Printf("error: %s", err.Error())
 	}
 
 	buf := new(bytes.Buffer)

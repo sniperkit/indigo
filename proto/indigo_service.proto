@@ -19,66 +19,67 @@ service Indigo {
 }
 
 message CreateIndexRequest {
-    string name = 1;
-    bytes mapping = 2;
-    string type = 3;
-    string store = 4;
+    string indexName = 1;
+    bytes indexMapping = 2;
+    string indexType = 3;
+    string indexStore = 4;
 }
 message CreateIndexResponse {
-    string name = 1;
+    string indexName = 1;
 }
 
 message DeleteIndexRequest {
-    string name = 1;
+    string indexName = 1;
 }
 message DeleteIndexResponse {
-    string name = 1;
+    string indexName = 1;
 }
 
 
 message GetStatsRequest {
-    string name = 1;
+    string indexName = 1;
 }
 message GetStatsResponse {
-    bytes stats = 1;
+    bytes indexStats = 1;
 }
 
 message GetMappingRequest {
-    string name = 1;
+    string indexName = 1;
 }
 message GetMappingResponse {
-    bytes mapping = 1;
+    bytes indexMapping = 1;
 }
 
 
 message PutDocumentRequest {
-    string name = 1;
-    string id = 2;
+    string indexName = 1;
+    string documentID = 2;
     bytes document = 3;
 }
 message PutDocumentResponse {
-    int32 count = 1;
+    int32 putCount = 1;
+    int32 putErrorCount = 2;
 }
 
 message GetDocumentRequest {
-    string name = 1;
-    string id = 2;
+    string indexName = 1;
+    string documentID = 2;
 }
 message GetDocumentResponse {
     bytes document = 1;
 }
 
 message DeleteDocumentRequest {
-    string name = 1;
-    string id = 2;
+    string indexName = 1;
+    string documentID = 2;
 }
 message DeleteDocumentResponse {
-    int32 count = 1;
+    int32 deleteCount = 1;
 }
 
 
 message BulkRequest {
-    string name = 1;
+    string indexName = 1;
     bytes bulkRequest = 2;
     int32 batchSize = 3;
 }
@@ -90,7 +91,7 @@ message BulkResponse {
 
 
 message SearchRequest {
-    string name = 1;
+    string indexName = 1;
     bytes searchRequest = 2;
 }
 message SearchResponse {

@@ -32,7 +32,7 @@ var bulkCmd = &cobra.Command{
 		defer conn.Close()
 
 		client := proto.NewIndigoClient(conn)
-		resp, err := client.Bulk(context.Background(), &proto.BulkRequest{Name: indexName, BulkRequest: documents, BatchSize: batchSize})
+		resp, err := client.Bulk(context.Background(), &proto.BulkRequest{IndexName: indexName, BulkRequest: documents, BatchSize: batchSize})
 		if err != nil {
 			return err
 		}

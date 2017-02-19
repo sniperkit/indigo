@@ -22,8 +22,13 @@ func NewIndigoRESTServer(serverPort int, serverPath, gRPCServerName string, gRPC
 	router := mux.NewRouter()
 	router.StrictSlash(true)
 
-	conn, err := grpc.Dial(fmt.Sprintf("%s:%d", gRPCServerName, gRPCServerPort), grpc.WithInsecure())
-	if err != nil {
+	target := fmt.Sprintf("%s:%d", gRPCServerName, gRPCServerPort)
+
+	conn, err := grpc.Dial(target, grpc.WithInsecure())
+	if err == nil {
+		log.Printf("info: create connection target=\"%s\"\n", target)
+	} else {
+		log.Printf("error: failed to create connection (%s) target=\"%s\"\n", err.Error(), target)
 		return nil
 	}
 
@@ -47,12 +52,12 @@ func NewIndigoRESTServer(serverPort int, serverPath, gRPCServerName string, gRPC
 	router.Handle(fmt.Sprintf("%s/{indexName}/_search", serverPath), handler.NewSearchHandler(client)).Methods("POST")
 
 	listener, err := net.Listen("tcp", fmt.Sprintf(":%d", serverPort))
-	if err != nil {
-		log.Printf("error: failed to create listener :%d (%s)\n", serverPort, err.Error())
+	if err == nil {
+		log.Printf("info: create listener port=%d\n", serverPort)
+	} else {
+		log.Printf("error: failed to create listener (%s) port=%d\n", err.Error(), serverPort)
 		return nil
 	}
-
-	log.Printf("info: The Indigo REST Server created %s\n", listener.Addr().String())
 
 	return &indigoRESTServer{
 		router:   router,
@@ -67,25 +72,29 @@ func (irs *indigoRESTServer) Start() error {
 		return
 	}()
 
-	log.Printf("info: The Indigo REST Server started %s\n", irs.listener.Addr().String())
+	log.Printf("info: The Indigo REST Server started addr=\"%s\"\n", irs.listener.Addr().String())
 
 	return nil
 }
 
 func (irs *indigoRESTServer) Stop() error {
 	err := irs.conn.Close()
-	if err != nil {
+	if err == nil {
+		log.Print("info: close connection\n")
+	} else {
 		log.Printf("error: failed to close connection (%s)\n", err.Error())
 		return err
 	}
 
 	err = irs.listener.Close()
-	if err != nil {
+	if err == nil {
+		log.Print("info: close listener\n")
+	} else {
 		log.Printf("error: failed to close listener (%s)\n", err.Error())
 		return err
 	}
 
-	log.Printf("info: The Indigo REST Server stopped %s\n", irs.listener.Addr().String())
+	log.Printf("info: The Indigo REST Server stopped addr=\"%s\"\n", irs.listener.Addr().String())
 
 	return nil
 }

@@ -27,12 +27,12 @@ var getMappingCmd = &cobra.Command{
 		defer conn.Close()
 
 		client := proto.NewIndigoClient(conn)
-		resp, err := client.GetMapping(context.Background(), &proto.GetMappingRequest{Name: indexName})
+		resp, err := client.GetMapping(context.Background(), &proto.GetMappingRequest{IndexName: indexName})
 		if err != nil {
 			return err
 		}
 
-		fmt.Printf("%s\n", resp.Mapping)
+		fmt.Printf("%s\n", resp.IndexMapping)
 
 		return nil
 	},

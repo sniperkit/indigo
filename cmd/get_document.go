@@ -28,7 +28,7 @@ var getDocumentCmd = &cobra.Command{
 		defer conn.Close()
 
 		client := proto.NewIndigoClient(conn)
-		resp, err := client.GetDocument(context.Background(), &proto.GetDocumentRequest{Name: indexName, Id: id})
+		resp, err := client.GetDocument(context.Background(), &proto.GetDocumentRequest{IndexName: indexName, DocumentID: id})
 		if err != nil {
 			return err
 		}

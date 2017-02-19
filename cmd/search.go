@@ -33,7 +33,7 @@ var searchCmd = &cobra.Command{
 
 		client := proto.NewIndigoClient(conn)
 
-		resp, err := client.Search(context.Background(), &proto.SearchRequest{Name: indexName, SearchRequest: searchRequest})
+		resp, err := client.Search(context.Background(), &proto.SearchRequest{IndexName: indexName, SearchRequest: searchRequest})
 		if err != nil {
 			return err
 		}

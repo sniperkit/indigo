@@ -28,12 +28,12 @@ var deleteDocumentCmd = &cobra.Command{
 		defer conn.Close()
 
 		client := proto.NewIndigoClient(conn)
-		resp, err := client.DeleteDocument(context.Background(), &proto.DeleteDocumentRequest{Name: indexName, Id: id})
+		resp, err := client.DeleteDocument(context.Background(), &proto.DeleteDocumentRequest{IndexName: indexName, DocumentID: id})
 		if err != nil {
 			return err
 		}
 
-		fmt.Printf("%d document deleted\n", resp.Count)
+		fmt.Printf("%d document deleted\n", resp.DeleteCount)
 
 		return nil
 	},

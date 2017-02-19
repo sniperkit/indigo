@@ -27,12 +27,12 @@ var getStatsCmd = &cobra.Command{
 		defer conn.Close()
 
 		client := proto.NewIndigoClient(conn)
-		resp, err := client.GetStats(context.Background(), &proto.GetStatsRequest{Name: indexName})
+		resp, err := client.GetStats(context.Background(), &proto.GetStatsRequest{IndexName: indexName})
 		if err != nil {
 			return err
 		}
 
-		fmt.Printf("%s\n", resp.Stats)
+		fmt.Printf("%s\n", resp.IndexStats)
 
 		return nil
 	},

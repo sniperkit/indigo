@@ -31,12 +31,12 @@ func (h *DeleteDocumentHandler) ServeHTTP(w http.ResponseWriter, req *http.Reque
 
 	response := make(map[string]interface{})
 
-	resp, err := h.client.DeleteDocument(context.Background(), &proto.DeleteDocumentRequest{Name: indexName, Id: id})
+	resp, err := h.client.DeleteDocument(context.Background(), &proto.DeleteDocumentRequest{IndexName: indexName, DocumentID: id})
 	if err == nil {
-		log.Print("info: request to Indigo gRPC Server was successful\n")
+		log.Print("debug: request to the Indigo gRPC Server\n")
 
 		w.WriteHeader(http.StatusOK)
-		response["count"] = resp.Count
+		response["delete_count"] = resp.DeleteCount
 	} else {
 		log.Printf("error: failed to request to the Indigo gRPC Server (%s)\n", err.Error())
 
@@ -45,9 +45,12 @@ func (h *DeleteDocumentHandler) ServeHTTP(w http.ResponseWriter, req *http.Reque
 	}
 
 	bytesResponse, err := json.Marshal(response)
-	if err != nil {
+	if err == nil {
+		log.Print("debug: create response\n")
+	} else {
+		log.Printf("error: failed to create response (%s)\n", err.Error())
+
 		w.WriteHeader(http.StatusServiceUnavailable)
-		log.Printf("error: %s", err.Error())
 	}
 
 	buf := new(bytes.Buffer)

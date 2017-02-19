@@ -29,20 +29,20 @@ func (h *GetStatsHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 
 	response := make(map[string]interface{})
 
-	resp, err := h.client.GetStats(context.Background(), &proto.GetStatsRequest{Name: indexName})
+	resp, err := h.client.GetStats(context.Background(), &proto.GetStatsRequest{IndexName: indexName})
 	if err == nil {
-		log.Print("info: request to Indigo gRPC Server was successful\n")
+		log.Print("debug: request to Indigo gRPC Server\n")
 
 		indexStats := make(map[string]interface{})
 
-		err = json.Unmarshal(resp.Stats, &indexStats)
+		err = json.Unmarshal(resp.IndexStats, &indexStats)
 		if err == nil {
-			log.Print("info: index stats created\n")
+			log.Print("debug: index stats created\n")
 
 			w.WriteHeader(http.StatusOK)
 			response["stats"] = indexStats
 		} else {
-			log.Printf("error: failed to create index mapping (%s)\n", err.Error())
+			log.Printf("error: failed to create index stats (%s)\n", err.Error())
 
 			w.WriteHeader(http.StatusServiceUnavailable)
 			response["error"] = err.Error()
@@ -55,9 +55,12 @@ func (h *GetStatsHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	}
 
 	bytesResponse, err := json.Marshal(response)
-	if err != nil {
+	if err == nil {
+		log.Print("debug: create response\n")
+	} else {
+		log.Printf("error: failed to create response (%s)\n", err.Error())
+
 		w.WriteHeader(http.StatusServiceUnavailable)
-		log.Printf("error: %s", err.Error())
 	}
 
 	buf := new(bytes.Buffer)
