@@ -1,6 +1,6 @@
 # Indigo
 
-The Indigo is an index server written in [Go](https://golang.org), built on top of the [Bleve](http://www.blevesearch.com).
+The Indigo is a fill text search and indexing server written in [Go](https://golang.org), built on top of the [Bleve](http://www.blevesearch.com).
 
 
 ## Indigo gRPC Server
@@ -381,7 +381,7 @@ See [Queries](http://www.blevesearch.com/docs/Query/), [Query String Query](http
 $ indigo search example "$(cat example/simple_query.json)" | jq .
 ```
 
-The result of the above `search documents` command is:
+The result of the above `search` command is:
 
 ```json
 {
@@ -463,7 +463,7 @@ See [type SearchResult](https://godoc.org/github.com/blevesearch/bleve#SearchRes
 
 The Indigo REST Server is a [RESTful](https://en.wikipedia.org/wiki/Representational_state_transfer) Web Server that communicates with The Indigo gRPC Server.
 
-### Start Indigo gRPC Server
+### Start Indigo REST Server
 
 The `indigo start rest` command starts the Indigo REST Server.
 
