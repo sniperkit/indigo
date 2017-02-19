@@ -1,6 +1,6 @@
 # Indigo
 
-The Indigo is a fill text search and indexing server written in [Go](https://golang.org), built on top of the [Bleve](http://www.blevesearch.com).
+The Indigo is a full text search and indexing server written in [Go](https://golang.org), built on top of the [Bleve](http://www.blevesearch.com).
 
 
 ## Indigo gRPC Server
