@@ -11,10 +11,10 @@ import (
 	"strings"
 )
 
-var indexDocumentCmd = &cobra.Command{
+var putDocumentCmd = &cobra.Command{
 	Use:   "document INDEX_NAME ID DOCUMENT",
-	Short: "indexes the document to the Indigo gRPC Server",
-	Long:  `The index document command indexes the document to the Indigo gRPC Server.`,
+	Short: "puts the document to the Indigo gRPC Server",
+	Long:  `The index document command puts the document to the Indigo gRPC Server.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if len(args) < 3 {
 			return errors.New("few arguments")
@@ -33,7 +33,7 @@ var indexDocumentCmd = &cobra.Command{
 		defer conn.Close()
 
 		client := proto.NewIndigoClient(conn)
-		resp, err := client.IndexDocument(context.Background(), &proto.IndexDocumentRequest{Name: indexName, Id: id, Document: document})
+		resp, err := client.PutDocument(context.Background(), &proto.PutDocumentRequest{Name: indexName, Id: id, Document: document})
 		if err != nil {
 			return err
 		}
@@ -45,5 +45,5 @@ var indexDocumentCmd = &cobra.Command{
 }
 
 func init() {
-	indexCmd.AddCommand(indexDocumentCmd)
+	putCmd.AddCommand(putDocumentCmd)
 }

@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/blevesearch/bleve"
+	"github.com/blevesearch/bleve/document"
 	_ "github.com/mosuka/indigo/config"
 	"github.com/mosuka/indigo/proto"
 	"golang.org/x/net/context"
@@ -13,6 +14,7 @@ import (
 	"os"
 	"path"
 	"sync"
+	"time"
 )
 
 type indigoGRPCService struct {
@@ -177,7 +179,7 @@ func (igs *indigoGRPCService) GetMapping(ctx context.Context, req *proto.GetMapp
 	return &proto.GetMappingResponse{Mapping: indexMapping}, err
 }
 
-func (igs *indigoGRPCService) IndexDocument(ctx context.Context, req *proto.IndexDocumentRequest) (*proto.IndexDocumentResponse, error) {
+func (igs *indigoGRPCService) PutDocument(ctx context.Context, req *proto.PutDocumentRequest) (*proto.PutDocumentResponse, error) {
 	var document interface{}
 	var err error
 	count := 0
@@ -203,7 +205,71 @@ func (igs *indigoGRPCService) IndexDocument(ctx context.Context, req *proto.Inde
 		log.Printf("error: index name does not exist (%s)\n", err.Error())
 	}
 
-	return &proto.IndexDocumentResponse{Count: int32(count)}, err
+	return &proto.PutDocumentResponse{Count: int32(count)}, err
+}
+
+func (igs *indigoGRPCService) GetDocument(ctx context.Context, req *proto.GetDocumentRequest) (*proto.GetDocumentResponse, error) {
+	var bytesResp []byte
+	var err error
+
+	index, ok := igs.indices[req.Name]
+	if ok == true {
+		doc, err := index.Document(req.Id)
+		if err == nil {
+			log.Printf("info: get document name=\"%s\" id=\"%s\"\n", req.Name, req.Id)
+
+			fields := make(map[string]interface{})
+
+			for _, field := range doc.Fields {
+				var value interface{}
+
+				switch field := field.(type) {
+				case *document.TextField:
+					value = string(field.Value())
+				case *document.NumericField:
+					numValue, err := field.Number()
+					if err == nil {
+						value = numValue
+					}
+				case *document.DateTimeField:
+					dateValue, err := field.DateTime()
+					if err == nil {
+						dateValue.Format(time.RFC3339Nano)
+						value = dateValue
+					}
+				}
+
+				existedField, existed := fields[field.Name()]
+				if existed {
+					switch existedField := existedField.(type) {
+					case []interface{}:
+						fields[field.Name()] = append(existedField, value)
+					case interface{}:
+						arr := make([]interface{}, 2)
+						arr[0] = existedField
+						arr[1] = value
+						fields[field.Name()] = arr
+					}
+				} else {
+					fields[field.Name()] = value
+				}
+			}
+
+			bytesResp, err = json.Marshal(fields)
+			if err == nil {
+				log.Printf("info: create document name=\"%s\"\n", req.Name)
+			} else {
+				log.Printf("error: failed to create document (%s) name=\"%s\"\n", err.Error(), req.Name)
+			}
+		} else {
+			log.Printf("error: failed to get document (%s) name=\"%s\" id=\"%s\"\n", err.Error(), req.Name, req.Id)
+		}
+	} else {
+		err = errors.New(fmt.Sprintf("%s does not exist", req.Name))
+		log.Printf("error: index name does not exist (%s)\n", err.Error())
+	}
+
+	return &proto.GetDocumentResponse{Document: bytesResp}, err
 }
 
 func (igs *indigoGRPCService) DeleteDocument(ctx context.Context, req *proto.DeleteDocumentRequest) (*proto.DeleteDocumentResponse, error) {

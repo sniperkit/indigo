@@ -5,12 +5,17 @@ package proto;
 service Indigo {
     rpc CreateIndex(CreateIndexRequest) returns (CreateIndexResponse) {}
     rpc DeleteIndex(DeleteIndexRequest) returns (DeleteIndexResponse) {}
+
     rpc GetStats(GetStatsRequest) returns (GetStatsResponse) {}
     rpc GetMapping(GetMappingRequest) returns (GetMappingResponse) {}
-    rpc IndexDocument(IndexDocumentRequest) returns (IndexDocumentResponse) {}
+
+    rpc PutDocument(PutDocumentRequest) returns (PutDocumentResponse) {}
+    rpc GetDocument(GetDocumentRequest) returns (GetDocumentResponse) {}
     rpc DeleteDocument(DeleteDocumentRequest) returns (DeleteDocumentResponse) {}
+
     rpc IndexBulk(IndexBulkRequest) returns (IndexBulkResponse) {}
     rpc DeleteBulk(DeleteBulkRequest) returns (DeleteBulkResponse) {}
+
     rpc SearchDocuments(SearchDocumentsRequest) returns (SearchDocumentsResponse) {}
 }
 
@@ -31,6 +36,7 @@ message DeleteIndexResponse {
     string name = 1;
 }
 
+
 message GetStatsRequest {
     string name = 1;
 }
@@ -45,13 +51,22 @@ message GetMappingResponse {
     bytes mapping = 1;
 }
 
-message IndexDocumentRequest {
+
+message PutDocumentRequest {
     string name = 1;
     string id = 2;
     bytes document = 3;
 }
-message IndexDocumentResponse {
+message PutDocumentResponse {
     int32 count = 1;
+}
+
+message GetDocumentRequest {
+    string name = 1;
+    string id = 2;
+}
+message GetDocumentResponse {
+    bytes document = 1;
 }
 
 message DeleteDocumentRequest {
@@ -61,6 +76,7 @@ message DeleteDocumentRequest {
 message DeleteDocumentResponse {
     int32 count = 1;
 }
+
 
 message IndexBulkRequest {
     string name = 1;

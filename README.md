@@ -312,23 +312,41 @@ The result of the above `get mapping` command is:
 }
 ```
 
-### Index the document to the Indigo gRPC Server via CLI
+### Put the document to the Indigo gRPC Server via CLI
 
 ```sh
-$ indigo index document example "1" "$(cat example/index_document.json)"
+$ indigo put document example 1 "$(cat example/index_document.json)"
 ```
 
-The result of the above `index document` command is:
+The result of the above `put document` command is:
 
 ```text
 1 document indexed
 ```
 
+### Get the document from the Indigo gRPC Server via CLI
+
+```sh
+$ indigo get document example 1 | jq .
+```
+
+The result of the above `get document` command is:
+
+```json
+{
+  "category": "Library",
+  "description": "Full-text search library written in Go.",
+  "name": "Bleve",
+  "popularity": 1,
+  "release": "2014-04-18T00:00:00Z",
+  "type": "document"
+}
+```
 
 ### Delete the document from the Indigo gRPC Server via CLI
 
 ```sh
-$ indigo delete document example "1"
+$ indigo delete document example 1
 ```
 
 The result of the above `delete document` command is:
@@ -642,7 +660,7 @@ The result of the above command is:
 }
 ```
 
-### Index the document to the Indigo gRPC Server via the Indigo REST Server
+### Put the document to the Indigo gRPC Server via the Indigo REST Server
 
 ```sh
 $ curl -X PUT "http://localhost:2289/api/example/1" -H "Content-Type: application/json" -d @example/index_document.json -s | jq .
@@ -650,9 +668,30 @@ $ curl -X PUT "http://localhost:2289/api/example/1" -H "Content-Type: applicatio
 
 The result of the above command is:
 
-```text
+```json
 {
   "count": 1
+}
+```
+
+### Get the document to the Indigo gRPC Server via the Indigo REST Server
+
+```sh
+$ curl -X GET "http://localhost:2289/api/example/1" -s | jq .
+```
+
+The result of the above command is:
+
+```json
+{
+  "document": {
+    "category": "Library",
+    "description": "Full-text search library written in Go.",
+    "name": "Bleve",
+    "popularity": 1,
+    "release": "2014-04-18T00:00:00Z",
+    "type": "document"
+  }
 }
 ```
 
@@ -664,7 +703,7 @@ $ curl -X DELETE "http://localhost:2289/api/example/1" -s | jq .
 
 The result of the above command is:
 
-```text
+```json
 {
   "count": 1
 }

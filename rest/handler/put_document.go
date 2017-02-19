@@ -12,17 +12,17 @@ import (
 	"net/http"
 )
 
-type IndexDocumentHandler struct {
+type PutDocumentHandler struct {
 	client proto.IndigoClient
 }
 
-func NewIndexDocumentHandler(client proto.IndigoClient) *IndexDocumentHandler {
-	return &IndexDocumentHandler{
+func NewPutDocumentHandler(client proto.IndigoClient) *PutDocumentHandler {
+	return &PutDocumentHandler{
 		client: client,
 	}
 }
 
-func (h *IndexDocumentHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
+func (h *PutDocumentHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	log.Printf("info: host=\"%s\" request_uri=\"%s\" method=\"%s\" remote_addr=\"%s\" user_agent=\"%s\"\n", req.Host, req.RequestURI, req.Method, req.RemoteAddr, req.UserAgent())
 
 	vars := mux.Vars(req)
@@ -39,7 +39,7 @@ func (h *IndexDocumentHandler) ServeHTTP(w http.ResponseWriter, req *http.Reques
 
 	response := make(map[string]interface{})
 
-	resp, err := h.client.IndexDocument(context.Background(), &proto.IndexDocumentRequest{Name: indexName, Id: id, Document: document})
+	resp, err := h.client.PutDocument(context.Background(), &proto.PutDocumentRequest{Name: indexName, Id: id, Document: document})
 	if err == nil {
 		log.Print("info: request to Indigo gRPC Server was successful\n")
 

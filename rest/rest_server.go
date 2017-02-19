@@ -38,7 +38,8 @@ func NewIndigoRESTServer(serverPort int, serverPath, gRPCServerName string, gRPC
 	router.Handle(fmt.Sprintf("%s/{indexName}/_mapping", serverPath), handler.NewGetMappingHandler(client)).Methods("GET")
 	router.Handle(fmt.Sprintf("%s/{indexName}/_stats", serverPath), handler.NewGetStatsHandler(client)).Methods("GET")
 
-	router.Handle(fmt.Sprintf("%s/{indexName}/{id}", serverPath), handler.NewIndexDocumentHandler(client)).Methods("PUT")
+	router.Handle(fmt.Sprintf("%s/{indexName}/{id}", serverPath), handler.NewPutDocumentHandler(client)).Methods("PUT")
+	router.Handle(fmt.Sprintf("%s/{indexName}/{id}", serverPath), handler.NewGetDocumentHandler(client)).Methods("GET")
 	router.Handle(fmt.Sprintf("%s/{indexName}/{id}", serverPath), handler.NewDeleteDocumentHandler(client)).Methods("DELETE")
 
 	router.Handle(fmt.Sprintf("%s/{indexName}/_bulk", serverPath), handler.NewIndexBulkHandler(client)).Methods("POST")
