@@ -13,10 +13,9 @@ service Indigo {
     rpc GetDocument(GetDocumentRequest) returns (GetDocumentResponse) {}
     rpc DeleteDocument(DeleteDocumentRequest) returns (DeleteDocumentResponse) {}
 
-    rpc IndexBulk(IndexBulkRequest) returns (IndexBulkResponse) {}
-    rpc DeleteBulk(DeleteBulkRequest) returns (DeleteBulkResponse) {}
+    rpc Bulk(BulkRequest) returns (BulkResponse) {}
 
-    rpc SearchDocuments(SearchDocumentsRequest) returns (SearchDocumentsResponse) {}
+    rpc Search(SearchRequest) returns (SearchResponse) {}
 }
 
 message CreateIndexRequest {
@@ -78,28 +77,22 @@ message DeleteDocumentResponse {
 }
 
 
-message IndexBulkRequest {
+message BulkRequest {
     string name = 1;
-    bytes documents = 2;
+    bytes bulkRequest = 2;
     int32 batchSize = 3;
 }
-message IndexBulkResponse {
-    int32 count = 1;
+message BulkResponse {
+    int32 putCount = 1;
+    int32 putErrorCount = 2;
+    int32 deleteCount = 3;
 }
 
-message DeleteBulkRequest {
-    string name = 1;
-    bytes ids = 2;
-    int32 batchSize = 3;
-}
-message DeleteBulkResponse {
-    int32 count = 1;
-}
 
-message SearchDocumentsRequest {
+message SearchRequest {
     string name = 1;
     bytes searchRequest = 2;
 }
-message SearchDocumentsResponse {
+message SearchResponse {
     bytes searchResult = 1;
 }

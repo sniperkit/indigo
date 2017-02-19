@@ -180,17 +180,17 @@ func (igs *indigoGRPCService) GetMapping(ctx context.Context, req *proto.GetMapp
 }
 
 func (igs *indigoGRPCService) PutDocument(ctx context.Context, req *proto.PutDocumentRequest) (*proto.PutDocumentResponse, error) {
-	var document interface{}
+	var doc interface{}
 	var err error
 	count := 0
 
 	index, ok := igs.indices[req.Name]
 	if ok == true {
-		err = json.Unmarshal(req.Document, &document)
+		err = json.Unmarshal(req.Document, &doc)
 		if err == nil {
 			log.Printf("info: create document name=\"%s\" id=\"%s\"\n", req.Name, req.Id)
 
-			err = index.Index(req.Id, document)
+			err = index.Index(req.Id, doc)
 			if err == nil {
 				count++
 				log.Printf("info: index document name=\"%s\" id=\"%s\"\n", req.Name, req.Id)
@@ -216,43 +216,47 @@ func (igs *indigoGRPCService) GetDocument(ctx context.Context, req *proto.GetDoc
 	if ok == true {
 		doc, err := index.Document(req.Id)
 		if err == nil {
-			log.Printf("info: get document name=\"%s\" id=\"%s\"\n", req.Name, req.Id)
-
 			fields := make(map[string]interface{})
 
-			for _, field := range doc.Fields {
-				var value interface{}
+			if doc != nil {
+				log.Printf("info: document exists name=\"%s\" id=\"%s\"\n", req.Name, req.Id)
 
-				switch field := field.(type) {
-				case *document.TextField:
-					value = string(field.Value())
-				case *document.NumericField:
-					numValue, err := field.Number()
-					if err == nil {
-						value = numValue
+				for _, field := range doc.Fields {
+					var value interface{}
+
+					switch field := field.(type) {
+					case *document.TextField:
+						value = string(field.Value())
+					case *document.NumericField:
+						numValue, err := field.Number()
+						if err == nil {
+							value = numValue
+						}
+					case *document.DateTimeField:
+						dateValue, err := field.DateTime()
+						if err == nil {
+							dateValue.Format(time.RFC3339Nano)
+							value = dateValue
+						}
 					}
-				case *document.DateTimeField:
-					dateValue, err := field.DateTime()
-					if err == nil {
-						dateValue.Format(time.RFC3339Nano)
-						value = dateValue
+
+					existedField, existed := fields[field.Name()]
+					if existed {
+						switch existedField := existedField.(type) {
+						case []interface{}:
+							fields[field.Name()] = append(existedField, value)
+						case interface{}:
+							arr := make([]interface{}, 2)
+							arr[0] = existedField
+							arr[1] = value
+							fields[field.Name()] = arr
+						}
+					} else {
+						fields[field.Name()] = value
 					}
 				}
-
-				existedField, existed := fields[field.Name()]
-				if existed {
-					switch existedField := existedField.(type) {
-					case []interface{}:
-						fields[field.Name()] = append(existedField, value)
-					case interface{}:
-						arr := make([]interface{}, 2)
-						arr[0] = existedField
-						arr[1] = value
-						fields[field.Name()] = arr
-					}
-				} else {
-					fields[field.Name()] = value
-				}
+			} else {
+				log.Printf("info: document does not exist name=\"%s\" id=\"%s\"\n", req.Name, req.Id)
 			}
 
 			bytesResp, err = json.Marshal(fields)
@@ -281,9 +285,9 @@ func (igs *indigoGRPCService) DeleteDocument(ctx context.Context, req *proto.Del
 		err = index.Delete(req.Id)
 		if err == nil {
 			count++
-			log.Printf("info: delete document name=\"%s\" id=\"%s\"\n", req.Name, req.Id)
+			log.Printf("debug: delete document name=\"%s\" id=\"%s\"\n", req.Name, req.Id)
 		} else {
-			log.Printf("error: failed to delete document (%s) name=\"%s\" id=%\n", err.Error(), req.Name, req.Id)
+			log.Printf("error: failed to delete document (%s) name=\"%s\" id=%s\n", err.Error(), req.Name, req.Id)
 		}
 	} else {
 		err = errors.New(fmt.Sprintf("%s does not exist", req.Name))
@@ -293,35 +297,80 @@ func (igs *indigoGRPCService) DeleteDocument(ctx context.Context, req *proto.Del
 	return &proto.DeleteDocumentResponse{Count: int32(count)}, err
 }
 
-func (igs *indigoGRPCService) IndexBulk(ctx context.Context, req *proto.IndexBulkRequest) (*proto.IndexBulkResponse, error) {
-	count := 0
-	batchCount := 0
-	var documents interface{}
+func (igs *indigoGRPCService) Bulk(ctx context.Context, req *proto.BulkRequest) (*proto.BulkResponse, error) {
+	var batchCount int32 = 0
+	var putCount int32 = 0
+	var putErrorCount int32 = 0
+	var deleteCount int32 = 0
+	var bulkRequest interface{}
 	var err error
 
 	index, ok := igs.indices[req.Name]
 	if ok == true {
-		err = json.Unmarshal(req.Documents, &documents)
+		err = json.Unmarshal(req.BulkRequest, &bulkRequest)
 		if err == nil {
-			log.Printf("info: create documents name=\"%s\"\n", req.Name)
+			log.Printf("debug: create documents name=\"%s\"\n", req.Name)
 
 			batch := index.NewBatch()
 
-			if _, ok := documents.(map[string]interface{}); ok {
-				log.Printf("info: expected format name=\"%s\"\n", req.Name)
+			if _, ok := bulkRequest.([]interface{}); ok {
+				log.Printf("debug: expected bulk request format name=\"%s\"\n", req.Name)
 
-				for id, doc := range documents.(map[string]interface{}) {
-					err = batch.Index(id, doc)
-					if err == nil {
-						count++
-						log.Printf("info: index document name=\"%s\" id=\"%s\"\n", req.Name, id)
+				for num, request := range bulkRequest.([]interface{}) {
+					if request, ok := request.(map[string]interface{}); ok {
+						log.Printf("debug: expected request format name=\"%s\" num=%d\n", req.Name, num)
+
+						var method string
+						var id string
+
+						if _, ok := request["method"]; ok {
+							log.Printf("debug: method exists in request name=\"%s\" num=%d\n", req.Name, num)
+							method = request["method"].(string)
+						} else {
+							log.Printf("error: method does not exist in request (%s) name=\"%s\" num=%d\n", err.Error(), req.Name, num)
+							continue
+						}
+						if _, ok := request["id"]; ok {
+							log.Printf("debug: id exists in request name=\"%s\" num=%d\n", req.Name, num)
+							id = request["id"].(string)
+						} else {
+							log.Printf("error: id does not exist in request (%s) name=\"%s\" num=%d\n", err.Error(), req.Name, num)
+							continue
+						}
+
+						switch method {
+						case "put":
+							var document interface{}
+
+							if _, ok := request["document"]; ok {
+								log.Printf("debug: document exists in request name=\"%s\" num=%d\n", req.Name, num)
+								document = request["document"]
+							} else {
+								log.Printf("error: document does not exist in request (%s) name=\"%s\" num=%d\n", err.Error(), req.Name, num)
+								continue
+							}
+
+							err = batch.Index(id, document)
+							if err == nil {
+								putCount++
+								log.Printf("debug: index document name=\"%s\" id=\"%s\"\n", req.Name, id)
+							} else {
+								putErrorCount++
+								log.Printf("error: failed to index document (%s) name=\"%s\" id=\"%s\"\n", err.Error(), req.Name, id)
+							}
+						case "delete":
+							batch.Delete(id)
+							deleteCount++
+							log.Printf("debug: delete document name=\"%s\" id=\"%s\"\n", req.Name, id)
+						default:
+							log.Printf("error: unexpected method name=\"%s\" method=\"%s\" id=\"%s\"\n", req.Name, method, id)
+						}
+						batchCount++
 					} else {
-						log.Printf("error: failed to index document (%s) name=\"%s\" id=\"%s\"\n", err.Error(), req.Name, id)
+						log.Printf("error: unexpected request format name=\"%s\"\n", req.Name)
 					}
 
-					batchCount++
-
-					if int32(batchCount)%req.BatchSize == 0 {
+					if batchCount%req.BatchSize == 0 {
 						err = index.Batch(batch)
 						if err == nil {
 							log.Printf("info: index documents in bulk name=\"%s\"\n", req.Name)
@@ -333,7 +382,7 @@ func (igs *indigoGRPCService) IndexBulk(ctx context.Context, req *proto.IndexBul
 					}
 				}
 			} else {
-				log.Printf("error: unexpected format name=\"%s\"\n", req.Name)
+				log.Printf("error: unexpected bulk request format name=\"%s\"\n", req.Name)
 			}
 
 			if batch.Size() > 0 {
@@ -352,60 +401,10 @@ func (igs *indigoGRPCService) IndexBulk(ctx context.Context, req *proto.IndexBul
 		log.Printf("error: index name does not exist (%s)\n", err.Error())
 	}
 
-	return &proto.IndexBulkResponse{Count: int32(count)}, err
+	return &proto.BulkResponse{PutCount: putCount, PutErrorCount: putErrorCount, DeleteCount: deleteCount}, err
 }
 
-func (igs *indigoGRPCService) DeleteBulk(ctx context.Context, req *proto.DeleteBulkRequest) (*proto.DeleteBulkResponse, error) {
-	count := 0
-	var ids []string
-	var err error
-
-	index, ok := igs.indices[req.Name]
-	if ok == true {
-		err = json.Unmarshal(req.Ids, &ids)
-		if err == nil {
-			log.Printf("info: create document ids name=\"%s\"\n", req.Name)
-
-			batch := index.NewBatch()
-
-			for _, id := range ids {
-				batch.Delete(id)
-				log.Printf("info: delete document name=\"%s\" id=\"%s\"\n", req.Name, id)
-
-				count++
-
-				if int32(count)%req.BatchSize == 0 {
-					err = index.Batch(batch)
-					if err == nil {
-						log.Printf("info: delete documents in bulk name=\"%s\"\n", req.Name)
-					} else {
-						log.Printf("error: failed to delete documents in bulk (%s) name=\"%s\"\n", err.Error(), req.Name)
-					}
-
-					batch = index.NewBatch()
-				}
-			}
-
-			if batch.Size() > 0 {
-				err = index.Batch(batch)
-				if err == nil {
-					log.Printf("info: delete documents in bulk name=\"%s\"\n", req.Name)
-				} else {
-					log.Printf("error: failed to delete documents in bulk (%s) name=\"%s\"\n", err.Error(), req.Name)
-				}
-			}
-		} else {
-			log.Printf("error: failed to create document ids (%s)", err.Error())
-		}
-	} else {
-		err = errors.New(fmt.Sprintf("%s does not exist", req.Name))
-		log.Printf("error: index name does not exist (%s)\n", err.Error())
-	}
-
-	return &proto.DeleteBulkResponse{Count: int32(count)}, err
-}
-
-func (igs *indigoGRPCService) SearchDocuments(ctx context.Context, req *proto.SearchDocumentsRequest) (*proto.SearchDocumentsResponse, error) {
+func (igs *indigoGRPCService) Search(ctx context.Context, req *proto.SearchRequest) (*proto.SearchResponse, error) {
 	var bytesResp []byte
 	var err error
 
@@ -437,5 +436,5 @@ func (igs *indigoGRPCService) SearchDocuments(ctx context.Context, req *proto.Se
 		log.Printf("error: index name does not exist (%s)\n", err.Error())
 	}
 
-	return &proto.SearchDocumentsResponse{SearchResult: bytesResp}, err
+	return &proto.SearchResponse{SearchResult: bytesResp}, err
 }

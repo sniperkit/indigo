@@ -315,7 +315,7 @@ The result of the above `get mapping` command is:
 ### Put the document to the Indigo gRPC Server via CLI
 
 ```sh
-$ indigo put document example 1 "$(cat example/index_document.json)"
+$ indigo put document example 1 "$(cat example/document_1.json)"
 ```
 
 The result of the above `put document` command is:
@@ -359,25 +359,15 @@ The result of the above `delete document` command is:
 ### Index the documents in bulk to the Indigo gRPC Server via CLI
 
 ```sh
-$ indigo index bulk example "$(cat example/index_bulk.json)"
+$ indigo bulk example "$(cat example/bulk.json)"
 ```
 
 The result of the above `index bulk` command is:
 
 ```text
-5 documents indexed in bulk
-```
-
-### Delete the documents in bulk from the Indigo gRPC Server via CLI
-
-```sh
-$ indigo delete bulk example "$(cat example/delete_bulk.json)"
-```
-
-The result of the above `delete bulk` command is:
-
-```text
-3 documents deleted in bulk
+2 documents put in bulk
+0 error documents occurred in bulk
+5 documents deleted in bulk
 ```
 
 
@@ -388,7 +378,7 @@ See [Queries](http://www.blevesearch.com/docs/Query/), [Query String Query](http
 #### Simple query
 
 ```sh
-$ indigo search documents example "$(cat example/simple_query.json)" | jq .
+$ indigo search example "$(cat example/simple_query.json)" | jq .
 ```
 
 The result of the above `search documents` command is:
@@ -484,7 +474,7 @@ $ indigo start rest
 ### Create the index to the Indigo gRPC Server via the Indigo REST Server
 
 ```sh
-$ curl -X PUT "http://localhost:2289/api/example" -H "Content-Type: application/json" -d @example/mapping.json -s | jq .
+$ curl -X PUT "http://localhost:2289/api/example?indexType=upside_down&indexStore=boltdb" -H "Content-Type: application/json" -d @example/mapping.json -s | jq .
 ```
 
 The result of the above command is:
@@ -512,7 +502,7 @@ The result of the above command is:
 ### Get the index stats from the Indigo gRPC Server via the Indigo REST Server
 
 ```sh
-$ curl -X GET "http://localhost:2289/api/example/stats" -s | jq .
+$ curl -X GET "http://localhost:2289/api/example/_stats" -s | jq .
 ```
 
 The result of the above command is:
@@ -540,7 +530,7 @@ The result of the above command is:
 ### Get the index mapping from the Indigo gRPC Server via the Indigo REST Server
 
 ```sh
-$ curl -X GET "http://localhost:2289/api/example/mapping" -s | jq .
+$ curl -X GET "http://localhost:2289/api/example/_mapping" -s | jq .
 ```
 
 The result of the above command is:
@@ -663,7 +653,7 @@ The result of the above command is:
 ### Put the document to the Indigo gRPC Server via the Indigo REST Server
 
 ```sh
-$ curl -X PUT "http://localhost:2289/api/example/1" -H "Content-Type: application/json" -d @example/index_document.json -s | jq .
+$ curl -X PUT "http://localhost:2289/api/example/1" -H "Content-Type: application/json" -d @example/document_1.json -s | jq .
 ```
 
 The result of the above command is:
@@ -712,28 +702,16 @@ The result of the above command is:
 ### Index the documents in bulk to the Indigo gRPC Server via the Indigo REST Server
 
 ```sh
-$ curl -X POST "http://localhost:2289/api/example/_bulk" -H "Content-Type: application/json" -d @example/index_bulk.json -s | jq .
+$ curl -X POST "http://localhost:2289/api/example/_bulk" -H "Content-Type: application/json" -d @example/bulk.json -s | jq .
 ```
 
 The result of the above command is:
 
 ```text
 {
-  "count": 5
-}
-```
-
-### Delete the documents in bulk to the Indigo gRPC Server via the Indigo REST Server
-
-```sh
-$ curl -X DELETE "http://localhost:2289/api/example/_bulk" -H "Content-Type: application/json" -d @example/delete_bulk.json -s | jq .
-```
-
-The result of the above command is:
-
-```text
-{
-  "count": 5
+  "delete_count": 5,
+  "put_count": 2,
+  "put_error_count": 0
 }
 ```
 
@@ -750,71 +728,73 @@ The result of the above `search documents` command is:
 
 ```json
 {
-  "status": {
-    "total": 1,
-    "failed": 0,
-    "successful": 1
-  },
-  "request": {
-    "query": {
-      "query": "description:*"
-    },
-    "size": 10,
-    "from": 0,
-    "highlight": null,
-    "fields": [
-      "name",
-      "description",
-      "category",
-      "popularity",
-      "release",
-      "type"
-    ],
-    "facets": null,
-    "explain": false,
-    "sort": [
-      "-_score"
-    ],
-    "includeLocations": false
-  },
-  "hits": [
-    {
-      "index": "data/example",
-      "id": "1",
-      "score": 0.2527852661670985,
-      "sort": [
-        "_score"
-      ],
-      "fields": {
-        "category": "Library",
-        "description": "Full-text search library written in Go.",
-        "name": "Bleve",
-        "popularity": 1,
-        "release": "2014-04-18T00:00:00Z",
-        "type": "document"
+  "searchResult": {
+    "facets": {},
+    "hits": [
+      {
+        "fields": {
+          "category": "Library",
+          "description": "Full-text search library written in Go.",
+          "name": "Bleve",
+          "popularity": 1,
+          "release": "2014-04-18T00:00:00Z",
+          "type": "document"
+        },
+        "id": "1",
+        "index": "data/example",
+        "score": 0.41589955606724527,
+        "sort": [
+          "_score"
+        ]
+      },
+      {
+        "fields": {
+          "category": "Server",
+          "description": "Full-text search server built on Bleve.",
+          "name": "Indigo",
+          "popularity": 5,
+          "release": "2017-01-13T00:00:00Z",
+          "type": "document"
+        },
+        "id": "7",
+        "index": "data/example",
+        "score": 0.41589955606724527,
+        "sort": [
+          "_score"
+        ]
       }
-    },
-    {
-      "index": "data/example",
-      "id": "5",
-      "score": 0.2527852661670985,
-      "sort": [
-        "_score"
+    ],
+    "max_score": 0.41589955606724527,
+    "request": {
+      "explain": false,
+      "facets": null,
+      "fields": [
+        "name",
+        "description",
+        "category",
+        "popularity",
+        "release",
+        "type"
       ],
-      "fields": {
-        "category": "Server",
-        "description": "Full-text search server built on Bleve.",
-        "name": "Indigo",
-        "popularity": 5,
-        "release": "2017-01-13T00:00:00Z",
-        "type": "document"
-      }
-    }
-  ],
-  "total_hits": 2,
-  "max_score": 0.2527852661670985,
-  "took": 1991761,
-  "facets": {}
+      "from": 0,
+      "highlight": null,
+      "includeLocations": false,
+      "query": {
+        "query": "description:*"
+      },
+      "size": 10,
+      "sort": [
+        "-_score"
+      ]
+    },
+    "status": {
+      "failed": 0,
+      "successful": 1,
+      "total": 1
+    },
+    "took": 7488585,
+    "total_hits": 2
+  }
 }
 ```
 

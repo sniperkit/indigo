@@ -1,0 +1,8 @@
+{
+  "name": "Lucene",
+  "description": "Full-text search library written in Java.",
+  "category": "Library",
+  "popularity": 2.5,
+  "release": "2000-03-30T00:00:00Z",
+  "type": "document"
+}

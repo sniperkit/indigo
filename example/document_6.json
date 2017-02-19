@@ -1,0 +1,8 @@
+{
+  "name": "Elasticsearch",
+  "description": "Full-text search server built on Lucene.",
+  "category": "Server",
+  "popularity": 5.0,
+  "release": "2010-02-08T00:00:00Z",
+  "type": "document"
+}

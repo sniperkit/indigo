@@ -42,8 +42,7 @@ func NewIndigoRESTServer(serverPort int, serverPath, gRPCServerName string, gRPC
 	router.Handle(fmt.Sprintf("%s/{indexName}/{id}", serverPath), handler.NewGetDocumentHandler(client)).Methods("GET")
 	router.Handle(fmt.Sprintf("%s/{indexName}/{id}", serverPath), handler.NewDeleteDocumentHandler(client)).Methods("DELETE")
 
-	router.Handle(fmt.Sprintf("%s/{indexName}/_bulk", serverPath), handler.NewIndexBulkHandler(client)).Methods("POST")
-	router.Handle(fmt.Sprintf("%s/{indexName}/_bulk", serverPath), handler.NewDeleteBulkHandler(client)).Methods("DELETE")
+	router.Handle(fmt.Sprintf("%s/{indexName}/_bulk", serverPath), handler.NewBulkHandler(client)).Methods("POST")
 
 	router.Handle(fmt.Sprintf("%s/{indexName}/_search", serverPath), handler.NewSearchHandler(client)).Methods("POST")
 

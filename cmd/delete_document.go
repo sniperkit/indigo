@@ -10,7 +10,7 @@ import (
 )
 
 var deleteDocumentCmd = &cobra.Command{
-	Use:   "document INDEX_NAME DOCUMENT_IDS",
+	Use:   "document INDEX_NAME DOCUMENT_ID",
 	Short: "deletes the document from the Indigo gRPC Server",
 	Long:  `The delete document command deletes the document from the Indigo gRPC Server.`,
 	RunE: func(cmd *cobra.Command, args []string) error {

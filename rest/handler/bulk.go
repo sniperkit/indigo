@@ -14,24 +14,24 @@ import (
 	"strconv"
 )
 
-type IndexBulkHandler struct {
+type BulkHandler struct {
 	client proto.IndigoClient
 }
 
-func NewIndexBulkHandler(client proto.IndigoClient) *IndexBulkHandler {
-	return &IndexBulkHandler{
+func NewBulkHandler(client proto.IndigoClient) *BulkHandler {
+	return &BulkHandler{
 		client: client,
 	}
 }
 
-func (h *IndexBulkHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
+func (h *BulkHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	log.Printf("info: host=\"%s\" request_uri=\"%s\" method=\"%s\" remote_addr=\"%s\" user_agent=\"%s\"\n", req.Host, req.RequestURI, req.Method, req.RemoteAddr, req.UserAgent())
 
 	vars := mux.Vars(req)
 
 	indexName := vars["indexName"]
 
-	documents, err := ioutil.ReadAll(req.Body)
+	bulkRequest, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		log.Printf("error: %s", err.Error())
@@ -52,12 +52,14 @@ func (h *IndexBulkHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 
 	response := make(map[string]interface{})
 
-	resp, err := h.client.IndexBulk(context.Background(), &proto.IndexBulkRequest{Name: indexName, Documents: documents, BatchSize: batchSize})
+	resp, err := h.client.Bulk(context.Background(), &proto.BulkRequest{Name: indexName, BulkRequest: bulkRequest, BatchSize: batchSize})
 	if err == nil {
 		log.Print("info: request to Indigo gRPC Server was successful\n")
 
 		w.WriteHeader(http.StatusOK)
-		response["count"] = resp.Count
+		response["put_count"] = resp.PutCount
+		response["put_error_count"] = resp.PutErrorCount
+		response["delete_count"] = resp.DeleteCount
 	} else {
 		log.Printf("error: failed to request to the Indigo gRPC Server (%s)\n", err.Error())
 

@@ -38,7 +38,7 @@ func (h *SearchHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 
 	response := make(map[string]interface{})
 
-	resp, err := h.client.SearchDocuments(context.Background(), &proto.SearchDocumentsRequest{Name: indexName, SearchRequest: searchRequest})
+	resp, err := h.client.Search(context.Background(), &proto.SearchRequest{Name: indexName, SearchRequest: searchRequest})
 	if err == nil {
 		log.Print("info: request to Indigo gRPC Server was successful\n")
 

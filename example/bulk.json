@@ -1,0 +1,46 @@
+[
+  {
+    "method" : "put",
+    "id": "1",
+    "document": {
+      "name": "Bleve",
+      "description": "Full-text search library written in Go.",
+      "category": "Library",
+      "popularity": 1.0,
+      "release": "2014-04-18T00:00:00Z",
+      "type": "document"
+    }
+  },
+  {
+    "method" : "delete",
+    "id": "2"
+  },
+  {
+    "method" : "delete",
+    "id": "3"
+  },
+  {
+    "method" : "delete",
+    "id": "4"
+  },
+  {
+    "method" : "delete",
+    "id": "5"
+  },
+  {
+    "method" : "delete",
+    "id": "6"
+  },
+  {
+    "method" : "put",
+    "id": "7",
+    "document": {
+      "name": "Indigo",
+      "description": "Full-text search server built on Bleve.",
+      "category": "Server",
+      "popularity": 5.0,
+      "release": "2017-01-13T00:00:00Z",
+      "type": "document"
+    }
+  }
+]

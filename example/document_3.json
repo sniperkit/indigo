@@ -1,0 +1,8 @@
+{
+  "name": "Whoosh",
+  "description": "Full-text search library written in Python.",
+  "category": "Library",
+  "popularity": 1.0,
+  "release": "2008-02-20T00:00:00Z",
+  "type": "document"
+}

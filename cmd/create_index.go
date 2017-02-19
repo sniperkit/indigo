@@ -12,7 +12,7 @@ import (
 )
 
 var createIndexCmd = &cobra.Command{
-	Use:   "index NAME MAPPING",
+	Use:   "index INDEX_NAME INDEX_MAPPING",
 	Short: "creates the index to the Indigo gRPC Server",
 	Long:  `The create index command creates the index to the Indigo gRPC Server.`,
 	RunE: func(cmd *cobra.Command, args []string) error {

@@ -10,7 +10,7 @@ import (
 )
 
 var getDocumentCmd = &cobra.Command{
-	Use:   "document INDEX_NAME DOCUMENT_IDS",
+	Use:   "document INDEX_NAME DOCUMENT_ID",
 	Short: "gets the document from the Indigo gRPC Server",
 	Long:  `The get document command gets the document from the Indigo gRPC Server.`,
 	RunE: func(cmd *cobra.Command, args []string) error {

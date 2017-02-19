@@ -10,7 +10,7 @@ import (
 )
 
 var deleteIndexCmd = &cobra.Command{
-	Use:   "index NAME",
+	Use:   "index INDEX_NAME",
 	Short: "deletes the index from the Indigo gRPC Server",
 	Long:  `The delete index command deletes the index from the Indigo gRPC Server.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
