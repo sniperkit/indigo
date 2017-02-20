@@ -11,12 +11,15 @@ import (
 type indigoGRPCServer struct {
 	server   *grpc.Server
 	listener net.Listener
+	service  *indigoGRPCService
 }
 
 func NewIndigoGRPCServer(serverPort int, dataDir string) *indigoGRPCServer {
 	server := grpc.NewServer()
+	service := NewIndigoGRPCService(dataDir)
 
-	proto.RegisterIndigoServer(server, NewIndigoGRPCService(dataDir))
+	proto.RegisterIndigoServer(server, service)
+
 	listener, err := net.Listen("tcp", fmt.Sprintf(":%d", serverPort))
 	if err == nil {
 		log.Printf("info: create listener port=%d \n", serverPort)
@@ -28,11 +31,13 @@ func NewIndigoGRPCServer(serverPort int, dataDir string) *indigoGRPCServer {
 	return &indigoGRPCServer{
 		server:   server,
 		listener: listener,
+		service:  service,
 	}
 }
 
 func (igs *indigoGRPCServer) Start() error {
 	go func() {
+		igs.service.OpenIndices()
 		igs.server.Serve(igs.listener)
 		return
 	}()
@@ -43,6 +48,7 @@ func (igs *indigoGRPCServer) Start() error {
 }
 
 func (igs *indigoGRPCServer) Stop() error {
+	igs.service.CloseIndices()
 	igs.server.GracefulStop()
 
 	log.Printf("info: The Indigo gRPC Server stopped addr=\"%s\"\n", igs.listener.Addr().String())

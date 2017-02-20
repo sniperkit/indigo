@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"github.com/mosuka/indigo/constant"
 	"github.com/mosuka/indigo/proto"
 	"github.com/spf13/cobra"
 	"golang.org/x/net/context"
@@ -44,8 +45,8 @@ var createIndexCmd = &cobra.Command{
 }
 
 func init() {
-	createIndexCmd.Flags().StringVarP(&indexType, "index-type", "t", indexType, "index type")
-	createIndexCmd.Flags().StringVarP(&indexStore, "index-store", "s", indexStore, "index store")
+	createIndexCmd.Flags().StringVarP(&indexType, "index-type", "t", constant.DefaultIndexType, "index type")
+	createIndexCmd.Flags().StringVarP(&indexStore, "index-store", "s", constant.DefaultIndexStore, "index store")
 
 	createCmd.AddCommand(createIndexCmd)
 }

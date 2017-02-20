@@ -3,6 +3,7 @@ package cmd
 import (
 	"errors"
 	"fmt"
+	"github.com/mosuka/indigo/constant"
 	"github.com/mosuka/indigo/version"
 	"github.com/spf13/cobra"
 	"os"
@@ -36,5 +37,5 @@ func Execute() {
 }
 
 func init() {
-	RootCmd.PersistentFlags().BoolVarP(&versionFlag, "version", "v", versionFlag, "show version numner")
+	RootCmd.PersistentFlags().BoolVarP(&versionFlag, "version", "v", constant.DefaultVersionFlag, "show version numner")
 }

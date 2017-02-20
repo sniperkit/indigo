@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"github.com/mosuka/indigo/constant"
 	"github.com/mosuka/indigo/grpc"
 	"github.com/spf13/cobra"
 	"log"
@@ -60,8 +61,8 @@ var startGRPCCmd = &cobra.Command{
 }
 
 func init() {
-	startGRPCCmd.Flags().IntVarP(&gRPCServerPort, "server-port", "p", gRPCServerPort, "port number")
-	startGRPCCmd.Flags().StringVarP(&dataDir, "data-dir", "d", dataDir, "data directory")
+	startGRPCCmd.Flags().IntVarP(&gRPCServerPort, "server-port", "p", constant.DefaultGRPCServerPort, "port number")
+	startGRPCCmd.Flags().StringVarP(&dataDir, "data-dir", "d", constant.DefaultDataDir, "data directory")
 
 	startCmd.AddCommand(startGRPCCmd)
 }

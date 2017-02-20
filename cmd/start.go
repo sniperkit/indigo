@@ -3,6 +3,7 @@ package cmd
 import (
 	"errors"
 	"github.com/comail/colog"
+	"github.com/mosuka/indigo/constant"
 	"github.com/spf13/cobra"
 	"log"
 	"os"
@@ -33,19 +34,19 @@ var startCmd = &cobra.Command{
 		 */
 		switch logLevel {
 		case "trace":
-			colog.SetDefaultLevel(colog.LTrace)
+			colog.SetMinLevel(colog.LTrace)
 		case "debug":
-			colog.SetDefaultLevel(colog.LDebug)
+			colog.SetMinLevel(colog.LDebug)
 		case "info":
-			colog.SetDefaultLevel(colog.LInfo)
+			colog.SetMinLevel(colog.LInfo)
 		case "warn":
-			colog.SetDefaultLevel(colog.LWarning)
+			colog.SetMinLevel(colog.LWarning)
 		case "error":
-			colog.SetDefaultLevel(colog.LError)
+			colog.SetMinLevel(colog.LError)
 		case "alert":
-			colog.SetDefaultLevel(colog.LAlert)
+			colog.SetMinLevel(colog.LAlert)
 		default:
-			colog.SetDefaultLevel(colog.LInfo)
+			colog.SetMinLevel(colog.LInfo)
 		}
 
 		/*
@@ -68,6 +69,8 @@ var startCmd = &cobra.Command{
 				Flag:   log.Ldate | log.Ltime | log.Lshortfile,
 			})
 		}
+
+		colog.SetDefaultLevel(colog.LInfo)
 
 		colog.ParseFields(true)
 
@@ -92,9 +95,9 @@ var startCmd = &cobra.Command{
 }
 
 func init() {
-	startCmd.PersistentFlags().StringVarP(&logOutputFile, "log-output-file", "o", logOutputFile, "log file")
-	startCmd.PersistentFlags().StringVarP(&logLevel, "log-level", "l", logLevel, "log level")
-	startCmd.PersistentFlags().StringVarP(&logFormat, "log-format", "f", logFormat, "log format")
+	startCmd.PersistentFlags().StringVarP(&logOutputFile, "log-output-file", "o", constant.DefaultLogOutputFile, "log file")
+	startCmd.PersistentFlags().StringVarP(&logLevel, "log-level", "l", constant.DefaultLogLevel, "log level")
+	startCmd.PersistentFlags().StringVarP(&logFormat, "log-format", "f", constant.DefaultLogFormat, "log format")
 
 	RootCmd.AddCommand(startCmd)
 }

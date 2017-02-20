@@ -1,6 +1,22 @@
 package constant
 
-const DefaultIndexType string = "upside_down"
-const DefaultIndexStore string = "boltdb"
+const (
+	DefaultVersionFlag bool = false
 
-const DefaultBatchSize int32 = 1000
+	DefaultLogOutputFile string = ""
+	DefaultLogLevel      string = "info"
+	DefaultLogFormat     string = "text"
+
+	DefaultGRPCServerName string = "localhost"
+	DefaultGRPCServerPort int    = 1289
+	DefaultRESTServerPort int    = 2289
+
+	DefaultDataDir string = "./data"
+
+	DefaultBaseURI string = "/api"
+
+	DefaultIndexType  string = "upside_down"
+	DefaultIndexStore string = "boltdb"
+
+	DefaultBatchSize int32 = 1000
+)

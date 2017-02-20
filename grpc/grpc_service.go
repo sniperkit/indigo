@@ -18,14 +18,16 @@ import (
 )
 
 type indigoGRPCService struct {
-	mutex   sync.RWMutex
 	dataDir string
 	indices map[string]bleve.Index
+	mutexes map[string]*sync.RWMutex
 }
 
 func NewIndigoGRPCService(dataDir string) *indigoGRPCService {
+	var err error = nil
+
 	indices := make(map[string]bleve.Index)
-	var err error
+	mutexes := make(map[string]*sync.RWMutex)
 
 	_, err = os.Stat(dataDir)
 	if os.IsNotExist(err) {
@@ -39,41 +41,87 @@ func NewIndigoGRPCService(dataDir string) *indigoGRPCService {
 		log.Printf("debug: data directory already exists data_dir=\"%s\"\n", dataDir)
 	}
 
-	fiList, err := ioutil.ReadDir(dataDir)
+	return &indigoGRPCService{
+		dataDir: dataDir,
+		indices: indices,
+		mutexes: mutexes,
+	}
+}
+
+func (igs *indigoGRPCService) OpenIndices() error {
+	var err error = nil
+
+	fiList, err := ioutil.ReadDir(igs.dataDir)
 	if err == nil {
 		for _, fi := range fiList {
 			if fi.IsDir() {
-				indexDir := path.Join(dataDir, fi.Name())
+				indexDir := path.Join(igs.dataDir, fi.Name())
 				index, err := bleve.Open(indexDir)
 				if err == nil {
-					log.Printf("debug: open index index_name=\"%s\"\n", fi.Name())
-					indices[fi.Name()] = index
+					log.Printf("info: open index index_name=\"%s\"\n", fi.Name())
+					igs.indices[fi.Name()] = index
+					igs.mutexes[fi.Name()] = new(sync.RWMutex)
 				} else {
 					log.Printf("error: failed to open index index_dir=\"%s\"\n", indexDir)
 				}
 			}
 		}
 	} else {
-		log.Printf("error: failed to read data directory data_dir=\"%s\"\n", dataDir)
+		log.Printf("error: failed to read data directory (%s) data_dir=\"%s\"\n", err.Error(), igs.dataDir)
 	}
 
-	return &indigoGRPCService{
-		dataDir: dataDir,
-		indices: indices,
+	return err
+}
+
+func (igs *indigoGRPCService) CloseIndices() error {
+	var err error = nil
+
+	for indexName, index := range igs.indices {
+		err = index.Close()
+		if err == nil {
+			log.Printf("info: close index index_name=\"%s\"\n", indexName)
+		} else {
+			log.Printf("error: failed to close index (%s) index_name=\"%s\"\n", err.Error(), indexName)
+		}
 	}
+
+	return err
+}
+
+func (igs *indigoGRPCService) lockIndex(indexName string) {
+	_, mutexExisted := igs.mutexes[indexName]
+	if mutexExisted == false {
+		igs.mutexes[indexName] = new(sync.RWMutex)
+	}
+
+	igs.mutexes[indexName].Lock()
+	log.Printf("debug: lock index index_name=\"%s\"\n", indexName)
+}
+
+func (igs *indigoGRPCService) unlockIndex(indexName string) {
+	_, mutexExisted := igs.mutexes[indexName]
+	if mutexExisted == false {
+		igs.mutexes[indexName] = new(sync.RWMutex)
+	}
+
+	igs.mutexes[indexName].Unlock()
+	log.Printf("debug: unlock index index_name=\"%s\"\n", indexName)
 }
 
 func (igs *indigoGRPCService) CreateIndex(ctx context.Context, req *proto.CreateIndexRequest) (*proto.CreateIndexResponse, error) {
-	igs.mutex.Lock()
-	defer igs.mutex.Unlock()
+	var (
+		index bleve.Index
+		err   error
+	)
+
+	igs.lockIndex(req.IndexName)
+	defer igs.unlockIndex(req.IndexName)
 
 	indexDir := path.Join(igs.dataDir, req.IndexName)
 	indexMapping := bleve.NewIndexMapping()
-	var index bleve.Index
-	var err error
 
-	_, ok := igs.indices[req.IndexName]
-	if ok == false {
+	_, indexExisted := igs.indices[req.IndexName]
+	if indexExisted == false {
 		_, err = os.Stat(indexDir)
 		if os.IsNotExist(err) {
 			err = json.Unmarshal(req.IndexMapping, indexMapping)
@@ -103,11 +151,12 @@ func (igs *indigoGRPCService) CreateIndex(ctx context.Context, req *proto.Create
 }
 
 func (igs *indigoGRPCService) DeleteIndex(ctx context.Context, req *proto.DeleteIndexRequest) (*proto.DeleteIndexResponse, error) {
-	igs.mutex.Lock()
-	defer igs.mutex.Unlock()
+	var err error
+
+	igs.lockIndex(req.IndexName)
+	defer igs.unlockIndex(req.IndexName)
 
 	indexDir := path.Join(igs.dataDir, req.IndexName)
-	var err error
 
 	index, ok := igs.indices[req.IndexName]
 	if ok == true {
@@ -140,8 +189,10 @@ func (igs *indigoGRPCService) DeleteIndex(ctx context.Context, req *proto.Delete
 }
 
 func (igs *indigoGRPCService) GetStats(ctx context.Context, req *proto.GetStatsRequest) (*proto.GetStatsResponse, error) {
-	var indexStat []byte
-	var err error
+	var (
+		indexStat []byte
+		err       error
+	)
 
 	index, ok := igs.indices[req.IndexName]
 	if ok == true {
@@ -160,8 +211,10 @@ func (igs *indigoGRPCService) GetStats(ctx context.Context, req *proto.GetStatsR
 }
 
 func (igs *indigoGRPCService) GetMapping(ctx context.Context, req *proto.GetMappingRequest) (*proto.GetMappingResponse, error) {
-	var indexMapping []byte
-	var err error
+	var (
+		indexMapping []byte
+		err          error
+	)
 
 	index, ok := igs.indices[req.IndexName]
 	if ok == true {
@@ -180,10 +233,12 @@ func (igs *indigoGRPCService) GetMapping(ctx context.Context, req *proto.GetMapp
 }
 
 func (igs *indigoGRPCService) PutDocument(ctx context.Context, req *proto.PutDocumentRequest) (*proto.PutDocumentResponse, error) {
-	var doc interface{}
-	var err error
-	var putCount int32 = 0
-	var putErrorCount int32 = 0
+	var (
+		doc           interface{}
+		putCount      int32 = 0
+		putErrorCount int32 = 0
+		err           error
+	)
 
 	index, ok := igs.indices[req.IndexName]
 	if ok == true {
@@ -211,8 +266,10 @@ func (igs *indigoGRPCService) PutDocument(ctx context.Context, req *proto.PutDoc
 }
 
 func (igs *indigoGRPCService) GetDocument(ctx context.Context, req *proto.GetDocumentRequest) (*proto.GetDocumentResponse, error) {
-	var bytesResp []byte
-	var err error
+	var (
+		bytesResp []byte
+		err       error
+	)
 
 	index, ok := igs.indices[req.IndexName]
 	if ok == true {
@@ -279,8 +336,10 @@ func (igs *indigoGRPCService) GetDocument(ctx context.Context, req *proto.GetDoc
 }
 
 func (igs *indigoGRPCService) DeleteDocument(ctx context.Context, req *proto.DeleteDocumentRequest) (*proto.DeleteDocumentResponse, error) {
-	var err error
-	var deleteCount int32 = 0
+	var (
+		deleteCount int32 = 0
+		err         error
+	)
 
 	index, ok := igs.indices[req.IndexName]
 	if ok == true {
@@ -300,12 +359,17 @@ func (igs *indigoGRPCService) DeleteDocument(ctx context.Context, req *proto.Del
 }
 
 func (igs *indigoGRPCService) Bulk(ctx context.Context, req *proto.BulkRequest) (*proto.BulkResponse, error) {
-	var batchCount int32 = 0
-	var putCount int32 = 0
-	var putErrorCount int32 = 0
-	var deleteCount int32 = 0
-	var bulkRequest interface{}
-	var err error
+	var (
+		batchCount    int32 = 0
+		putCount      int32 = 0
+		putErrorCount int32 = 0
+		deleteCount   int32 = 0
+		bulkRequest   interface{}
+		err           error
+	)
+
+	igs.lockIndex(req.IndexName)
+	defer igs.unlockIndex(req.IndexName)
 
 	index, ok := igs.indices[req.IndexName]
 	if ok == true {
@@ -408,8 +472,10 @@ func (igs *indigoGRPCService) Bulk(ctx context.Context, req *proto.BulkRequest) 
 }
 
 func (igs *indigoGRPCService) Search(ctx context.Context, req *proto.SearchRequest) (*proto.SearchResponse, error) {
-	var bytesResp []byte
-	var err error
+	var (
+		bytesResp []byte
+		err       error
+	)
 
 	index, ok := igs.indices[req.IndexName]
 	if ok == true {

@@ -4,22 +4,23 @@ import (
 	"github.com/mosuka/indigo/constant"
 )
 
-var versionFlag bool = false
+var (
+	versionFlag bool = constant.DefaultVersionFlag
 
-var logOutputFile string = ""
-var logLevel string = "info"
-var logFormat string = "text"
+	logOutputFile string = constant.DefaultLogOutputFile
+	logLevel      string = constant.DefaultLogLevel
+	logFormat     string = constant.DefaultLogFormat
 
-var gRPCServerName string = "localhost"
-var gRPCServerPort int = 1289
-var restServerPort int = 2289
+	gRPCServerName string = constant.DefaultGRPCServerName
+	gRPCServerPort int    = constant.DefaultGRPCServerPort
+	restServerPort int    = constant.DefaultRESTServerPort
 
-var dataDir string = "./data"
+	dataDir string = constant.DefaultDataDir
 
-var baseURI string = "/api"
+	baseURI string = constant.DefaultBaseURI
 
-var indexType string = constant.DefaultIndexType
-var indexStore string = constant.DefaultIndexStore
-var kvConfig map[string]interface{} = nil
+	indexType  string = constant.DefaultIndexType
+	indexStore string = constant.DefaultIndexStore
 
-var batchSize int32 = constant.DefaultBatchSize
+	batchSize int32 = constant.DefaultBatchSize
+)

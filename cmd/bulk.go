@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"github.com/mosuka/indigo/constant"
 	"github.com/mosuka/indigo/proto"
 	"github.com/spf13/cobra"
 	"golang.org/x/net/context"
@@ -46,9 +47,9 @@ var bulkCmd = &cobra.Command{
 }
 
 func init() {
-	bulkCmd.Flags().StringVarP(&gRPCServerName, "grpc-server-name", "n", gRPCServerName, "Indigo gRPC Sever name")
-	bulkCmd.Flags().IntVarP(&gRPCServerPort, "grpc-server-port", "p", gRPCServerPort, "Indigo gRPC Server port number")
-	bulkCmd.Flags().Int32VarP(&batchSize, "batch-size", "b", batchSize, "port number")
+	bulkCmd.Flags().StringVarP(&gRPCServerName, "grpc-server-name", "n", constant.DefaultGRPCServerName, "Indigo gRPC Sever name")
+	bulkCmd.Flags().IntVarP(&gRPCServerPort, "grpc-server-port", "p", constant.DefaultGRPCServerPort, "Indigo gRPC Server port number")
+	bulkCmd.Flags().Int32VarP(&batchSize, "batch-size", "b", constant.DefaultBatchSize, "port number")
 
 	RootCmd.AddCommand(bulkCmd)
 }

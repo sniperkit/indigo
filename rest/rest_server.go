@@ -18,7 +18,6 @@ type indigoRESTServer struct {
 }
 
 func NewIndigoRESTServer(serverPort int, serverPath, gRPCServerName string, gRPCServerPort int) *indigoRESTServer {
-
 	router := mux.NewRouter()
 	router.StrictSlash(true)
 
