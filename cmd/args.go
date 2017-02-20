@@ -19,8 +19,10 @@ var (
 
 	baseURI string = constant.DefaultBaseURI
 
-	indexType  string = constant.DefaultIndexType
-	indexStore string = constant.DefaultIndexStore
+	indexName        string = constant.DefaultIndexName
+	indexMappingFile string = constant.DefaultIndexMappingFile
+	indexType        string = constant.DefaultIndexType
+	indexStore       string = constant.DefaultIndexStore
 
 	batchSize int32 = constant.DefaultBatchSize
 )

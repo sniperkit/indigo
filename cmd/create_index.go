@@ -1,30 +1,35 @@
 package cmd
 
 import (
-	"bytes"
-	"errors"
 	"fmt"
 	"github.com/mosuka/indigo/constant"
 	"github.com/mosuka/indigo/proto"
 	"github.com/spf13/cobra"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
-	"strings"
+	"io/ioutil"
+	"os"
 )
 
 var createIndexCmd = &cobra.Command{
-	Use:   "index INDEX_NAME INDEX_MAPPING",
+	Use:   "index INDEX_NAME ",
 	Short: "creates the index to the Indigo gRPC Server",
 	Long:  `The create index command creates the index to the Indigo gRPC Server.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		if len(args) < 2 {
-			return errors.New("few arguments")
-		}
+		var indexMapping []byte
 
-		indexName := args[0]
-		buf := new(bytes.Buffer)
-		buf.ReadFrom(strings.NewReader(args[1]))
-		indexMapping := buf.Bytes()
+		if indexMappingFile != "" {
+			file, err := os.Open(indexMappingFile)
+			if err != nil {
+				return err
+			}
+			defer file.Close()
+
+			indexMapping, err = ioutil.ReadAll(file)
+			if err != nil {
+				return err
+			}
+		}
 
 		conn, err := grpc.Dial(fmt.Sprintf("%s:%d", gRPCServerName, gRPCServerPort), grpc.WithInsecure())
 		if err != nil {
@@ -45,6 +50,8 @@ var createIndexCmd = &cobra.Command{
 }
 
 func init() {
+	createIndexCmd.Flags().StringVarP(&indexName, "index-name", "i", constant.DefaultIndexName, "index name")
+	createIndexCmd.Flags().StringVarP(&indexMappingFile, "index-mapping", "m", constant.DefaultIndexMappingFile, "index mapping")
 	createIndexCmd.Flags().StringVarP(&indexType, "index-type", "t", constant.DefaultIndexType, "index type")
 	createIndexCmd.Flags().StringVarP(&indexStore, "index-store", "s", constant.DefaultIndexStore, "index store")
 

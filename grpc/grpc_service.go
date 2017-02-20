@@ -124,18 +124,22 @@ func (igs *indigoGRPCService) CreateIndex(ctx context.Context, req *proto.Create
 	if indexExisted == false {
 		_, err = os.Stat(indexDir)
 		if os.IsNotExist(err) {
-			err = json.Unmarshal(req.IndexMapping, indexMapping)
-			if err == nil {
-				log.Printf("debug: create index mapping index_name=\"%s\"\n", req.IndexName)
-
-				index, err = bleve.NewUsing(indexDir, indexMapping, req.IndexType, req.IndexStore, nil)
+			if len(req.IndexMapping) > 0 {
+				err = json.Unmarshal(req.IndexMapping, indexMapping)
 				if err == nil {
-					log.Printf("info: create index index_name=\"%s\" index_dir=\"%s\" index_type=\"%s\" index_store=\"%s\"\n", req.IndexName, indexDir, req.IndexType, req.IndexStore)
+					log.Printf("debug: create index mapping index_name=\"%s\"\n", req.IndexName)
 				} else {
-					log.Printf("error: faild to create index (%s) index_name=\"%s\" index_dir=\"%s\" index_type=\"%s\" index_store=\"%s\"\n", err.Error(), req.IndexName, indexDir, req.IndexType, req.IndexStore)
+					log.Printf("error: faild to create index mapping (%s) index_name=\"%s\"\n", err.Error(), req.IndexName)
 				}
 			} else {
-				log.Printf("error: faild to create index mapping (%s) index_name=\"%s\"\n", err.Error(), req.IndexName)
+				log.Printf("debug: use default index mapping index_name=\"%s\"\n", req.IndexName)
+			}
+
+			index, err = bleve.NewUsing(indexDir, indexMapping, req.IndexType, req.IndexStore, nil)
+			if err == nil {
+				log.Printf("info: create index index_name=\"%s\" index_dir=\"%s\" index_type=\"%s\" index_store=\"%s\"\n", req.IndexName, indexDir, req.IndexType, req.IndexStore)
+			} else {
+				log.Printf("error: faild to create index (%s) index_name=\"%s\" index_dir=\"%s\" index_type=\"%s\" index_store=\"%s\"\n", err.Error(), req.IndexName, indexDir, req.IndexType, req.IndexStore)
 			}
 		} else {
 			log.Printf("error: index directory already exists (%s) index_dir=\"%s\"\n", err.Error(), indexDir)

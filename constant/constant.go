@@ -15,8 +15,10 @@ const (
 
 	DefaultBaseURI string = "/api"
 
-	DefaultIndexType  string = "upside_down"
-	DefaultIndexStore string = "boltdb"
+	DefaultIndexName        string = "default"
+	DefaultIndexMappingFile string = ""
+	DefaultIndexType        string = "upside_down"
+	DefaultIndexStore       string = "boltdb"
 
 	DefaultBatchSize int32 = 1000
 )
