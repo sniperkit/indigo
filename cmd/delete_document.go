@@ -1,8 +1,8 @@
 package cmd
 
 import (
-	"errors"
 	"fmt"
+	"github.com/mosuka/indigo/constant"
 	"github.com/mosuka/indigo/proto"
 	"github.com/spf13/cobra"
 	"golang.org/x/net/context"
@@ -10,25 +10,29 @@ import (
 )
 
 var deleteDocumentCmd = &cobra.Command{
-	Use:   "document INDEX_NAME DOCUMENT_ID",
+	Use:   "document",
 	Short: "deletes the document from the Indigo gRPC Server",
 	Long:  `The delete document command deletes the document from the Indigo gRPC Server.`,
-	RunE: func(cmd *cobra.Command, args []string) error {
-		if len(args) < 2 {
-			return errors.New("few arguments")
+	PreRunE: func(cmd *cobra.Command, args []string) error {
+		if indexName == "" {
+			return fmt.Errorf("required flag: --%s", cmd.Flag("index-name").Name)
 		}
 
-		indexName := args[0]
-		id := args[1]
+		if documentID == "" {
+			return fmt.Errorf("required flag: --%s", cmd.Flag("document-id").Name)
+		}
 
-		conn, err := grpc.Dial(fmt.Sprintf("%s:%d", gRPCServerName, gRPCServerPort), grpc.WithInsecure())
+		return nil
+	},
+	RunE: func(cmd *cobra.Command, args []string) error {
+		conn, err := grpc.Dial(gRPCServer, grpc.WithInsecure())
 		if err != nil {
 			return err
 		}
 		defer conn.Close()
 
 		client := proto.NewIndigoClient(conn)
-		resp, err := client.DeleteDocument(context.Background(), &proto.DeleteDocumentRequest{IndexName: indexName, DocumentID: id})
+		resp, err := client.DeleteDocument(context.Background(), &proto.DeleteDocumentRequest{IndexName: indexName, DocumentID: documentID})
 		if err != nil {
 			return err
 		}
@@ -40,5 +44,8 @@ var deleteDocumentCmd = &cobra.Command{
 }
 
 func init() {
+	deleteDocumentCmd.Flags().StringVarP(&indexName, "index-name", "i", constant.DefaultIndexName, "index name")
+	deleteDocumentCmd.Flags().StringVarP(&documentID, "document-id", "I", constant.DefaultDocumentID, "document id")
+
 	deleteCmd.AddCommand(deleteDocumentCmd)
 }

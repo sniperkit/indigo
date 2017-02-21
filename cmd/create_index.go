@@ -12,11 +12,18 @@ import (
 )
 
 var createIndexCmd = &cobra.Command{
-	Use:   "index INDEX_NAME ",
+	Use:   "index",
 	Short: "creates the index to the Indigo gRPC Server",
 	Long:  `The create index command creates the index to the Indigo gRPC Server.`,
+	PreRunE: func(cmd *cobra.Command, args []string) error {
+		if indexName == "" {
+			return fmt.Errorf("required flag: --%s", cmd.Flag("index-name").Name)
+		}
+
+		return nil
+	},
 	RunE: func(cmd *cobra.Command, args []string) error {
-		var indexMapping []byte
+		indexMapping := make([]byte, 0)
 
 		if indexMappingFile != "" {
 			file, err := os.Open(indexMappingFile)
@@ -31,7 +38,7 @@ var createIndexCmd = &cobra.Command{
 			}
 		}
 
-		conn, err := grpc.Dial(fmt.Sprintf("%s:%d", gRPCServerName, gRPCServerPort), grpc.WithInsecure())
+		conn, err := grpc.Dial(gRPCServer, grpc.WithInsecure())
 		if err != nil {
 			return err
 		}

@@ -7,18 +7,26 @@ const (
 	DefaultLogLevel      string = "info"
 	DefaultLogFormat     string = "text"
 
-	DefaultGRPCServerName string = "localhost"
-	DefaultGRPCServerPort int    = 1289
-	DefaultRESTServerPort int    = 2289
+	//DefaultGRPCServerName string = "localhost"
+	DefaultGRPCServerPort int = 1289
+	DefaultRESTServerPort int = 2289
+
+	DefaultGRPCServer string = "localhost:1289"
 
 	DefaultDataDir string = "./data"
 
 	DefaultBaseURI string = "/api"
 
-	DefaultIndexName        string = "default"
+	DefaultIndexName        string = ""
 	DefaultIndexMappingFile string = ""
 	DefaultIndexType        string = "upside_down"
 	DefaultIndexStore       string = "boltdb"
 
-	DefaultBatchSize int32 = 1000
+	DefaultDocumentID   string = ""
+	DefaultDocumentFile string = ""
+
+	DefaultBulkRequestFile string = ""
+	DefaultBatchSize       int32  = 1000
+
+	DefaultSearchRequestFile string = ""
 )

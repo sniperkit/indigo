@@ -11,9 +11,10 @@ var (
 	logLevel      string = constant.DefaultLogLevel
 	logFormat     string = constant.DefaultLogFormat
 
-	gRPCServerName string = constant.DefaultGRPCServerName
-	gRPCServerPort int    = constant.DefaultGRPCServerPort
-	restServerPort int    = constant.DefaultRESTServerPort
+	gRPCServerPort int = constant.DefaultGRPCServerPort
+	restServerPort int = constant.DefaultRESTServerPort
+
+	gRPCServer string = constant.DefaultGRPCServer
 
 	dataDir string = constant.DefaultDataDir
 
@@ -24,5 +25,11 @@ var (
 	indexType        string = constant.DefaultIndexType
 	indexStore       string = constant.DefaultIndexStore
 
-	batchSize int32 = constant.DefaultBatchSize
+	documentID   string = constant.DefaultDocumentID
+	documentFile string = constant.DefaultDocumentFile
+
+	bulkRequestFile string = constant.DefaultBulkRequestFile
+	batchSize       int32  = constant.DefaultBatchSize
+
+	searchRequestFile string = constant.DefaultSearchRequestFile
 )

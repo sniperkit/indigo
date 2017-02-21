@@ -1,39 +1,52 @@
 package cmd
 
 import (
-	"bytes"
-	"errors"
 	"fmt"
 	"github.com/mosuka/indigo/constant"
 	"github.com/mosuka/indigo/proto"
 	"github.com/spf13/cobra"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
-	"strings"
+	"io/ioutil"
+	"os"
 )
 
 var bulkCmd = &cobra.Command{
-	Use:   "bulk INDEX_NAME BULK_REQUEST",
+	Use:   "bulk",
 	Short: "indexes the documents in bulk to the Indigo gRPC Server",
 	Long:  `The bulk command indexes the documents in bulk to the Indigo gRPC Server.`,
-	RunE: func(cmd *cobra.Command, args []string) error {
-		if len(args) < 2 {
-			return errors.New("few arguments")
+	PreRunE: func(cmd *cobra.Command, args []string) error {
+		if indexName == "" {
+			return fmt.Errorf("required flag: --%s", cmd.Flag("index-name").Name)
 		}
 
-		indexName := args[0]
-		buf := new(bytes.Buffer)
-		buf.ReadFrom(strings.NewReader(args[1]))
-		documents := buf.Bytes()
+		if bulkRequestFile == "" {
+			return fmt.Errorf("required flag: --%s", cmd.Flag("bulk-request-file").Name)
+		}
 
-		conn, err := grpc.Dial(fmt.Sprintf("%s:%d", gRPCServerName, gRPCServerPort), grpc.WithInsecure())
+		return nil
+	},
+	RunE: func(cmd *cobra.Command, args []string) error {
+		bulkRequest := make([]byte, 0)
+		file, err := os.Open(bulkRequestFile)
+		if err != nil {
+			return err
+		}
+		defer file.Close()
+
+		bulkRequest, err = ioutil.ReadAll(file)
+		if err != nil {
+			return err
+		}
+
+		conn, err := grpc.Dial(gRPCServer, grpc.WithInsecure())
 		if err != nil {
 			return err
 		}
 		defer conn.Close()
 
 		client := proto.NewIndigoClient(conn)
-		resp, err := client.Bulk(context.Background(), &proto.BulkRequest{IndexName: indexName, BulkRequest: documents, BatchSize: batchSize})
+		resp, err := client.Bulk(context.Background(), &proto.BulkRequest{IndexName: indexName, BulkRequest: bulkRequest, BatchSize: batchSize})
 		if err != nil {
 			return err
 		}
@@ -47,9 +60,10 @@ var bulkCmd = &cobra.Command{
 }
 
 func init() {
-	bulkCmd.Flags().StringVarP(&gRPCServerName, "grpc-server-name", "n", constant.DefaultGRPCServerName, "Indigo gRPC Sever name")
-	bulkCmd.Flags().IntVarP(&gRPCServerPort, "grpc-server-port", "p", constant.DefaultGRPCServerPort, "Indigo gRPC Server port number")
-	bulkCmd.Flags().Int32VarP(&batchSize, "batch-size", "b", constant.DefaultBatchSize, "port number")
+	bulkCmd.Flags().StringVarP(&gRPCServer, "grpc-server", "g", constant.DefaultGRPCServer, "Indigo gRPC Sever")
+	bulkCmd.Flags().StringVarP(&indexName, "index-name", "i", constant.DefaultIndexName, "index name")
+	bulkCmd.Flags().StringVarP(&bulkRequestFile, "bulk-request-file", "b", constant.DefaultBulkRequestFile, "bulk request file")
+	bulkCmd.Flags().Int32VarP(&batchSize, "batch-size", "B", constant.DefaultBatchSize, "batch size")
 
 	RootCmd.AddCommand(bulkCmd)
 }

@@ -17,17 +17,15 @@ type indigoRESTServer struct {
 	conn     *grpc.ClientConn
 }
 
-func NewIndigoRESTServer(serverPort int, serverPath, gRPCServerName string, gRPCServerPort int) *indigoRESTServer {
+func NewIndigoRESTServer(serverPort int, serverPath, gRPCServer string) *indigoRESTServer {
 	router := mux.NewRouter()
 	router.StrictSlash(true)
 
-	target := fmt.Sprintf("%s:%d", gRPCServerName, gRPCServerPort)
-
-	conn, err := grpc.Dial(target, grpc.WithInsecure())
+	conn, err := grpc.Dial(gRPCServer, grpc.WithInsecure())
 	if err == nil {
-		log.Printf("info: create connection target=\"%s\"\n", target)
+		log.Printf("info: create connection target=\"%s\"\n", gRPCServer)
 	} else {
-		log.Printf("error: failed to create connection (%s) target=\"%s\"\n", err.Error(), target)
+		log.Printf("error: failed to create connection (%s) target=\"%s\"\n", err.Error(), gRPCServer)
 		return nil
 	}
 

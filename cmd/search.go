@@ -1,32 +1,45 @@
 package cmd
 
 import (
-	"bytes"
-	"errors"
 	"fmt"
 	"github.com/mosuka/indigo/constant"
 	"github.com/mosuka/indigo/proto"
 	"github.com/spf13/cobra"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
-	"strings"
+	"io/ioutil"
+	"os"
 )
 
 var searchCmd = &cobra.Command{
-	Use:   "search INDEX_NAME SEARCH_REQUEST",
+	Use:   "search",
 	Short: "searches the documents from the Indigo gRPC Server",
 	Long:  `The search command searches the documents from the Indigo gRPC Server.`,
-	RunE: func(cmd *cobra.Command, args []string) error {
-		if len(args) < 1 {
-			return errors.New("few arguments")
+	PreRunE: func(cmd *cobra.Command, args []string) error {
+		if indexName == "" {
+			return fmt.Errorf("required flag: --%s", cmd.Flag("index-name").Name)
 		}
 
-		indexName := args[0]
-		buf := new(bytes.Buffer)
-		buf.ReadFrom(strings.NewReader(args[1]))
-		searchRequest := buf.Bytes()
+		if searchRequestFile == "" {
+			return fmt.Errorf("required flag: --%s", cmd.Flag("search-request-file").Name)
+		}
 
-		conn, err := grpc.Dial(fmt.Sprintf("%s:%d", gRPCServerName, gRPCServerPort), grpc.WithInsecure())
+		return nil
+	},
+	RunE: func(cmd *cobra.Command, args []string) error {
+		searchRequest := make([]byte, 0)
+		file, err := os.Open(searchRequestFile)
+		if err != nil {
+			return err
+		}
+		defer file.Close()
+
+		searchRequest, err = ioutil.ReadAll(file)
+		if err != nil {
+			return err
+		}
+
+		conn, err := grpc.Dial(gRPCServer, grpc.WithInsecure())
 		if err != nil {
 			return err
 		}
@@ -46,8 +59,9 @@ var searchCmd = &cobra.Command{
 }
 
 func init() {
-	searchCmd.Flags().StringVarP(&gRPCServerName, "grpc-server-name", "n", constant.DefaultGRPCServerName, "Indigo gRPC Sever name")
-	searchCmd.Flags().IntVarP(&gRPCServerPort, "grpc-server-port", "p", constant.DefaultGRPCServerPort, "Indigo gRPC Server port number")
+	searchCmd.Flags().StringVarP(&gRPCServer, "grpc-server", "g", constant.DefaultGRPCServer, "Indigo gRPC Sever")
+	searchCmd.Flags().StringVarP(&indexName, "index-name", "i", constant.DefaultIndexName, "index name")
+	searchCmd.Flags().StringVarP(&searchRequestFile, "search-request-file", "r", constant.DefaultSearchRequestFile, "search request file")
 
 	RootCmd.AddCommand(searchCmd)
 }

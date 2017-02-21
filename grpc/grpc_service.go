@@ -38,7 +38,8 @@ func NewIndigoGRPCService(dataDir string) *indigoGRPCService {
 			log.Printf("error: failed to make data directory (%s) data_dir=\"%s\"\n", err.Error(), dataDir)
 		}
 	} else {
-		log.Printf("debug: data directory already exists data_dir=\"%s\"\n", dataDir)
+		err = errors.New(fmt.Sprintf("%s already exists", dataDir))
+		log.Printf("debug: data directory already exists (%s) data_dir=\"%s\"\n", err.Error(), dataDir)
 	}
 
 	return &indigoGRPCService{
@@ -142,7 +143,8 @@ func (igs *indigoGRPCService) CreateIndex(ctx context.Context, req *proto.Create
 				log.Printf("error: faild to create index (%s) index_name=\"%s\" index_dir=\"%s\" index_type=\"%s\" index_store=\"%s\"\n", err.Error(), req.IndexName, indexDir, req.IndexType, req.IndexStore)
 			}
 		} else {
-			log.Printf("error: index directory already exists (%s) index_dir=\"%s\"\n", err.Error(), indexDir)
+			err = errors.New(fmt.Sprintf("%s already exists", indexDir))
+			log.Printf("error: index directory already exists index_dir=\"%s\"\n", indexDir)
 		}
 
 		igs.indices[req.IndexName] = index
@@ -175,7 +177,7 @@ func (igs *indigoGRPCService) DeleteIndex(ctx context.Context, req *proto.Delete
 
 			err = os.RemoveAll(indexDir)
 			if err == nil {
-				log.Printf("info: delete index indexDir index_dir=\"%s\"\n", indexDir)
+				log.Printf("info: delete index index_dir=\"%s\"\n", indexDir)
 			} else {
 				log.Printf("error: failed to delete index directory (%s) index_dir=\"%s\"\n", err.Error(), indexDir)
 			}
@@ -433,7 +435,7 @@ func (igs *indigoGRPCService) Bulk(ctx context.Context, req *proto.BulkRequest) 
 							batch.Delete(id)
 							deleteCount++
 							batchCount++
-							log.Printf("debug: delete document index_name=\"%s\" document_id=\"%s\" num=%d\n", req.IndexName, id, num)
+							log.Printf("info: delete document index_name=\"%s\" document_id=\"%s\" num=%d\n", req.IndexName, id, num)
 						default:
 							log.Printf("error: unexpected method method=\"%s\" index_name=\"%s\" document_id=\"%s\"\n", method, req.IndexName, id)
 						}

@@ -1,8 +1,8 @@
 package cmd
 
 import (
-	"errors"
 	"fmt"
+	"github.com/mosuka/indigo/constant"
 	"github.com/mosuka/indigo/proto"
 	"github.com/spf13/cobra"
 	"golang.org/x/net/context"
@@ -10,17 +10,18 @@ import (
 )
 
 var getStatsCmd = &cobra.Command{
-	Use:   "stats INDEX_NAME",
+	Use:   "stats",
 	Short: "gets the index stats from the Indigo gRPC Server",
 	Long:  `The get stats command gets the index stats from the Indigo gRPC Server.`,
-	RunE: func(cmd *cobra.Command, args []string) error {
-		if len(args) < 1 {
-			return errors.New("few arguments")
+	PreRunE: func(cmd *cobra.Command, args []string) error {
+		if indexName == "" {
+			return fmt.Errorf("required flag: --%s", cmd.Flag("index-name").Name)
 		}
 
-		indexName := args[0]
-
-		conn, err := grpc.Dial(fmt.Sprintf("%s:%d", gRPCServerName, gRPCServerPort), grpc.WithInsecure())
+		return nil
+	},
+	RunE: func(cmd *cobra.Command, args []string) error {
+		conn, err := grpc.Dial(gRPCServer, grpc.WithInsecure())
 		if err != nil {
 			return err
 		}
@@ -39,5 +40,7 @@ var getStatsCmd = &cobra.Command{
 }
 
 func init() {
+	getStatsCmd.Flags().StringVarP(&indexName, "index-name", "i", constant.DefaultIndexName, "index name")
+
 	getCmd.AddCommand(getStatsCmd)
 }
