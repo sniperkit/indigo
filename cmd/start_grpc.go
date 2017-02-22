@@ -61,7 +61,7 @@ var startGRPCCmd = &cobra.Command{
 }
 
 func init() {
-	startGRPCCmd.Flags().IntVarP(&gRPCServerPort, "server-port", "p", constant.DefaultGRPCServerPort, "port number")
+	startGRPCCmd.Flags().IntVarP(&gRPCServerPort, "port", "p", constant.DefaultGRPCServerPort, "port number")
 	startGRPCCmd.Flags().StringVarP(&dataDir, "data-dir", "d", constant.DefaultDataDir, "data directory")
 
 	startCmd.AddCommand(startGRPCCmd)

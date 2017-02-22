@@ -21,7 +21,7 @@ var bulkCmd = &cobra.Command{
 		}
 
 		if bulkRequestFile == "" {
-			return fmt.Errorf("required flag: --%s", cmd.Flag("bulk-request-file").Name)
+			return fmt.Errorf("required flag: --%s", cmd.Flag("bulk-request").Name)
 		}
 
 		return nil
@@ -61,9 +61,9 @@ var bulkCmd = &cobra.Command{
 
 func init() {
 	bulkCmd.Flags().StringVarP(&gRPCServer, "grpc-server", "g", constant.DefaultGRPCServer, "Indigo gRPC Sever")
-	bulkCmd.Flags().StringVarP(&indexName, "index-name", "i", constant.DefaultIndexName, "index name")
-	bulkCmd.Flags().StringVarP(&bulkRequestFile, "bulk-request-file", "r", constant.DefaultBulkRequestFile, "bulk request file")
-	bulkCmd.Flags().Int32VarP(&batchSize, "batch-size", "b", constant.DefaultBatchSize, "batch size")
+	bulkCmd.Flags().StringVarP(&indexName, "index-name", "n", constant.DefaultIndexName, "index name")
+	bulkCmd.Flags().StringVarP(&bulkRequestFile, "bulk-request", "b", constant.DefaultBulkRequestFile, "bulk request file")
+	bulkCmd.Flags().Int32VarP(&batchSize, "batch-size", "s", constant.DefaultBatchSize, "batch size")
 
 	RootCmd.AddCommand(bulkCmd)
 }

@@ -22,7 +22,7 @@ The Indigo provides some commands for control the Indigo Server.
 ### Create the index to the Indigo gRPC Server via CLI
 
 ```sh
-$ indigo create index example "$(cat example/mapping.json)" -s boltdb -t upside_down
+$ indigo create index -n example -m mapping.json -s boltdb -t upside_down
 ```
 
 The result of the above `create index` command is:
@@ -156,7 +156,7 @@ See [Introduction to Index Mappings](http://www.blevesearch.com/docs/Index-Mappi
 ### Delete the index from the Indigo gRPC Server via CLI
 
 ```sh
-$ indigo delete index example
+$ indigo delete index -n example
 ```
 
 The result of the above `delete index` command is:
@@ -168,7 +168,7 @@ example deleted
 ### Get the index stats from the Indigo gRPC Server via CLI
 
 ```sh
-$ indigo get stats example | jq .
+$ indigo get stats -n example | jq .
 ```
 
 The result of the above `get stats` command is:
@@ -194,7 +194,7 @@ The result of the above `get stats` command is:
 ### Get the index mapping from the Indigo gRPC Server via CLI
 
 ```sh
-$ indigo get mapping example | jq .
+$ indigo get mapping -n example | jq .
 ```
 
 The result of the above `get mapping` command is:
@@ -315,7 +315,7 @@ The result of the above `get mapping` command is:
 ### Put the document to the Indigo gRPC Server via CLI
 
 ```sh
-$ indigo put document example 1 "$(cat example/document_1.json)"
+$ indigo put document -n example -i 1 -d document_1.json
 ```
 
 The result of the above `put document` command is:
@@ -327,7 +327,7 @@ The result of the above `put document` command is:
 ### Get the document from the Indigo gRPC Server via CLI
 
 ```sh
-$ indigo get document example 1 | jq .
+$ indigo get document -n example -i 1 | jq .
 ```
 
 The result of the above `get document` command is:
@@ -346,7 +346,7 @@ The result of the above `get document` command is:
 ### Delete the document from the Indigo gRPC Server via CLI
 
 ```sh
-$ indigo delete document example 1
+$ indigo delete document -n example -i 1
 ```
 
 The result of the above `delete document` command is:
@@ -359,7 +359,7 @@ The result of the above `delete document` command is:
 ### Index the documents in bulk to the Indigo gRPC Server via CLI
 
 ```sh
-$ indigo bulk example "$(cat example/bulk.json)"
+$ indigo bulk -n example -r bulk.json
 ```
 
 The result of the above `index bulk` command is:
@@ -378,7 +378,7 @@ See [Queries](http://www.blevesearch.com/docs/Query/), [Query String Query](http
 #### Simple query
 
 ```sh
-$ indigo search example "$(cat example/simple_query.json)" | jq .
+$ indigo search -n example -r simple_query.json | jq .
 ```
 
 The result of the above `search` command is:
@@ -474,7 +474,7 @@ $ indigo start rest
 ### Create the index to the Indigo gRPC Server via the Indigo REST Server
 
 ```sh
-$ curl -X PUT "http://localhost:2289/api/example?indexType=upside_down&indexStore=boltdb" -H "Content-Type: application/json" -d @example/mapping.json -s | jq .
+$ curl -X PUT "http://localhost:2289/api/example?indexType=upside_down&indexStore=boltdb" -H "Content-Type: application/json" --data-binary @example/mapping.json -s | jq .
 ```
 
 The result of the above command is:
@@ -653,7 +653,7 @@ The result of the above command is:
 ### Put the document to the Indigo gRPC Server via the Indigo REST Server
 
 ```sh
-$ curl -X PUT "http://localhost:2289/api/example/1" -H "Content-Type: application/json" -d @example/document_1.json -s | jq .
+$ curl -X PUT "http://localhost:2289/api/example/1" -H "Content-Type: application/json" --data-binary @example/document_1.json -s | jq .
 ```
 
 The result of the above command is:
@@ -702,7 +702,7 @@ The result of the above command is:
 ### Index the documents in bulk to the Indigo gRPC Server via the Indigo REST Server
 
 ```sh
-$ curl -X POST "http://localhost:2289/api/example/_bulk" -H "Content-Type: application/json" -d @example/bulk.json -s | jq .
+$ curl -X POST "http://localhost:2289/api/example/_bulk" -H "Content-Type: application/json" --data-binary @example/bulk.json -s | jq .
 ```
 
 The result of the above command is:
@@ -721,7 +721,7 @@ The result of the above command is:
 #### Simple query
 
 ```sh
-$ curl -X POST "http://localhost:2289/api/example/_search" -H "Content-Type: application/json" -d @example/simple_query.json -s | jq .
+$ curl -X POST "http://localhost:2289/api/example/_search" -H "Content-Type: application/json" --data-binary @example/simple_query.json -s | jq .
 ```
 
 The result of the above `search documents` command is:

@@ -49,6 +49,26 @@ func NewIndigoGRPCService(dataDir string) *indigoGRPCService {
 	}
 }
 
+func (igs *indigoGRPCService) lockIndex(indexName string) {
+	_, mutexExisted := igs.mutexes[indexName]
+	if mutexExisted == false {
+		igs.mutexes[indexName] = new(sync.RWMutex)
+	}
+
+	igs.mutexes[indexName].Lock()
+	log.Printf("debug: lock index index_name=\"%s\"\n", indexName)
+}
+
+func (igs *indigoGRPCService) unlockIndex(indexName string) {
+	_, mutexExisted := igs.mutexes[indexName]
+	if mutexExisted == false {
+		igs.mutexes[indexName] = new(sync.RWMutex)
+	}
+
+	igs.mutexes[indexName].Unlock()
+	log.Printf("debug: unlock index index_name=\"%s\"\n", indexName)
+}
+
 func (igs *indigoGRPCService) OpenIndices() error {
 	var err error = nil
 
@@ -61,7 +81,6 @@ func (igs *indigoGRPCService) OpenIndices() error {
 				if err == nil {
 					log.Printf("info: open index index_name=\"%s\"\n", fi.Name())
 					igs.indices[fi.Name()] = index
-					igs.mutexes[fi.Name()] = new(sync.RWMutex)
 				} else {
 					log.Printf("error: failed to open index index_dir=\"%s\"\n", indexDir)
 				}
@@ -89,26 +108,6 @@ func (igs *indigoGRPCService) CloseIndices() error {
 	return err
 }
 
-func (igs *indigoGRPCService) lockIndex(indexName string) {
-	_, mutexExisted := igs.mutexes[indexName]
-	if mutexExisted == false {
-		igs.mutexes[indexName] = new(sync.RWMutex)
-	}
-
-	igs.mutexes[indexName].Lock()
-	log.Printf("debug: lock index index_name=\"%s\"\n", indexName)
-}
-
-func (igs *indigoGRPCService) unlockIndex(indexName string) {
-	_, mutexExisted := igs.mutexes[indexName]
-	if mutexExisted == false {
-		igs.mutexes[indexName] = new(sync.RWMutex)
-	}
-
-	igs.mutexes[indexName].Unlock()
-	log.Printf("debug: unlock index index_name=\"%s\"\n", indexName)
-}
-
 func (igs *indigoGRPCService) CreateIndex(ctx context.Context, req *proto.CreateIndexRequest) (*proto.CreateIndexResponse, error) {
 	var (
 		index bleve.Index
@@ -122,11 +121,10 @@ func (igs *indigoGRPCService) CreateIndex(ctx context.Context, req *proto.Create
 	indexMapping := bleve.NewIndexMapping()
 	kvConfig := new(map[string]interface{})
 
-	_, indexExisted := igs.indices[req.IndexName]
-	if indexExisted == false {
+	_, ok := igs.indices[req.IndexName]
+	if ok == false {
 		_, err = os.Stat(indexDir)
 		if os.IsNotExist(err) {
-			//if len(req.IndexMapping) > 0 {
 			if req.IndexMapping != nil {
 				err = json.Unmarshal(req.IndexMapping, indexMapping)
 				if err == nil {
@@ -149,21 +147,21 @@ func (igs *indigoGRPCService) CreateIndex(ctx context.Context, req *proto.Create
 				log.Printf("debug: use default kv config index_name=\"%s\"\n", req.IndexName)
 			}
 
-			index, err = bleve.NewUsing(indexDir, indexMapping, req.IndexType, req.IndexStore, *kvConfig)
+			index, err = bleve.NewUsing(indexDir, indexMapping, req.IndexType, req.KvStore, *kvConfig)
 			if err == nil {
-				log.Printf("info: create index index_name=\"%s\" index_dir=\"%s\" index_type=\"%s\" index_store=\"%s\"\n", req.IndexName, indexDir, req.IndexType, req.IndexStore)
+				log.Printf("info: create index index_name=\"%s\" index_dir=\"%s\" index_type=\"%s\" index_store=\"%s\"\n", req.IndexName, indexDir, req.IndexType, req.KvStore)
+				log.Printf("info: open index index_name=\"%s\" index_dir=\"%s\" index_type=\"%s\" index_store=\"%s\"\n", req.IndexName, indexDir, req.IndexType, req.KvStore)
+				igs.indices[req.IndexName] = index
 			} else {
-				log.Printf("error: faild to create index (%s) index_name=\"%s\" index_dir=\"%s\" index_type=\"%s\" index_store=\"%s\"\n", err.Error(), req.IndexName, indexDir, req.IndexType, req.IndexStore)
+				log.Printf("error: faild to create index (%s) index_name=\"%s\" index_dir=\"%s\" index_type=\"%s\" index_store=\"%s\"\n", err.Error(), req.IndexName, indexDir, req.IndexType, req.KvStore)
 			}
 		} else {
 			err = errors.New(fmt.Sprintf("%s already exists", indexDir))
 			log.Printf("error: index directory already exists index_dir=\"%s\"\n", indexDir)
 		}
-
-		igs.indices[req.IndexName] = index
 	} else {
 		err = errors.New(fmt.Sprintf("%s already exists", req.IndexName))
-		log.Printf("error: index exists (%s) index_name=\"%s\"\n", err.Error(), req.IndexName)
+		log.Printf("error: index already opened (%s) index_name=\"%s\"\n", err.Error(), req.IndexName)
 	}
 
 	return &proto.CreateIndexResponse{IndexName: req.IndexName}, err
@@ -177,34 +175,98 @@ func (igs *indigoGRPCService) DeleteIndex(ctx context.Context, req *proto.Delete
 
 	indexDir := path.Join(igs.dataDir, req.IndexName)
 
-	index, ok := igs.indices[req.IndexName]
-	if ok == true {
+	_, ok := igs.indices[req.IndexName]
+	if ok == false {
 		_, err = os.Stat(indexDir)
 		if err == nil {
-			err = index.Close()
-			if err == nil {
-				log.Printf("info: close index index_name=\"%s\"\n", req.IndexName)
-			} else {
-				log.Printf("error: failed to close index (%s) index_name=\"%s\"\n", err.Error(), req.IndexName)
-			}
-
 			err = os.RemoveAll(indexDir)
 			if err == nil {
 				log.Printf("info: delete index index_dir=\"%s\"\n", indexDir)
+				delete(igs.indices, req.IndexName)
 			} else {
 				log.Printf("error: failed to delete index directory (%s) index_dir=\"%s\"\n", err.Error(), indexDir)
 			}
 		} else {
 			log.Printf("error: index directory does not exist (%s) index_dir=\"%s\"\n", err.Error(), indexDir)
 		}
-
-		delete(igs.indices, req.IndexName)
 	} else {
-		err = errors.New(fmt.Sprintf("%s does not exist", req.IndexName))
-		log.Printf("error: index does not exist (%s) index_name=\"%s\"\n", err.Error(), req.IndexName)
+		err = errors.New(fmt.Sprintf("%s already exists", req.IndexName))
+		log.Printf("error: index has been opened (%s) index_name=\"%s\"\n", err.Error(), req.IndexName)
 	}
 
 	return &proto.DeleteIndexResponse{IndexName: req.IndexName}, err
+}
+
+func (igs *indigoGRPCService) OpenIndex(ctx context.Context, req *proto.OpenIndexRequest) (*proto.OpenIndexResponse, error) {
+	var (
+		index bleve.Index
+		err   error
+	)
+
+	igs.lockIndex(req.IndexName)
+	defer igs.unlockIndex(req.IndexName)
+
+	indexDir := path.Join(igs.dataDir, req.IndexName)
+	runtimeConfig := new(map[string]interface{})
+
+	_, ok := igs.indices[req.IndexName]
+	if ok == false {
+		_, err = os.Stat(indexDir)
+		if err == nil {
+			if req.RuntimeConfig != nil {
+				err = json.Unmarshal(req.RuntimeConfig, runtimeConfig)
+				if err == nil {
+					log.Printf("debug: create runtime config index_name=\"%s\"\n", req.IndexName)
+				} else {
+					log.Printf("error: faild to create runtime config (%s) index_name=\"%s\"\n", err.Error(), req.IndexName)
+				}
+			} else {
+				log.Printf("debug: use default kv config index_name=\"%s\"\n", req.IndexName)
+			}
+
+			index, err = bleve.OpenUsing(indexDir, *runtimeConfig)
+			if err == nil {
+				log.Printf("info: open index index_name=\"%s\"\n", req.IndexName)
+
+				igs.indices[req.IndexName] = index
+			} else {
+				log.Printf("error: failed to open index (%s) index_name=\"%s\"\n", err.Error(), req.IndexName)
+			}
+		} else {
+			log.Printf("error: index directory does not exist (%s) index_dir=\"%s\"\n", err.Error(), indexDir)
+		}
+	} else {
+		err = errors.New(fmt.Sprintf("%s does not exist", req.IndexName))
+		log.Printf("error: index already opened (%s) index_name=\"%s\"\n", err.Error(), req.IndexName)
+	}
+
+	return &proto.OpenIndexResponse{IndexName: req.IndexName}, err
+}
+
+func (igs *indigoGRPCService) CloseIndex(ctx context.Context, req *proto.CloseIndexRequest) (*proto.CloseIndexResponse, error) {
+	var (
+		index bleve.Index
+		err   error
+	)
+
+	igs.lockIndex(req.IndexName)
+	defer igs.unlockIndex(req.IndexName)
+
+	index, ok := igs.indices[req.IndexName]
+	if ok {
+		err = index.Close()
+		if err == nil {
+			log.Printf("info: close index index_name=\"%s\"\n", req.IndexName)
+			delete(igs.indices, req.IndexName)
+		} else {
+			log.Printf("error: failed to close index (%s) index_name=\"%s\"\n", err.Error(), req.IndexName)
+		}
+	} else {
+		err = errors.New(fmt.Sprintf("%s does not exist", req.IndexName))
+		log.Printf("error: index already closed (%s) index_name=\"%s\"\n", err.Error(), req.IndexName)
+	}
+
+	return &proto.CloseIndexResponse{IndexName: req.IndexName}, err
 }
 
 func (igs *indigoGRPCService) GetStats(ctx context.Context, req *proto.GetStatsRequest) (*proto.GetStatsResponse, error) {

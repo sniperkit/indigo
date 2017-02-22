@@ -51,7 +51,7 @@ var startCmd = &cobra.Command{
 		/*
 		 * set log format
 		 */
-		switch logFormat {
+		switch outputFormat {
 		case "text":
 			colog.SetFormatter(&colog.StdFormatter{
 				Colors: true,
@@ -102,9 +102,8 @@ var startCmd = &cobra.Command{
 }
 
 func init() {
-	startCmd.PersistentFlags().StringVarP(&logOutputFile, "log-output-file", "o", constant.DefaultLogOutputFile, "log file")
+	startCmd.PersistentFlags().StringVarP(&logOutputFile, "log-output", "o", constant.DefaultLogOutputFile, "log file")
 	startCmd.PersistentFlags().StringVarP(&logLevel, "log-level", "l", constant.DefaultLogLevel, "log level")
-	startCmd.PersistentFlags().StringVarP(&logFormat, "log-format", "f", constant.DefaultLogFormat, "log format")
 
 	RootCmd.AddCommand(startCmd)
 }

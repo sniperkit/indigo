@@ -44,8 +44,8 @@ var getDocumentCmd = &cobra.Command{
 }
 
 func init() {
-	getDocumentCmd.Flags().StringVarP(&indexName, "index-name", "i", constant.DefaultIndexName, "index name")
-	getDocumentCmd.Flags().StringVarP(&documentID, "document-id", "I", constant.DefaultDocumentID, "document id")
+	getDocumentCmd.Flags().StringVarP(&indexName, "index-name", "n", constant.DefaultIndexName, "index name")
+	getDocumentCmd.Flags().StringVarP(&documentID, "document-id", "i", constant.DefaultDocumentID, "document id")
 
 	getCmd.AddCommand(getDocumentCmd)
 }

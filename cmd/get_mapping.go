@@ -40,7 +40,7 @@ var getMappingCmd = &cobra.Command{
 }
 
 func init() {
-	getMappingCmd.Flags().StringVarP(&indexName, "index-name", "i", constant.DefaultIndexName, "index name")
+	getMappingCmd.Flags().StringVarP(&indexName, "index-name", "n", constant.DefaultIndexName, "index name")
 
 	getCmd.AddCommand(getMappingCmd)
 }

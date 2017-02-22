@@ -40,7 +40,7 @@ var deleteIndexCmd = &cobra.Command{
 }
 
 func init() {
-	deleteIndexCmd.Flags().StringVarP(&indexName, "index-name", "i", constant.DefaultIndexName, "index name")
+	deleteIndexCmd.Flags().StringVarP(&indexName, "index-name", "n", constant.DefaultIndexName, "index name")
 
 	deleteCmd.AddCommand(deleteIndexCmd)
 }

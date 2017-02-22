@@ -61,7 +61,7 @@ var startRESTCmd = &cobra.Command{
 }
 
 func init() {
-	startRESTCmd.Flags().IntVarP(&restServerPort, "server-port", "p", constant.DefaultRESTServerPort, "port number")
+	startRESTCmd.Flags().IntVarP(&restServerPort, "port", "p", constant.DefaultRESTServerPort, "port number")
 	startRESTCmd.Flags().StringVarP(&baseURI, "base-uri", "b", constant.DefaultBaseURI, "base URI to run Indigo REST Server on")
 	startRESTCmd.Flags().StringVarP(&gRPCServer, "grpc-server", "g", constant.DefaultGRPCServer, "Indigo gRPC Sever")
 

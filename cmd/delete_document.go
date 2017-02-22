@@ -44,8 +44,8 @@ var deleteDocumentCmd = &cobra.Command{
 }
 
 func init() {
-	deleteDocumentCmd.Flags().StringVarP(&indexName, "index-name", "i", constant.DefaultIndexName, "index name")
-	deleteDocumentCmd.Flags().StringVarP(&documentID, "document-id", "I", constant.DefaultDocumentID, "document id")
+	deleteDocumentCmd.Flags().StringVarP(&indexName, "index-name", "n", constant.DefaultIndexName, "index name")
+	deleteDocumentCmd.Flags().StringVarP(&documentID, "document-id", "i", constant.DefaultDocumentID, "document id")
 
 	deleteCmd.AddCommand(deleteDocumentCmd)
 }

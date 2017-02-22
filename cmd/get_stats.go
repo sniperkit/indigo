@@ -40,7 +40,7 @@ var getStatsCmd = &cobra.Command{
 }
 
 func init() {
-	getStatsCmd.Flags().StringVarP(&indexName, "index-name", "i", constant.DefaultIndexName, "index name")
+	getStatsCmd.Flags().StringVarP(&indexName, "index-name", "n", constant.DefaultIndexName, "index name")
 
 	getCmd.AddCommand(getStatsCmd)
 }

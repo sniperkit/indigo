@@ -1,5 +1,5 @@
 package version
 
 var (
-	Ver string
+	Version string
 )

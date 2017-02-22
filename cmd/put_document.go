@@ -25,7 +25,7 @@ var putDocumentCmd = &cobra.Command{
 		}
 
 		if documentFile == "" {
-			return fmt.Errorf("required flag: --%s", cmd.Flag("document-file").Name)
+			return fmt.Errorf("required flag: --%s", cmd.Flag("document").Name)
 		}
 
 		return nil
@@ -63,9 +63,9 @@ var putDocumentCmd = &cobra.Command{
 }
 
 func init() {
-	putDocumentCmd.Flags().StringVarP(&indexName, "index-name", "i", constant.DefaultIndexName, "index name")
-	putDocumentCmd.Flags().StringVarP(&documentID, "document-id", "I", constant.DefaultDocumentID, "document id")
-	putDocumentCmd.Flags().StringVarP(&documentFile, "document-file", "d", constant.DefaultDocumentFile, "document file")
+	putDocumentCmd.Flags().StringVarP(&indexName, "index-name", "n", constant.DefaultIndexName, "index name")
+	putDocumentCmd.Flags().StringVarP(&documentID, "document-id", "i", constant.DefaultDocumentID, "document id")
+	putDocumentCmd.Flags().StringVarP(&documentFile, "document", "d", constant.DefaultDocumentFile, "document file")
 
 	putCmd.AddCommand(putDocumentCmd)
 }

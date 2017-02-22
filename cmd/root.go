@@ -14,7 +14,7 @@ var RootCmd = &cobra.Command{
 	Long:  `The Indigo Command Line Interface controlls the Indigo Server.`,
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 		if versionFlag {
-			fmt.Printf("%s\n", version.Ver)
+			fmt.Printf("%s\n", version.Version)
 			os.Exit(0)
 		}
 
@@ -39,5 +39,6 @@ func Execute() {
 }
 
 func init() {
+	RootCmd.PersistentFlags().StringVarP(&outputFormat, "output-format", "f", constant.DefaultOutputFormat, "output format")
 	RootCmd.PersistentFlags().BoolVarP(&versionFlag, "version", "v", constant.DefaultVersionFlag, "show version numner")
 }

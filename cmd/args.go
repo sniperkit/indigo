@@ -9,7 +9,6 @@ var (
 
 	logOutputFile string = constant.DefaultLogOutputFile
 	logLevel      string = constant.DefaultLogLevel
-	logFormat     string = constant.DefaultLogFormat
 
 	gRPCServerPort int    = constant.DefaultGRPCServerPort
 	dataDir        string = constant.DefaultDataDir
@@ -22,8 +21,10 @@ var (
 
 	indexMappingFile string = constant.DefaultIndexMappingFile
 	indexType        string = constant.DefaultIndexType
-	indexStore       string = constant.DefaultIndexStore
+	kvStore          string = constant.DefaultKVStore
 	kvConfigFile     string = constant.DefaultKVConfigFile
+
+	runtimeConfigFile string = constant.DefaultRuntimeConfigFile
 
 	documentID   string = constant.DefaultDocumentID
 	documentFile string = constant.DefaultDocumentFile
@@ -32,4 +33,6 @@ var (
 	batchSize       int32  = constant.DefaultBatchSize
 
 	searchRequestFile string = constant.DefaultSearchRequestFile
+
+	outputFormat string = constant.DefaultOutputFormat
 )

@@ -6,6 +6,9 @@ service Indigo {
     rpc CreateIndex(CreateIndexRequest) returns (CreateIndexResponse) {}
     rpc DeleteIndex(DeleteIndexRequest) returns (DeleteIndexResponse) {}
 
+    rpc OpenIndex(OpenIndexRequest) returns (OpenIndexResponse) {}
+    rpc CloseIndex(CloseIndexRequest) returns (CloseIndexResponse) {}
+
     rpc GetStats(GetStatsRequest) returns (GetStatsResponse) {}
     rpc GetMapping(GetMappingRequest) returns (GetMappingResponse) {}
 
@@ -22,7 +25,7 @@ message CreateIndexRequest {
     string indexName = 1;
     bytes indexMapping = 2;
     string indexType = 3;
-    string indexStore = 4;
+    string kvStore = 4;
     bytes kvConfig = 5;
 }
 message CreateIndexResponse {
@@ -33,6 +36,23 @@ message DeleteIndexRequest {
     string indexName = 1;
 }
 message DeleteIndexResponse {
+    string indexName = 1;
+}
+
+
+message OpenIndexRequest {
+    string indexName = 1;
+    bytes runtimeConfig = 2;
+}
+message OpenIndexResponse {
+    string indexName = 1;
+}
+
+
+message CloseIndexRequest {
+    string indexName = 1;
+}
+message CloseIndexResponse {
     string indexName = 1;
 }
 

@@ -47,12 +47,12 @@ func (h *CreateIndexHandler) ServeHTTP(w http.ResponseWriter, req *http.Request)
 
 	indexStore := req.URL.Query().Get("indexStore")
 	if indexStore == "" {
-		indexStore = constant.DefaultIndexStore
+		indexStore = constant.DefaultKVStore
 	}
 
 	response := make(map[string]interface{})
 
-	resp, err := h.client.CreateIndex(context.Background(), &proto.CreateIndexRequest{IndexName: indexName, IndexMapping: indexMapping, IndexType: indexType, IndexStore: indexStore})
+	resp, err := h.client.CreateIndex(context.Background(), &proto.CreateIndexRequest{IndexName: indexName, IndexMapping: indexMapping, IndexType: indexType, KvStore: indexStore})
 	if err == nil {
 		log.Print("debug: request to the Indigo gRPC Server\n")
 

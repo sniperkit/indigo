@@ -5,7 +5,6 @@ const (
 
 	DefaultLogOutputFile string = ""
 	DefaultLogLevel      string = "info"
-	DefaultLogFormat     string = "text"
 
 	DefaultGRPCServerPort int    = 1289
 	DefaultDataDir        string = "./data"
@@ -18,8 +17,10 @@ const (
 
 	DefaultIndexMappingFile string = ""
 	DefaultIndexType        string = "upside_down"
-	DefaultIndexStore       string = "boltdb"
+	DefaultKVStore          string = "boltdb"
 	DefaultKVConfigFile     string = ""
+
+	DefaultRuntimeConfigFile string = ""
 
 	DefaultDocumentID   string = ""
 	DefaultDocumentFile string = ""
@@ -28,4 +29,6 @@ const (
 	DefaultBatchSize       int32  = 1000
 
 	DefaultSearchRequestFile string = ""
+
+	DefaultOutputFormat string = "text"
 )

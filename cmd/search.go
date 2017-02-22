@@ -21,7 +21,7 @@ var searchCmd = &cobra.Command{
 		}
 
 		if searchRequestFile == "" {
-			return fmt.Errorf("required flag: --%s", cmd.Flag("search-request-file").Name)
+			return fmt.Errorf("required flag: --%s", cmd.Flag("search-request").Name)
 		}
 
 		return nil
@@ -60,8 +60,8 @@ var searchCmd = &cobra.Command{
 
 func init() {
 	searchCmd.Flags().StringVarP(&gRPCServer, "grpc-server", "g", constant.DefaultGRPCServer, "Indigo gRPC Sever")
-	searchCmd.Flags().StringVarP(&indexName, "index-name", "i", constant.DefaultIndexName, "index name")
-	searchCmd.Flags().StringVarP(&searchRequestFile, "search-request-file", "r", constant.DefaultSearchRequestFile, "search request file")
+	searchCmd.Flags().StringVarP(&indexName, "index-name", "n", constant.DefaultIndexName, "index name")
+	searchCmd.Flags().StringVarP(&searchRequestFile, "search-request", "s", constant.DefaultSearchRequestFile, "search request file")
 
 	RootCmd.AddCommand(searchCmd)
 }
