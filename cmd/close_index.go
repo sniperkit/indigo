@@ -8,14 +8,12 @@ import (
 	"github.com/spf13/cobra"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
-	"io/ioutil"
-	"os"
 )
 
-var openIndexCmd = &cobra.Command{
+var closeIndexCmd = &cobra.Command{
 	Use:   "index",
-	Short: "opens the index to the Indigo gRPC Server",
-	Long:  `The open index command opens the index to the Indigo gRPC Server.`,
+	Short: "closes the index to the Indigo gRPC Server",
+	Long:  `The close index command closes the index to the Indigo gRPC Server.`,
 	PreRunE: func(cmd *cobra.Command, args []string) error {
 		if indexName == "" {
 			return fmt.Errorf("required flag: --%s", cmd.Flag("name").Name)
@@ -24,21 +22,6 @@ var openIndexCmd = &cobra.Command{
 		return nil
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
-		var runtimeConfig []byte = nil
-
-		if runtimeConfigFile != "" {
-			file, err := os.Open(runtimeConfigFile)
-			if err != nil {
-				return err
-			}
-			defer file.Close()
-
-			runtimeConfig, err = ioutil.ReadAll(file)
-			if err != nil {
-				return err
-			}
-		}
-
 		conn, err := grpc.Dial(gRPCServer, grpc.WithInsecure())
 		if err != nil {
 			return err
@@ -46,7 +29,7 @@ var openIndexCmd = &cobra.Command{
 		defer conn.Close()
 
 		client := proto.NewIndigoClient(conn)
-		resp, err := client.OpenIndex(context.Background(), &proto.OpenIndexRequest{IndexName: indexName, RuntimeConfig: runtimeConfig})
+		resp, err := client.CloseIndex(context.Background(), &proto.CloseIndexRequest{IndexName: indexName})
 		if err != nil {
 			return err
 		}
@@ -70,8 +53,7 @@ var openIndexCmd = &cobra.Command{
 }
 
 func init() {
-	openIndexCmd.Flags().StringVarP(&indexName, "name", "n", constant.DefaultIndexName, "index name")
-	openIndexCmd.Flags().StringVarP(&runtimeConfigFile, "runtime-config", "r", constant.DefaultRuntimeConfigFile, "runtime config file")
+	closeIndexCmd.Flags().StringVarP(&indexName, "name", "n", constant.DefaultIndexName, "index name")
 
-	openCmd.AddCommand(openIndexCmd)
+	closeCmd.AddCommand(closeIndexCmd)
 }
