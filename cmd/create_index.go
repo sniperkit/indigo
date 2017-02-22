@@ -23,7 +23,8 @@ var createIndexCmd = &cobra.Command{
 		return nil
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
-		indexMapping := make([]byte, 0)
+		var indexMapping []byte = nil
+		var kvConfig []byte = nil
 
 		if indexMappingFile != "" {
 			file, err := os.Open(indexMappingFile)
@@ -38,6 +39,19 @@ var createIndexCmd = &cobra.Command{
 			}
 		}
 
+		if kvConfigFile != "" {
+			file, err := os.Open(kvConfigFile)
+			if err != nil {
+				return err
+			}
+			defer file.Close()
+
+			kvConfig, err = ioutil.ReadAll(file)
+			if err != nil {
+				return err
+			}
+		}
+
 		conn, err := grpc.Dial(gRPCServer, grpc.WithInsecure())
 		if err != nil {
 			return err
@@ -45,7 +59,7 @@ var createIndexCmd = &cobra.Command{
 		defer conn.Close()
 
 		client := proto.NewIndigoClient(conn)
-		resp, err := client.CreateIndex(context.Background(), &proto.CreateIndexRequest{IndexName: indexName, IndexMapping: indexMapping, IndexType: indexType, IndexStore: indexStore})
+		resp, err := client.CreateIndex(context.Background(), &proto.CreateIndexRequest{IndexName: indexName, IndexMapping: indexMapping, IndexType: indexType, IndexStore: indexStore, KvConfig: kvConfig})
 		if err != nil {
 			return err
 		}
@@ -58,9 +72,10 @@ var createIndexCmd = &cobra.Command{
 
 func init() {
 	createIndexCmd.Flags().StringVarP(&indexName, "index-name", "i", constant.DefaultIndexName, "index name")
-	createIndexCmd.Flags().StringVarP(&indexMappingFile, "index-mapping", "m", constant.DefaultIndexMappingFile, "index mapping")
+	createIndexCmd.Flags().StringVarP(&indexMappingFile, "index-mapping", "m", constant.DefaultIndexMappingFile, "index mapping file")
 	createIndexCmd.Flags().StringVarP(&indexType, "index-type", "t", constant.DefaultIndexType, "index type")
 	createIndexCmd.Flags().StringVarP(&indexStore, "index-store", "s", constant.DefaultIndexStore, "index store")
+	createIndexCmd.Flags().StringVarP(&kvConfigFile, "kv-config-file", "k", constant.DefaultKVConfigFile, "KV config file")
 
 	createCmd.AddCommand(createIndexCmd)
 }

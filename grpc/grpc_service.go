@@ -120,12 +120,14 @@ func (igs *indigoGRPCService) CreateIndex(ctx context.Context, req *proto.Create
 
 	indexDir := path.Join(igs.dataDir, req.IndexName)
 	indexMapping := bleve.NewIndexMapping()
+	kvConfig := new(map[string]interface{})
 
 	_, indexExisted := igs.indices[req.IndexName]
 	if indexExisted == false {
 		_, err = os.Stat(indexDir)
 		if os.IsNotExist(err) {
-			if len(req.IndexMapping) > 0 {
+			//if len(req.IndexMapping) > 0 {
+			if req.IndexMapping != nil {
 				err = json.Unmarshal(req.IndexMapping, indexMapping)
 				if err == nil {
 					log.Printf("debug: create index mapping index_name=\"%s\"\n", req.IndexName)
@@ -136,7 +138,18 @@ func (igs *indigoGRPCService) CreateIndex(ctx context.Context, req *proto.Create
 				log.Printf("debug: use default index mapping index_name=\"%s\"\n", req.IndexName)
 			}
 
-			index, err = bleve.NewUsing(indexDir, indexMapping, req.IndexType, req.IndexStore, nil)
+			if req.KvConfig != nil {
+				err = json.Unmarshal(req.KvConfig, kvConfig)
+				if err == nil {
+					log.Printf("debug: create kv config index_name=\"%s\"\n", req.IndexName)
+				} else {
+					log.Printf("error: faild to create kv config (%s) index_name=\"%s\"\n", err.Error(), req.IndexName)
+				}
+			} else {
+				log.Printf("debug: use default kv config index_name=\"%s\"\n", req.IndexName)
+			}
+
+			index, err = bleve.NewUsing(indexDir, indexMapping, req.IndexType, req.IndexStore, *kvConfig)
 			if err == nil {
 				log.Printf("info: create index index_name=\"%s\" index_dir=\"%s\" index_type=\"%s\" index_store=\"%s\"\n", req.IndexName, indexDir, req.IndexType, req.IndexStore)
 			} else {

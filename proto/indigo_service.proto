@@ -23,6 +23,7 @@ message CreateIndexRequest {
     bytes indexMapping = 2;
     string indexType = 3;
     string indexStore = 4;
+    bytes kvConfig = 5;
 }
 message CreateIndexResponse {
     string indexName = 1;
