@@ -6,8 +6,9 @@ const (
 	DefaultLogOutputFile string = ""
 	DefaultLogLevel      string = "info"
 
-	DefaultGRPCServerPort int    = 1289
-	DefaultDataDir        string = "./data"
+	DefaultGRPCServerPort    int    = 1289
+	DefaultDataDir           string = "./data"
+	DefaultOpenExistingIndex bool   = false
 
 	DefaultRESTServerPort int    = 2289
 	DefaultGRPCServer     string = "localhost:1289"

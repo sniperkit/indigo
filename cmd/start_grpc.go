@@ -19,7 +19,7 @@ var startGRPCCmd = &cobra.Command{
 		 * start Indigo gRPC Server
 		 */
 		server := grpc.NewIndigoGRPCServer(gRPCServerPort, dataDir)
-		server.Start()
+		server.Start(openExistingIndex)
 
 		/*
 		 * trap signals
@@ -63,6 +63,7 @@ var startGRPCCmd = &cobra.Command{
 func init() {
 	startGRPCCmd.Flags().IntVarP(&gRPCServerPort, "port", "p", constant.DefaultGRPCServerPort, "port number")
 	startGRPCCmd.Flags().StringVarP(&dataDir, "data-dir", "d", constant.DefaultDataDir, "data directory")
+	startGRPCCmd.Flags().BoolVarP(&openExistingIndex, "open-existing-index", "O", constant.DefaultOpenExistingIndex, "open existing index")
 
 	startCmd.AddCommand(startGRPCCmd)
 }

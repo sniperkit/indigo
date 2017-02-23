@@ -35,9 +35,11 @@ func NewIndigoGRPCServer(serverPort int, dataDir string) *indigoGRPCServer {
 	}
 }
 
-func (igs *indigoGRPCServer) Start() error {
+func (igs *indigoGRPCServer) Start(openExistsIndex bool) error {
 	go func() {
-		igs.service.OpenIndices()
+		if openExistsIndex {
+			igs.service.OpenIndices()
+		}
 		igs.server.Serve(igs.listener)
 		return
 	}()

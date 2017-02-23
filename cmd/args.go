@@ -10,8 +10,9 @@ var (
 	logOutputFile string = constant.DefaultLogOutputFile
 	logLevel      string = constant.DefaultLogLevel
 
-	gRPCServerPort int    = constant.DefaultGRPCServerPort
-	dataDir        string = constant.DefaultDataDir
+	gRPCServerPort    int    = constant.DefaultGRPCServerPort
+	dataDir           string = constant.DefaultDataDir
+	openExistingIndex bool   = constant.DefaultOpenExistingIndex
 
 	restServerPort int    = constant.DefaultRESTServerPort
 	gRPCServer     string = constant.DefaultGRPCServer
