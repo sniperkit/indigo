@@ -20,7 +20,7 @@ The Indigo provides some commands for control the Indigo Server.
 
 ### Start Indigo gRPC Server
 
-The `indigo start grpc` command starts the Indigo gRPC Server.
+The `start grpc` command starts the Indigo gRPC Server.
 
 ```sh
 $ indigo start grpc
@@ -47,7 +47,7 @@ The result of the above `create index` command is:
 $ indigo open index -n example -f json
 ```
 
-The result of the above `close index` command is:
+The result of the above `open index` command is:
 
 ```json
 {
@@ -290,7 +290,7 @@ The result of the above `delete document` command is:
 $ indigo bulk -n example -b example/bulk_put.json -f json
 ```
 
-The result of the above `index bulk` command is:
+The result of the above `bulk` command is:
 
 ```text
 {
@@ -468,7 +468,7 @@ See [type SearchResult](https://godoc.org/github.com/blevesearch/bleve#SearchRes
 
 ### Start Indigo REST Server
 
-The `indigo start rest` command starts the Indigo REST Server.
+The `start rest` command starts the Indigo REST Server.
 
 ```sh
 $ indigo start rest
