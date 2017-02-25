@@ -11,24 +11,24 @@ import (
 	"net/http"
 )
 
-type DeleteIndexHandler struct {
+type CloseIndexHandler struct {
 	client proto.IndigoClient
 }
 
-func NewDeleteIndexHandler(client proto.IndigoClient) *DeleteIndexHandler {
-	return &DeleteIndexHandler{
+func NewCloseIndexHandler(client proto.IndigoClient) *CloseIndexHandler {
+	return &CloseIndexHandler{
 		client: client,
 	}
 }
 
-func (h *DeleteIndexHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
+func (h *CloseIndexHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	log.Printf("info: host=\"%s\" request_uri=\"%s\" method=\"%s\" remote_addr=\"%s\" user_agent=\"%s\"\n", req.Host, req.RequestURI, req.Method, req.RemoteAddr, req.UserAgent())
 
 	vars := mux.Vars(req)
 
 	indexName := vars["indexName"]
 
-	resp, err := h.client.DeleteIndex(context.Background(), &proto.DeleteIndexRequest{IndexName: indexName})
+	resp, err := h.client.CloseIndex(context.Background(), &proto.CloseIndexRequest{IndexName: indexName})
 	if err != nil {
 		log.Printf("error: %s\n", err.Error())
 		http.Error(w, err.Error(), http.StatusServiceUnavailable)

@@ -4,9 +4,9 @@
     "id": "1",
     "document": {
       "name": "Bleve",
-      "description": "Full-text search library written in Go.",
+      "description": "Bleve is a full-text search and indexing library for Go.",
       "category": "Library",
-      "popularity": 1.0,
+      "popularity": 3.0,
       "release": "2014-04-18T00:00:00Z",
       "type": "document"
     }
@@ -36,9 +36,9 @@
     "id": "7",
     "document": {
       "name": "Indigo",
-      "description": "Full-text search server built on Bleve.",
+      "description": "Indigo is a full-text search and indexing server written in Go, built on top of Bleve.",
       "category": "Server",
-      "popularity": 5.0,
+      "popularity": 1.0,
       "release": "2017-01-13T00:00:00Z",
       "type": "document"
     }

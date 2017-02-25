@@ -33,6 +33,21 @@ func (h *GetDocumentHandler) ServeHTTP(w http.ResponseWriter, req *http.Request)
 
 	resp, err := h.client.GetDocument(context.Background(), &proto.GetDocumentRequest{IndexName: indexName, DocumentID: id})
 	if err == nil {
+		log.Print("info: request to the Indigo gRPC Server\n")
+
+		w.WriteHeader(http.StatusOK)
+		response["put_count"] = resp.Success
+	} else {
+		log.Printf("error: failed to request to the Indigo gRPC Server (%s)\n", err.Error())
+
+		w.WriteHeader(http.StatusServiceUnavailable)
+		response["error"] = err.Error()
+	}
+
+
+
+
+	if err == nil {
 		log.Print("debug: request to the Indigo gRPC Server\n")
 
 		document := make(map[string]interface{})

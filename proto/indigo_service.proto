@@ -78,8 +78,7 @@ message PutDocumentRequest {
     bytes document = 3;
 }
 message PutDocumentResponse {
-    int32 putCount = 1;
-    int32 putErrorCount = 2;
+    bool success = 1;
 }
 
 message GetDocumentRequest {
@@ -95,7 +94,7 @@ message DeleteDocumentRequest {
     string documentID = 2;
 }
 message DeleteDocumentResponse {
-    int32 deleteCount = 1;
+    bool success = 1;
 }
 
 

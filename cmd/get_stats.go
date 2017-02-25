@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/mosuka/indigo/constant"
 	"github.com/mosuka/indigo/proto"
@@ -33,7 +34,27 @@ var getStatsCmd = &cobra.Command{
 			return err
 		}
 
-		fmt.Printf("%s\n", resp.IndexStats)
+		switch outputFormat {
+		case "text":
+			fmt.Printf("%s\n", resp.String())
+		case "json":
+			result := make(map[string]interface{})
+
+			indexStats := make(map[string]interface{})
+			if err := json.Unmarshal(resp.IndexStats, &indexStats); err != nil {
+				return err
+			}
+			result["indexStats"] = indexStats
+
+			output, err := json.MarshalIndent(result, "", "  ")
+			if err != nil {
+				return err
+			}
+
+			fmt.Printf("%s\n", output)
+		default:
+			fmt.Printf("%s\n", resp.String())
+		}
 
 		return nil
 	},

@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/mosuka/indigo/constant"
 	"github.com/mosuka/indigo/proto"
@@ -37,7 +38,26 @@ var getDocumentCmd = &cobra.Command{
 			return err
 		}
 
-		fmt.Printf("%s\n", resp.Document)
+		switch outputFormat {
+		case "text":
+			fmt.Printf("%s\n", resp.String())
+		case "json":
+			result := make(map[string]interface{})
+
+			doc := make(map[string]interface{})
+			if err := json.Unmarshal(resp.Document, &doc); err != nil {
+				return err
+			}
+			result["document"] = doc
+
+			output, err := json.MarshalIndent(result, "", "  ")
+			if err != nil {
+				return err
+			}
+			fmt.Printf("%s\n", output)
+		default:
+			fmt.Printf("%s\n", resp.String())
+		}
 
 		return nil
 	},

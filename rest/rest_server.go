@@ -37,6 +37,9 @@ func NewIndigoRESTServer(serverPort int, serverPath, gRPCServer string) *indigoR
 	router.Handle(fmt.Sprintf("%s/{indexName}", serverPath), handler.NewCreateIndexHandler(client)).Methods("PUT")
 	router.Handle(fmt.Sprintf("%s/{indexName}", serverPath), handler.NewDeleteIndexHandler(client)).Methods("DELETE")
 
+	router.Handle(fmt.Sprintf("%s/{indexName}/_open", serverPath), handler.NewOpenIndexHandler(client)).Methods("POST")
+	router.Handle(fmt.Sprintf("%s/{indexName}/_close", serverPath), handler.NewCloseIndexHandler(client)).Methods("POST")
+
 	router.Handle(fmt.Sprintf("%s/{indexName}/_mapping", serverPath), handler.NewGetMappingHandler(client)).Methods("GET")
 	router.Handle(fmt.Sprintf("%s/{indexName}/_stats", serverPath), handler.NewGetStatsHandler(client)).Methods("GET")
 

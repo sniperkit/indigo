@@ -1,7 +1,9 @@
 package cmd
 
 import (
+	"encoding/json"
 	"fmt"
+	"github.com/blevesearch/bleve"
 	"github.com/mosuka/indigo/constant"
 	"github.com/mosuka/indigo/proto"
 	"github.com/spf13/cobra"
@@ -33,7 +35,26 @@ var getMappingCmd = &cobra.Command{
 			return err
 		}
 
-		fmt.Printf("%s\n", resp.IndexMapping)
+		switch outputFormat {
+		case "text":
+			fmt.Printf("%s\n", resp.String())
+		case "json":
+			result := make(map[string]interface{})
+
+			indexMapping := bleve.NewIndexMapping()
+			if err := json.Unmarshal(resp.IndexMapping, &indexMapping); err != nil {
+				return err
+			}
+			result["indexMapping"] = indexMapping
+
+			output, err := json.MarshalIndent(result, "", "  ")
+			if err != nil {
+				return err
+			}
+			fmt.Printf("%s\n", output)
+		default:
+			fmt.Printf("%s\n", resp.String())
+		}
 
 		return nil
 	},

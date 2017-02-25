@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/mosuka/indigo/constant"
 	"github.com/mosuka/indigo/proto"
@@ -52,7 +53,26 @@ var searchCmd = &cobra.Command{
 			return err
 		}
 
-		fmt.Printf("%s\n", resp.SearchResult)
+		switch outputFormat {
+		case "text":
+			fmt.Printf("%s\n", resp.String())
+		case "json":
+			result := make(map[string]interface{})
+
+			searchResult := make(map[string]interface{})
+			if err := json.Unmarshal(resp.SearchResult, &searchResult); err != nil {
+				return err
+			}
+			result["searchResult"] = searchResult
+
+			output, err := json.MarshalIndent(result, "", "  ")
+			if err != nil {
+				return err
+			}
+			fmt.Printf("%s\n", output)
+		default:
+			fmt.Printf("%s\n", resp.String())
+		}
 
 		return nil
 	},

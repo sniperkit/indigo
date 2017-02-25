@@ -67,16 +67,15 @@ var createIndexCmd = &cobra.Command{
 
 		switch outputFormat {
 		case "text":
-			fmt.Printf("IndexName: %s\n", resp.IndexName)
+			fmt.Printf("%s\n", resp.String())
 		case "json":
-			output, err := json.Marshal(resp)
+			output, err := json.MarshalIndent(resp, "", "  ")
 			if err != nil {
 				return err
 			}
-
 			fmt.Printf("%s\n", output)
 		default:
-			fmt.Printf("IndexName: %s\n", resp.IndexName)
+			fmt.Printf("%s\n", resp.String())
 		}
 
 		return nil

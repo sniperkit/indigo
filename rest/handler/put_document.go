@@ -40,34 +40,26 @@ func (h *PutDocumentHandler) ServeHTTP(w http.ResponseWriter, req *http.Request)
 		return
 	}
 
-	response := make(map[string]interface{})
-
 	resp, err := h.client.PutDocument(context.Background(), &proto.PutDocumentRequest{IndexName: indexName, DocumentID: id, Document: document})
-	if err == nil {
-		log.Print("info: request to the Indigo gRPC Server\n")
-
-		w.WriteHeader(http.StatusOK)
-		response["put_count"] = resp.PutCount
-		response["put_error_count"] = resp.PutErrorCount
-	} else {
-		log.Printf("error: failed to request to the Indigo gRPC Server (%s)\n", err.Error())
-
-		w.WriteHeader(http.StatusServiceUnavailable)
-		response["error"] = err.Error()
+	if err != nil {
+		log.Printf("error: %s\n", err.Error())
+		http.Error(w, err.Error(), http.StatusServiceUnavailable)
+		return
 	}
+	log.Print("debug: succeeded in requesting to the Indigo gRPC Server\n")
 
-	bytesResponse, err := json.Marshal(response)
-	if err == nil {
-		log.Print("debug: create response\n")
-	} else {
-		log.Printf("error: failed to create response (%s)\n", err.Error())
-
-		w.WriteHeader(http.StatusServiceUnavailable)
+	output, err := json.MarshalIndent(resp, "", "  ")
+	if err != nil {
+		log.Printf("error: %s\n", err.Error())
+		http.Error(w, err.Error(), http.StatusServiceUnavailable)
+		return
 	}
+	log.Print("debug: succeeded in creating response JSON\n")
 
 	buf := new(bytes.Buffer)
-	buf.ReadFrom(bytes.NewReader(bytesResponse))
+	buf.ReadFrom(bytes.NewReader(output))
 
+	w.WriteHeader(http.StatusOK)
 	fmt.Fprintf(w, "%s\n", buf.String())
 
 	return

@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/mosuka/indigo/constant"
 	"github.com/mosuka/indigo/proto"
@@ -37,7 +38,18 @@ var deleteDocumentCmd = &cobra.Command{
 			return err
 		}
 
-		fmt.Printf("%d document deleted\n", resp.DeleteCount)
+		switch outputFormat {
+		case "text":
+			fmt.Printf("%s\n", resp.String())
+		case "json":
+			output, err := json.MarshalIndent(resp, "", "  ")
+			if err != nil {
+				return err
+			}
+			fmt.Printf("%s\n", output)
+		default:
+			fmt.Printf("%s\n", resp.String())
+		}
 
 		return nil
 	},

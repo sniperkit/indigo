@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/mosuka/indigo/constant"
 	"github.com/mosuka/indigo/proto"
@@ -51,9 +52,18 @@ var bulkCmd = &cobra.Command{
 			return err
 		}
 
-		fmt.Printf("%d documents put in bulk\n", resp.PutCount)
-		fmt.Printf("%d error documents occurred in bulk\n", resp.PutErrorCount)
-		fmt.Printf("%d documents deleted in bulk\n", resp.DeleteCount)
+		switch outputFormat {
+		case "text":
+			fmt.Printf("%s\n", resp.String())
+		case "json":
+			output, err := json.MarshalIndent(resp, "", "  ")
+			if err != nil {
+				return err
+			}
+			fmt.Printf("%s\n", output)
+		default:
+			fmt.Printf("%s\n", resp.String())
+		}
 
 		return nil
 	},

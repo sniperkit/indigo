@@ -1,0 +1,30 @@
+[
+  {
+    "method" : "delete",
+    "id": "1"
+  },
+  {
+    "method" : "delete",
+    "id": "2"
+  },
+  {
+    "method" : "delete",
+    "id": "3"
+  },
+  {
+    "method" : "delete",
+    "id": "4"
+  },
+  {
+    "method" : "delete",
+    "id": "5"
+  },
+  {
+    "method" : "delete",
+    "id": "6"
+  },
+  {
+    "method" : "delete",
+    "id": "7"
+  }
+]
