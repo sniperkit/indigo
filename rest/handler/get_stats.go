@@ -27,45 +27,36 @@ func (h *GetStatsHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	vars := mux.Vars(req)
 	indexName := vars["indexName"]
 
-	response := make(map[string]interface{})
-
 	resp, err := h.client.GetStats(context.Background(), &proto.GetStatsRequest{IndexName: indexName})
-	if err == nil {
-		log.Print("debug: request to Indigo gRPC Server\n")
-
-		indexStats := make(map[string]interface{})
-
-		err = json.Unmarshal(resp.IndexStats, &indexStats)
-		if err == nil {
-			log.Print("debug: index stats created\n")
-
-			w.WriteHeader(http.StatusOK)
-			response["stats"] = indexStats
-		} else {
-			log.Printf("error: failed to create index stats (%s)\n", err.Error())
-
-			w.WriteHeader(http.StatusServiceUnavailable)
-			response["error"] = err.Error()
-		}
-	} else {
-		log.Printf("error: failed to request to the Indigo gRPC Server (%s)\n", err.Error())
-
-		w.WriteHeader(http.StatusServiceUnavailable)
-		response["error"] = err.Error()
+	if err != nil {
+		log.Printf("error: %s\n", err.Error())
+		http.Error(w, err.Error(), http.StatusServiceUnavailable)
+		return
 	}
+	log.Print("debug: succeeded in requesting to the Indigo gRPC Server\n")
 
-	bytesResponse, err := json.Marshal(response)
-	if err == nil {
-		log.Print("debug: create response\n")
-	} else {
-		log.Printf("error: failed to create response (%s)\n", err.Error())
+	result := make(map[string]interface{})
 
-		w.WriteHeader(http.StatusServiceUnavailable)
+	indexStats := make(map[string]interface{})
+	if err := json.Unmarshal(resp.IndexStats, &indexStats); err != nil {
+		log.Printf("error: %s\n", err.Error())
+		http.Error(w, err.Error(), http.StatusServiceUnavailable)
+		return
 	}
+	result["indexStats"] = indexStats
+
+	output, err := json.MarshalIndent(result, "", "  ")
+	if err != nil {
+		log.Printf("error: %s\n", err.Error())
+		http.Error(w, err.Error(), http.StatusServiceUnavailable)
+		return
+	}
+	log.Print("debug: succeeded in creating response JSON\n")
 
 	buf := new(bytes.Buffer)
-	buf.ReadFrom(bytes.NewReader(bytesResponse))
+	buf.ReadFrom(bytes.NewReader(output))
 
+	w.WriteHeader(http.StatusOK)
 	fmt.Fprintf(w, "%s\n", buf.String())
 
 	return

@@ -1,8 +1,8 @@
 {
   "name": "Whoosh",
-  "description": "Full-text search library written in Python.",
+  "description": "Whoosh is a fast, featureful full-text indexing and searching library implemented in pure Python. ",
   "category": "Library",
-  "popularity": 1.0,
+  "popularity": 3.0,
   "release": "2008-02-20T00:00:00Z",
   "type": "document"
 }

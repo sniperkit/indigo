@@ -526,7 +526,7 @@ The result of the above command is:
 
 ```json
 {
-  "name": "example"
+  "indexName": "example"
 }
 ```
 
@@ -540,7 +540,7 @@ The result of the above command is:
 
 ```json
 {
-  "stats": {
+  "indexStats": {
     "index": {
       "analysis_time": 0,
       "batches": 0,
@@ -561,122 +561,122 @@ The result of the above command is:
 ### Get the index mapping from the Indigo gRPC Server via the Indigo REST Server
 
 ```sh
-$ curl -X GET "http://localhost:2289/api/example/_mapping" -s | jq .
+$ curl -X GET "http://localhost:2289/api/example/_mapping" -s
 ```
 
 The result of the above command is:
 
 ```json
 {
-  "mapping": {
-    "types": {
-      "document": {
-        "enabled": true,
-        "dynamic": true,
-        "properties": {
-          "category": {
-            "enabled": true,
-            "dynamic": true,
-            "fields": [
-              {
-                "type": "text",
-                "analyzer": "keyword",
-                "store": true,
-                "index": true,
-                "include_term_vectors": true,
-                "include_in_all": true
-              }
-            ],
-            "default_analyzer": ""
-          },
-          "description": {
-            "enabled": true,
-            "dynamic": true,
-            "fields": [
-              {
-                "type": "text",
-                "analyzer": "en",
-                "store": true,
-                "index": true,
-                "include_term_vectors": true,
-                "include_in_all": true
-              }
-            ],
-            "default_analyzer": ""
-          },
-          "name": {
-            "enabled": true,
-            "dynamic": true,
-            "fields": [
-              {
-                "type": "text",
-                "analyzer": "en",
-                "store": true,
-                "index": true,
-                "include_term_vectors": true,
-                "include_in_all": true
-              }
-            ],
-            "default_analyzer": ""
-          },
-          "popularity": {
-            "enabled": true,
-            "dynamic": true,
-            "fields": [
-              {
-                "type": "number",
-                "store": true,
-                "index": true,
-                "include_in_all": true
-              }
-            ],
-            "default_analyzer": ""
-          },
-          "release": {
-            "enabled": true,
-            "dynamic": true,
-            "fields": [
-              {
-                "type": "datetime",
-                "store": true,
-                "index": true,
-                "include_in_all": true
-              }
-            ],
-            "default_analyzer": ""
-          },
-          "type": {
-            "enabled": true,
-            "dynamic": true,
-            "fields": [
-              {
-                "type": "text",
-                "analyzer": "keyword",
-                "store": true,
-                "index": true,
-                "include_term_vectors": true,
-                "include_in_all": true
-              }
-            ],
-            "default_analyzer": ""
-          }
-        },
-        "default_analyzer": ""
-      }
-    },
-    "default_mapping": {
-      "enabled": true,
-      "dynamic": true,
-      "default_analyzer": ""
-    },
-    "type_field": "type",
-    "default_type": "document",
+  "indexMapping": {
+    "analysis": {},
     "default_analyzer": "standard",
     "default_datetime_parser": "dateTimeOptional",
     "default_field": "_all",
-    "store_dynamic": true,
+    "default_mapping": {
+      "default_analyzer": "",
+      "dynamic": true,
+      "enabled": true
+    },
+    "default_type": "document",
     "index_dynamic": true,
-    "analysis": {}
+    "store_dynamic": true,
+    "type_field": "type",
+    "types": {
+      "document": {
+        "default_analyzer": "",
+        "dynamic": true,
+        "enabled": true,
+        "properties": {
+          "category": {
+            "default_analyzer": "",
+            "dynamic": true,
+            "enabled": true,
+            "fields": [
+              {
+                "analyzer": "keyword",
+                "include_in_all": true,
+                "include_term_vectors": true,
+                "index": true,
+                "store": true,
+                "type": "text"
+              }
+            ]
+          },
+          "description": {
+            "default_analyzer": "",
+            "dynamic": true,
+            "enabled": true,
+            "fields": [
+              {
+                "analyzer": "en",
+                "include_in_all": true,
+                "include_term_vectors": true,
+                "index": true,
+                "store": true,
+                "type": "text"
+              }
+            ]
+          },
+          "name": {
+            "default_analyzer": "",
+            "dynamic": true,
+            "enabled": true,
+            "fields": [
+              {
+                "analyzer": "en",
+                "include_in_all": true,
+                "include_term_vectors": true,
+                "index": true,
+                "store": true,
+                "type": "text"
+              }
+            ]
+          },
+          "popularity": {
+            "default_analyzer": "",
+            "dynamic": true,
+            "enabled": true,
+            "fields": [
+              {
+                "include_in_all": true,
+                "index": true,
+                "store": true,
+                "type": "number"
+              }
+            ]
+          },
+          "release": {
+            "default_analyzer": "",
+            "dynamic": true,
+            "enabled": true,
+            "fields": [
+              {
+                "include_in_all": true,
+                "index": true,
+                "store": true,
+                "type": "datetime"
+              }
+            ]
+          },
+          "type": {
+            "default_analyzer": "",
+            "dynamic": true,
+            "enabled": true,
+            "fields": [
+              {
+                "analyzer": "keyword",
+                "include_in_all": true,
+                "include_term_vectors": true,
+                "index": true,
+                "store": true,
+                "type": "text"
+              }
+            ]
+          }
+        }
+      }
+    }
   }
 }
 ```
@@ -684,21 +684,21 @@ The result of the above command is:
 ### Put the document to the Indigo gRPC Server via the Indigo REST Server
 
 ```sh
-$ curl -X PUT "http://localhost:2289/api/example/1" -H "Content-Type: application/json" --data-binary @example/document_1.json -s | jq .
+$ curl -X PUT "http://localhost:2289/api/example/1" -H "Content-Type: application/json" --data-binary @example/document_1.json -s
 ```
 
 The result of the above command is:
 
 ```json
 {
-  "count": 1
+  "success": true
 }
 ```
 
 ### Get the document to the Indigo gRPC Server via the Indigo REST Server
 
 ```sh
-$ curl -X GET "http://localhost:2289/api/example/1" -s | jq .
+$ curl -X GET "http://localhost:2289/api/example/1" -s
 ```
 
 The result of the above command is:
@@ -707,9 +707,9 @@ The result of the above command is:
 {
   "document": {
     "category": "Library",
-    "description": "Full-text search library written in Go.",
+    "description": "Bleve is a full-text search and indexing library for Go.",
     "name": "Bleve",
-    "popularity": 1,
+    "popularity": 3,
     "release": "2014-04-18T00:00:00Z",
     "type": "document"
   }
@@ -719,30 +719,28 @@ The result of the above command is:
 ### Delete the document from the Indigo gRPC Server via the Indigo REST Server
 
 ```sh
-$ curl -X DELETE "http://localhost:2289/api/example/1" -s | jq .
+$ curl -X DELETE "http://localhost:2289/api/example/1" -s
 ```
 
 The result of the above command is:
 
 ```json
 {
-  "count": 1
+  "success": true
 }
 ```
 
 ### Index the documents in bulk to the Indigo gRPC Server via the Indigo REST Server
 
 ```sh
-$ curl -X POST "http://localhost:2289/api/example/_bulk" -H "Content-Type: application/json" --data-binary @example/bulk.json -s | jq .
+$ curl -X POST "http://localhost:2289/api/example/_bulk" -H "Content-Type: application/json" --data-binary @example/bulk_put.json -s
 ```
 
 The result of the above command is:
 
 ```text
 {
-  "delete_count": 5,
-  "put_count": 2,
-  "put_error_count": 0
+  "putCount": 7
 }
 ```
 
@@ -752,7 +750,7 @@ The result of the above command is:
 #### Simple query
 
 ```sh
-$ curl -X POST "http://localhost:2289/api/example/_search" -H "Content-Type: application/json" --data-binary @example/simple_query.json -s | jq .
+$ curl -X POST "http://localhost:2289/api/example/_search" -H "Content-Type: application/json" --data-binary @example/simple_query.json -s
 ```
 
 The result of the above `search documents` command is:
@@ -765,15 +763,15 @@ The result of the above `search documents` command is:
       {
         "fields": {
           "category": "Library",
-          "description": "Full-text search library written in Go.",
-          "name": "Bleve",
-          "popularity": 1,
-          "release": "2014-04-18T00:00:00Z",
+          "description": "Apache Lucene is a high-performance, full-featured text search engine library written entirely in Java.",
+          "name": "Lucene",
+          "popularity": 4,
+          "release": "2000-03-30T00:00:00Z",
           "type": "document"
         },
-        "id": "1",
+        "id": "2",
         "index": "data/example",
-        "score": 0.41589955606724527,
+        "score": 0.28598991738818746,
         "sort": [
           "_score"
         ]
@@ -781,21 +779,101 @@ The result of the above `search documents` command is:
       {
         "fields": {
           "category": "Server",
-          "description": "Full-text search server built on Bleve.",
-          "name": "Indigo",
+          "description": "Solr is an open source enterprise search platform, written in Java, from the Apache Lucene project.",
+          "name": "Solr",
           "popularity": 5,
+          "release": "2006-12-22T00:00:00Z",
+          "type": "document"
+        },
+        "id": "5",
+        "index": "data/example",
+        "score": 0.2842565476963312,
+        "sort": [
+          "_score"
+        ]
+      },
+      {
+        "fields": {
+          "category": "Library",
+          "description": "Whoosh is a fast, featureful full-text indexing and searching library implemented in pure Python. ",
+          "name": "Whoosh",
+          "popularity": 3,
+          "release": "2008-02-20T00:00:00Z",
+          "type": "document"
+        },
+        "id": "3",
+        "index": "data/example",
+        "score": 0.2484309575477134,
+        "sort": [
+          "_score"
+        ]
+      },
+      {
+        "fields": {
+          "category": "Server",
+          "description": "Indigo is a full-text search and indexing server written in Go, built on top of Bleve.",
+          "name": "Indigo",
+          "popularity": 1,
           "release": "2017-01-13T00:00:00Z",
           "type": "document"
         },
         "id": "7",
         "index": "data/example",
-        "score": 0.41589955606724527,
+        "score": 0.24526800905441196,
+        "sort": [
+          "_score"
+        ]
+      },
+      {
+        "fields": {
+          "category": "Library",
+          "description": "Ferret is a super fast, highly configurable search library written in Ruby.",
+          "name": "Ferret",
+          "popularity": 2,
+          "release": "2005-10-01T00:00:00Z",
+          "type": "document"
+        },
+        "id": "4",
+        "index": "data/example",
+        "score": 0.2057485301587168,
+        "sort": [
+          "_score"
+        ]
+      },
+      {
+        "fields": {
+          "category": "Server",
+          "description": "Elasticsearch is a search engine based on Lucene, written in Java.",
+          "name": "Elasticsearch",
+          "popularity": 5,
+          "release": "2010-02-08T00:00:00Z",
+          "type": "document"
+        },
+        "id": "6",
+        "index": "data/example",
+        "score": 0.11396329383474207,
+        "sort": [
+          "_score"
+        ]
+      },
+      {
+        "fields": {
+          "category": "Library",
+          "description": "Bleve is a full-text search and indexing library for Go.",
+          "name": "Bleve",
+          "popularity": 3,
+          "release": "2014-04-18T00:00:00Z",
+          "type": "document"
+        },
+        "id": "1",
+        "index": "data/example",
+        "score": 0.0853843602235094,
         "sort": [
           "_score"
         ]
       }
     ],
-    "max_score": 0.41589955606724527,
+    "max_score": 0.28598991738818746,
     "request": {
       "explain": false,
       "facets": null,
@@ -823,15 +901,11 @@ The result of the above `search documents` command is:
       "successful": 1,
       "total": 1
     },
-    "took": 7488585,
-    "total_hits": 2
+    "took": 2.766836e+06,
+    "total_hits": 7
   }
 }
 ```
-
-
-
-
 
 
 ## The index mapping

@@ -1,8 +1,8 @@
 {
   "name": "Ferret",
-  "description": "Full-text search library written in Ruby.",
+  "description": "Ferret is a super fast, highly configurable search library written in Ruby.",
   "category": "Library",
-  "popularity": 1.0,
+  "popularity": 2.0,
   "release": "2005-10-01T00:00:00Z",
   "type": "document"
 }

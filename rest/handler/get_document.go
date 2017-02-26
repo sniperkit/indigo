@@ -29,60 +29,36 @@ func (h *GetDocumentHandler) ServeHTTP(w http.ResponseWriter, req *http.Request)
 	indexName := vars["indexName"]
 	id := vars["id"]
 
-	response := make(map[string]interface{})
-
 	resp, err := h.client.GetDocument(context.Background(), &proto.GetDocumentRequest{IndexName: indexName, DocumentID: id})
-	if err == nil {
-		log.Print("info: request to the Indigo gRPC Server\n")
-
-		w.WriteHeader(http.StatusOK)
-		response["put_count"] = resp.Success
-	} else {
-		log.Printf("error: failed to request to the Indigo gRPC Server (%s)\n", err.Error())
-
-		w.WriteHeader(http.StatusServiceUnavailable)
-		response["error"] = err.Error()
+	if err != nil {
+		log.Printf("error: %s\n", err.Error())
+		http.Error(w, err.Error(), http.StatusServiceUnavailable)
+		return
 	}
+	log.Print("debug: succeeded in requesting to the Indigo gRPC Server\n")
 
+	result := make(map[string]interface{})
 
-
-
-	if err == nil {
-		log.Print("debug: request to the Indigo gRPC Server\n")
-
-		document := make(map[string]interface{})
-
-		err = json.Unmarshal(resp.Document, &document)
-		if err == nil {
-			log.Print("debug: index mapping created\n")
-
-			w.WriteHeader(http.StatusOK)
-			response["document"] = document
-		} else {
-			log.Printf("error: failed to create index mapping (%s)\n", err.Error())
-
-			w.WriteHeader(http.StatusServiceUnavailable)
-			response["error"] = err.Error()
-		}
-	} else {
-		log.Printf("error: failed to request to the Indigo gRPC Server (%s)\n", err.Error())
-
-		w.WriteHeader(http.StatusServiceUnavailable)
-		response["error"] = err.Error()
+	document := make(map[string]interface{})
+	if err := json.Unmarshal(resp.Document, &document); err != nil {
+		log.Printf("error: %s\n", err.Error())
+		http.Error(w, err.Error(), http.StatusServiceUnavailable)
+		return
 	}
+	result["document"] = document
 
-	bytesResponse, err := json.Marshal(response)
-	if err == nil {
-		log.Print("debug: create response\n")
-	} else {
-		log.Printf("error: failed to create response (%s)\n", err.Error())
-
-		w.WriteHeader(http.StatusServiceUnavailable)
+	output, err := json.MarshalIndent(result, "", "  ")
+	if err != nil {
+		log.Printf("error: %s\n", err.Error())
+		http.Error(w, err.Error(), http.StatusServiceUnavailable)
+		return
 	}
+	log.Print("debug: succeeded in creating response JSON\n")
 
 	buf := new(bytes.Buffer)
-	buf.ReadFrom(bytes.NewReader(bytesResponse))
+	buf.ReadFrom(bytes.NewReader(output))
 
+	w.WriteHeader(http.StatusOK)
 	fmt.Fprintf(w, "%s\n", buf.String())
 
 	return
