@@ -54,6 +54,11 @@ var startCmd = &cobra.Command{
 		switch outputFormat {
 		case "text":
 			colog.SetFormatter(&colog.StdFormatter{
+				Colors: false,
+				Flag:   log.Ldate | log.Ltime | log.Lshortfile,
+			})
+		case "color":
+			colog.SetFormatter(&colog.StdFormatter{
 				Colors: true,
 				Flag:   log.Ldate | log.Ltime | log.Lshortfile,
 			})
@@ -63,8 +68,9 @@ var startCmd = &cobra.Command{
 				Flag:       log.Lshortfile,
 			})
 		default:
+			// same as text
 			colog.SetFormatter(&colog.StdFormatter{
-				Colors: true,
+				Colors: false,
 				Flag:   log.Ldate | log.Ltime | log.Lshortfile,
 			})
 		}

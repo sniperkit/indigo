@@ -1,21 +1,14 @@
 # Indigo
 
-The Indigo is a full text search and indexing server written in [Go](https://golang.org), built on top of the [Bleve](http://www.blevesearch.com).
-
-
-## Indigo gRPC Server
-
-The Indigo gRPC Server is an index server over [gRPC](http://www.grpc.io).
-
-
-## Indigo REST Server
-
-The Indigo REST Server is a [RESTful](https://en.wikipedia.org/wiki/Representational_state_transfer) Web Server that communicates with The Indigo gRPC Server.
+The Indigo is a full text search and indexing server written in [Go](https://golang.org) based on [Bleve](http://www.blevesearch.com).  
+Indigo includes a full text search and indexing server, it also includes a web server that provides a [RESTful](https://en.wikipedia.org/wiki/Representational_state_transfer) interface for Indigo gRPC server.  
+Indigo gRPC Server communicates with the client using [gRPC](http://www.grpc.io) ([HTTP/2](https://en.wikipedia.org/wiki/HTTP/2) + [Protocol Buffers](https://developers.google.com/protocol-buffers/)). You can access to the Indigo gRPC Server using gRPC directly.  
+Indigo REST Server provides JSON API ([HTTP/1.1](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol) + [JSON](http://www.json.org)) that communicate with Indigo gRPC Server. If you want to access to Indigo gRPC Server using traditional JSON API, you can access via Indigo REST Server.
 
 
 ## The Indigo Command Line Interface
 
-The Indigo provides some commands for control the Indigo Server.
+The Indigo provides some commands for controlling the Indigo Server.
 
 
 ### Start Indigo gRPC Server
@@ -23,8 +16,10 @@ The Indigo provides some commands for control the Indigo Server.
 The `start grpc` command starts the Indigo gRPC Server.
 
 ```sh
-$ indigo start grpc
+$ indigo start grpc -l trace
 ```
+
+The result of the above `create index` command is:
 
 
 ### Create the index to the Indigo gRPC Server
@@ -41,6 +36,7 @@ The result of the above `create index` command is:
 }
 ```
 
+
 ### Open the index to the Indigo gRPC Server
 
 ```sh
@@ -54,6 +50,7 @@ The result of the above `open index` command is:
   "indexName": "example"
 }
 ```
+
 
 ### Close the index from the Indigo gRPC Server
 
@@ -69,6 +66,7 @@ The result of the above `close index` command is:
 }
 ```
 
+
 ### Delete the index from the Indigo gRPC Server
 
 ```sh
@@ -82,6 +80,7 @@ The result of the above `delete index` command is:
   "indexName": "example"
 }
 ```
+
 
 ### Get the index stats from the Indigo gRPC Server
 
@@ -110,6 +109,7 @@ The result of the above `get stats` command is:
   }
 }
 ```
+
 
 ### Get the index mapping from the Indigo gRPC Server
 
@@ -234,6 +234,7 @@ The result of the above `get mapping` command is:
 }
 ```
 
+
 ### Put the document to the Indigo gRPC Server
 
 ```sh
@@ -247,6 +248,7 @@ The result of the above `put document` command is:
   "success": true
 }
 ```
+
 
 ### Get the document from the Indigo gRPC Server
 
@@ -268,6 +270,7 @@ The result of the above `get document` command is:
   }
 }
 ```
+
 
 ### Delete the document from the Indigo gRPC Server
 

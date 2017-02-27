@@ -17,7 +17,7 @@ type indigoRESTServer struct {
 	conn     *grpc.ClientConn
 }
 
-func NewIndigoRESTServer(serverPort int, serverPath, gRPCServer string) *indigoRESTServer {
+func NewIndigoRESTServer(port int, basePath, gRPCServer string) *indigoRESTServer {
 	router := mux.NewRouter()
 	router.StrictSlash(true)
 
@@ -25,7 +25,7 @@ func NewIndigoRESTServer(serverPort int, serverPath, gRPCServer string) *indigoR
 	if err == nil {
 		log.Printf("info: create connection target=\"%s\"\n", gRPCServer)
 	} else {
-		log.Printf("error: failed to create connection (%s) target=\"%s\"\n", err.Error(), gRPCServer)
+		log.Printf("error: %s target=\"%s\"\n", err.Error(), gRPCServer)
 		return nil
 	}
 
@@ -34,28 +34,23 @@ func NewIndigoRESTServer(serverPort int, serverPath, gRPCServer string) *indigoR
 	/*
 	 * set handlers
 	 */
-	router.Handle(fmt.Sprintf("%s/{indexName}", serverPath), handler.NewCreateIndexHandler(client)).Methods("PUT")
-	router.Handle(fmt.Sprintf("%s/{indexName}", serverPath), handler.NewDeleteIndexHandler(client)).Methods("DELETE")
+	router.Handle(fmt.Sprintf("%s/{indexName}", basePath), handler.NewCreateIndexHandler(client)).Methods("PUT")
+	router.Handle(fmt.Sprintf("%s/{indexName}", basePath), handler.NewDeleteIndexHandler(client)).Methods("DELETE")
+	router.Handle(fmt.Sprintf("%s/{indexName}/_open", basePath), handler.NewOpenIndexHandler(client)).Methods("POST")
+	router.Handle(fmt.Sprintf("%s/{indexName}/_close", basePath), handler.NewCloseIndexHandler(client)).Methods("POST")
+	router.Handle(fmt.Sprintf("%s/{indexName}/_mapping", basePath), handler.NewGetMappingHandler(client)).Methods("GET")
+	router.Handle(fmt.Sprintf("%s/{indexName}/_stats", basePath), handler.NewGetStatsHandler(client)).Methods("GET")
+	router.Handle(fmt.Sprintf("%s/{indexName}/{id}", basePath), handler.NewPutDocumentHandler(client)).Methods("PUT")
+	router.Handle(fmt.Sprintf("%s/{indexName}/{id}", basePath), handler.NewGetDocumentHandler(client)).Methods("GET")
+	router.Handle(fmt.Sprintf("%s/{indexName}/{id}", basePath), handler.NewDeleteDocumentHandler(client)).Methods("DELETE")
+	router.Handle(fmt.Sprintf("%s/{indexName}/_bulk", basePath), handler.NewBulkHandler(client)).Methods("POST")
+	router.Handle(fmt.Sprintf("%s/{indexName}/_search", basePath), handler.NewSearchHandler(client)).Methods("POST")
 
-	router.Handle(fmt.Sprintf("%s/{indexName}/_open", serverPath), handler.NewOpenIndexHandler(client)).Methods("POST")
-	router.Handle(fmt.Sprintf("%s/{indexName}/_close", serverPath), handler.NewCloseIndexHandler(client)).Methods("POST")
-
-	router.Handle(fmt.Sprintf("%s/{indexName}/_mapping", serverPath), handler.NewGetMappingHandler(client)).Methods("GET")
-	router.Handle(fmt.Sprintf("%s/{indexName}/_stats", serverPath), handler.NewGetStatsHandler(client)).Methods("GET")
-
-	router.Handle(fmt.Sprintf("%s/{indexName}/{id}", serverPath), handler.NewPutDocumentHandler(client)).Methods("PUT")
-	router.Handle(fmt.Sprintf("%s/{indexName}/{id}", serverPath), handler.NewGetDocumentHandler(client)).Methods("GET")
-	router.Handle(fmt.Sprintf("%s/{indexName}/{id}", serverPath), handler.NewDeleteDocumentHandler(client)).Methods("DELETE")
-
-	router.Handle(fmt.Sprintf("%s/{indexName}/_bulk", serverPath), handler.NewBulkHandler(client)).Methods("POST")
-
-	router.Handle(fmt.Sprintf("%s/{indexName}/_search", serverPath), handler.NewSearchHandler(client)).Methods("POST")
-
-	listener, err := net.Listen("tcp", fmt.Sprintf(":%d", serverPort))
+	listener, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
 	if err == nil {
-		log.Printf("info: create listener port=%d\n", serverPort)
+		log.Printf("info: create listener port=%d\n", port)
 	} else {
-		log.Printf("error: failed to create listener (%s) port=%d\n", err.Error(), serverPort)
+		log.Printf("error: %s port=%d\n", err.Error(), port)
 		return nil
 	}
 
@@ -82,7 +77,7 @@ func (irs *indigoRESTServer) Stop() error {
 	if err == nil {
 		log.Print("info: close connection\n")
 	} else {
-		log.Printf("error: failed to close connection (%s)\n", err.Error())
+		log.Printf("error: %s\n", err.Error())
 		return err
 	}
 
@@ -90,7 +85,7 @@ func (irs *indigoRESTServer) Stop() error {
 	if err == nil {
 		log.Print("info: close listener\n")
 	} else {
-		log.Printf("error: failed to close listener (%s)\n", err.Error())
+		log.Printf("error: %s\n", err.Error())
 		return err
 	}
 

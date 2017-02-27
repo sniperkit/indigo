@@ -14,17 +14,17 @@ type indigoGRPCServer struct {
 	service  *indigoGRPCService
 }
 
-func NewIndigoGRPCServer(serverPort int, dataDir string) *indigoGRPCServer {
+func NewIndigoGRPCServer(port int, dataDir string) *indigoGRPCServer {
 	server := grpc.NewServer()
 	service := NewIndigoGRPCService(dataDir)
 
 	proto.RegisterIndigoServer(server, service)
 
-	listener, err := net.Listen("tcp", fmt.Sprintf(":%d", serverPort))
+	listener, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
 	if err == nil {
-		log.Printf("info: create listener port=%d \n", serverPort)
+		log.Printf("info: create listener port=%d \n", port)
 	} else {
-		log.Printf("error: failed to create listener (%s) port=%d \n", err.Error(), serverPort)
+		log.Printf("error: %s port=%d \n", err.Error(), port)
 		return nil
 	}
 

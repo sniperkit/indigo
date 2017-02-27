@@ -5,19 +5,15 @@ package proto;
 service Indigo {
     rpc CreateIndex(CreateIndexRequest) returns (CreateIndexResponse) {}
     rpc DeleteIndex(DeleteIndexRequest) returns (DeleteIndexResponse) {}
-
     rpc OpenIndex(OpenIndexRequest) returns (OpenIndexResponse) {}
     rpc CloseIndex(CloseIndexRequest) returns (CloseIndexResponse) {}
-
+    rpc ListIndex(ListIndexRequest) returns (ListIndexResponse) {}
     rpc GetStats(GetStatsRequest) returns (GetStatsResponse) {}
     rpc GetMapping(GetMappingRequest) returns (GetMappingResponse) {}
-
     rpc PutDocument(PutDocumentRequest) returns (PutDocumentResponse) {}
     rpc GetDocument(GetDocumentRequest) returns (GetDocumentResponse) {}
     rpc DeleteDocument(DeleteDocumentRequest) returns (DeleteDocumentResponse) {}
-
     rpc Bulk(BulkRequest) returns (BulkResponse) {}
-
     rpc Search(SearchRequest) returns (SearchResponse) {}
 }
 
@@ -28,6 +24,7 @@ message CreateIndexRequest {
     string kvStore = 4;
     bytes kvConfig = 5;
 }
+
 message CreateIndexResponse {
     string indexName = 1;
 }
@@ -35,31 +32,39 @@ message CreateIndexResponse {
 message DeleteIndexRequest {
     string indexName = 1;
 }
+
 message DeleteIndexResponse {
     string indexName = 1;
 }
-
 
 message OpenIndexRequest {
     string indexName = 1;
     bytes runtimeConfig = 2;
 }
+
 message OpenIndexResponse {
     string indexName = 1;
 }
 
-
 message CloseIndexRequest {
     string indexName = 1;
 }
+
 message CloseIndexResponse {
     string indexName = 1;
 }
 
+message ListIndexRequest {
+}
+
+message ListIndexResponse {
+    repeated string indexName = 1;
+}
 
 message GetStatsRequest {
     string indexName = 1;
 }
+
 message GetStatsResponse {
     bytes indexStats = 1;
 }
@@ -67,16 +72,17 @@ message GetStatsResponse {
 message GetMappingRequest {
     string indexName = 1;
 }
+
 message GetMappingResponse {
     bytes indexMapping = 1;
 }
-
 
 message PutDocumentRequest {
     string indexName = 1;
     string documentID = 2;
     bytes document = 3;
 }
+
 message PutDocumentResponse {
     bool success = 1;
 }
@@ -85,6 +91,7 @@ message GetDocumentRequest {
     string indexName = 1;
     string documentID = 2;
 }
+
 message GetDocumentResponse {
     bytes document = 1;
 }
@@ -93,27 +100,28 @@ message DeleteDocumentRequest {
     string indexName = 1;
     string documentID = 2;
 }
+
 message DeleteDocumentResponse {
     bool success = 1;
 }
-
 
 message BulkRequest {
     string indexName = 1;
     bytes bulkRequest = 2;
     int32 batchSize = 3;
 }
+
 message BulkResponse {
     int32 putCount = 1;
     int32 putErrorCount = 2;
     int32 deleteCount = 3;
 }
 
-
 message SearchRequest {
     string indexName = 1;
     bytes searchRequest = 2;
 }
+
 message SearchResponse {
     bytes searchResult = 1;
 }

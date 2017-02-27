@@ -106,7 +106,7 @@ func (igs *indigoGRPCService) CreateIndex(ctx context.Context, req *proto.Create
 	if _, open := igs.indices[req.IndexName]; open {
 		err := errors.New("index already opened")
 		log.Printf("error: %s indexName=\"%s\"\n", err.Error(), req.IndexName)
-		return &proto.CreateIndexResponse{IndexName: req.IndexName}, err
+		return &proto.CreateIndexResponse{}, err
 	}
 
 	indexDir := path.Join(igs.dataDir, req.IndexName)
@@ -117,7 +117,7 @@ func (igs *indigoGRPCService) CreateIndex(ctx context.Context, req *proto.Create
 			log.Printf("debug: succeeded in creating index mapping indexName=\"%s\"\n", req.IndexName)
 		} else {
 			log.Printf("error: %s indexName=\"%s\"\n", err.Error(), req.IndexName)
-			return &proto.CreateIndexResponse{IndexName: req.IndexName}, err
+			return &proto.CreateIndexResponse{}, err
 		}
 	}
 
@@ -127,7 +127,7 @@ func (igs *indigoGRPCService) CreateIndex(ctx context.Context, req *proto.Create
 			log.Printf("debug: succeeded in creating kv config indexName=\"%s\"\n", req.IndexName)
 		} else {
 			log.Printf("error: %s indexName=\"%s\"\n", err.Error(), req.IndexName)
-			return &proto.CreateIndexResponse{IndexName: req.IndexName}, err
+			return &proto.CreateIndexResponse{}, err
 		}
 	}
 
@@ -146,7 +146,9 @@ func (igs *indigoGRPCService) CreateIndex(ctx context.Context, req *proto.Create
 		log.Printf("error: %s indexDir=\"%s\"\n", err.Error(), indexDir)
 	}
 
-	return &proto.CreateIndexResponse{IndexName: req.IndexName}, err
+	return &proto.CreateIndexResponse{
+		IndexName: req.IndexName,
+	}, err
 }
 
 func (igs *indigoGRPCService) DeleteIndex(ctx context.Context, req *proto.DeleteIndexRequest) (*proto.DeleteIndexResponse, error) {
@@ -156,7 +158,7 @@ func (igs *indigoGRPCService) DeleteIndex(ctx context.Context, req *proto.Delete
 	if _, open := igs.indices[req.IndexName]; open {
 		err := errors.New("index already opened")
 		log.Printf("error: %s indexName=\"%s\"\n", err.Error(), req.IndexName)
-		return &proto.DeleteIndexResponse{IndexName: req.IndexName}, err
+		return &proto.DeleteIndexResponse{}, err
 	}
 
 	indexDir := path.Join(igs.dataDir, req.IndexName)
@@ -173,7 +175,9 @@ func (igs *indigoGRPCService) DeleteIndex(ctx context.Context, req *proto.Delete
 		log.Printf("error: %s indexDir=\"%s\"\n", err.Error(), indexDir)
 	}
 
-	return &proto.DeleteIndexResponse{IndexName: req.IndexName}, err
+	return &proto.DeleteIndexResponse{
+		IndexName: req.IndexName,
+	}, err
 }
 
 func (igs *indigoGRPCService) OpenIndex(ctx context.Context, req *proto.OpenIndexRequest) (*proto.OpenIndexResponse, error) {
@@ -183,7 +187,7 @@ func (igs *indigoGRPCService) OpenIndex(ctx context.Context, req *proto.OpenInde
 	if _, open := igs.indices[req.IndexName]; open {
 		err := errors.New("index already opened")
 		log.Printf("error: %s indexName=\"%s\"\n", err.Error(), req.IndexName)
-		return &proto.OpenIndexResponse{IndexName: req.IndexName}, err
+		return &proto.OpenIndexResponse{}, err
 	}
 
 	indexDir := path.Join(igs.dataDir, req.IndexName)
@@ -195,7 +199,7 @@ func (igs *indigoGRPCService) OpenIndex(ctx context.Context, req *proto.OpenInde
 			log.Printf("debug: succeeded in creating runtime config indexName=\"%s\"\n", req.IndexName)
 		} else {
 			log.Printf("error: %s indexName=\"%s\"\n", err.Error(), req.IndexName)
-			return &proto.OpenIndexResponse{IndexName: req.IndexName}, err
+			return &proto.OpenIndexResponse{}, err
 		}
 	}
 
@@ -213,7 +217,9 @@ func (igs *indigoGRPCService) OpenIndex(ctx context.Context, req *proto.OpenInde
 		log.Printf("error: %s indexDir=\"%s\"\n", err.Error(), indexDir)
 	}
 
-	return &proto.OpenIndexResponse{IndexName: req.IndexName}, err
+	return &proto.OpenIndexResponse{
+		IndexName: req.IndexName,
+	}, err
 }
 
 func (igs *indigoGRPCService) CloseIndex(ctx context.Context, req *proto.CloseIndexRequest) (*proto.CloseIndexResponse, error) {
@@ -224,7 +230,7 @@ func (igs *indigoGRPCService) CloseIndex(ctx context.Context, req *proto.CloseIn
 	if !open {
 		err := errors.New("index is not open")
 		log.Printf("error: %s indexName=\"%s\"\n", err.Error(), req.IndexName)
-		return &proto.CloseIndexResponse{IndexName: req.IndexName}, err
+		return &proto.CloseIndexResponse{}, err
 	}
 
 	err := index.Close()
@@ -235,7 +241,9 @@ func (igs *indigoGRPCService) CloseIndex(ctx context.Context, req *proto.CloseIn
 		log.Printf("error: %s indexName=\"%s\"\n", err.Error(), req.IndexName)
 	}
 
-	return &proto.CloseIndexResponse{IndexName: req.IndexName}, err
+	return &proto.CloseIndexResponse{
+		IndexName: req.IndexName,
+	}, err
 }
 
 func (igs *indigoGRPCService) GetStats(ctx context.Context, req *proto.GetStatsRequest) (*proto.GetStatsResponse, error) {
@@ -243,7 +251,7 @@ func (igs *indigoGRPCService) GetStats(ctx context.Context, req *proto.GetStatsR
 	if !open {
 		err := errors.New("index is not open")
 		log.Printf("error: %s indexName=\"%s\"\n", err.Error(), req.IndexName)
-		return &proto.GetStatsResponse{IndexStats: nil}, err
+		return &proto.GetStatsResponse{}, err
 	}
 
 	bytesIndexStat, err := index.Stats().MarshalJSON()
@@ -253,7 +261,9 @@ func (igs *indigoGRPCService) GetStats(ctx context.Context, req *proto.GetStatsR
 		log.Printf("error: %s indexName=\"%s\"\n", err.Error(), req.IndexName)
 	}
 
-	return &proto.GetStatsResponse{IndexStats: bytesIndexStat}, err
+	return &proto.GetStatsResponse{
+		IndexStats: bytesIndexStat,
+	}, err
 }
 
 func (igs *indigoGRPCService) GetMapping(ctx context.Context, req *proto.GetMappingRequest) (*proto.GetMappingResponse, error) {
@@ -261,7 +271,7 @@ func (igs *indigoGRPCService) GetMapping(ctx context.Context, req *proto.GetMapp
 	if !open {
 		err := errors.New("index is not open")
 		log.Printf("error: %s indexName=\"%s\"\n", err.Error(), req.IndexName)
-		return &proto.GetMappingResponse{IndexMapping: nil}, err
+		return &proto.GetMappingResponse{}, err
 	}
 
 	indexMapping, err := json.Marshal(index.Mapping())
@@ -271,7 +281,9 @@ func (igs *indigoGRPCService) GetMapping(ctx context.Context, req *proto.GetMapp
 		log.Printf("error: %s indexName=\"%s\"\n", err.Error(), req.IndexName)
 	}
 
-	return &proto.GetMappingResponse{IndexMapping: indexMapping}, err
+	return &proto.GetMappingResponse{
+		IndexMapping: indexMapping,
+	}, err
 }
 
 func (igs *indigoGRPCService) PutDocument(ctx context.Context, req *proto.PutDocumentRequest) (*proto.PutDocumentResponse, error) {
@@ -299,7 +311,9 @@ func (igs *indigoGRPCService) PutDocument(ctx context.Context, req *proto.PutDoc
 		log.Printf("error: %s indexName=\"%s\" documentID=\"%s\"\n", err.Error(), req.IndexName, req.DocumentID)
 	}
 
-	return &proto.PutDocumentResponse{Success: success}, err
+	return &proto.PutDocumentResponse{
+		Success: success,
+	}, err
 }
 
 func (igs *indigoGRPCService) GetDocument(ctx context.Context, req *proto.GetDocumentRequest) (*proto.GetDocumentResponse, error) {
@@ -364,7 +378,9 @@ func (igs *indigoGRPCService) GetDocument(ctx context.Context, req *proto.GetDoc
 		log.Printf("error: %s index_name=\"%s\" document_id=\"%s\"\n", err.Error(), req.IndexName, req.DocumentID)
 	}
 
-	return &proto.GetDocumentResponse{Document: bytesDoc}, err
+	return &proto.GetDocumentResponse{
+		Document: bytesDoc,
+	}, err
 }
 
 func (igs *indigoGRPCService) DeleteDocument(ctx context.Context, req *proto.DeleteDocumentRequest) (*proto.DeleteDocumentResponse, error) {
@@ -384,7 +400,9 @@ func (igs *indigoGRPCService) DeleteDocument(ctx context.Context, req *proto.Del
 		log.Printf("error: %s indexName=\"%s\" documentID=\"%s\"\n", err.Error(), req.IndexName, req.DocumentID)
 	}
 
-	return &proto.DeleteDocumentResponse{Success: success}, err
+	return &proto.DeleteDocumentResponse{
+		Success: success,
+	}, err
 }
 
 func (igs *indigoGRPCService) Bulk(ctx context.Context, req *proto.BulkRequest) (*proto.BulkResponse, error) {
@@ -500,7 +518,11 @@ func (igs *indigoGRPCService) Bulk(ctx context.Context, req *proto.BulkRequest) 
 		}
 	}
 
-	return &proto.BulkResponse{PutCount: putCount, PutErrorCount: putErrorCount, DeleteCount: deleteCount}, nil
+	return &proto.BulkResponse{
+		PutCount:      putCount,
+		PutErrorCount: putErrorCount,
+		DeleteCount:   deleteCount,
+	}, nil
 }
 
 func (igs *indigoGRPCService) Search(ctx context.Context, req *proto.SearchRequest) (*proto.SearchResponse, error) {
@@ -508,7 +530,7 @@ func (igs *indigoGRPCService) Search(ctx context.Context, req *proto.SearchReque
 	if !open {
 		err := errors.New("index is not open")
 		log.Printf("error: %s indexName=\"%s\"\n", err.Error(), req.IndexName)
-		return &proto.SearchResponse{SearchResult: nil}, err
+		return &proto.SearchResponse{}, err
 	}
 
 	searchRequest := bleve.NewSearchRequest(nil)
@@ -516,7 +538,7 @@ func (igs *indigoGRPCService) Search(ctx context.Context, req *proto.SearchReque
 		err := json.Unmarshal(req.SearchRequest, searchRequest)
 		if err != nil {
 			log.Printf("error: %s indexName=\"%s\"\n", err.Error(), req.IndexName)
-			return &proto.SearchResponse{SearchResult: nil}, err
+			return &proto.SearchResponse{}, err
 		}
 	}
 
@@ -525,7 +547,7 @@ func (igs *indigoGRPCService) Search(ctx context.Context, req *proto.SearchReque
 		log.Printf("info: succeeded in searching documents indexName=\"%s\"\n", req.IndexName)
 	} else {
 		log.Printf("error: %s indexName=\"%s\"\n", err.Error(), req.IndexName)
-		return &proto.SearchResponse{SearchResult: nil}, err
+		return &proto.SearchResponse{}, err
 	}
 
 	bytesSearchResult, err := json.Marshal(&searchResult)
@@ -534,5 +556,7 @@ func (igs *indigoGRPCService) Search(ctx context.Context, req *proto.SearchReque
 	} else {
 		log.Printf("error: %s indexName=\"%s\"\n", err.Error(), req.IndexName)
 	}
-	return &proto.SearchResponse{SearchResult: bytesSearchResult}, err
+	return &proto.SearchResponse{
+		SearchResult: bytesSearchResult,
+	}, err
 }
