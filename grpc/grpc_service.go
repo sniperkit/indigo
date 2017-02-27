@@ -246,6 +246,19 @@ func (igs *indigoGRPCService) CloseIndex(ctx context.Context, req *proto.CloseIn
 	}, err
 }
 
+func (igs *indigoGRPCService) GetDocumentCount(ctx context.Context, req *proto.GetDocumentCountRequest) (*proto.GetDocumentCountResponse, error) {
+	index, open := igs.indices[req.IndexName]
+	if !open {
+		err := errors.New("index is not open")
+		log.Printf("error: %s indexName=\"%s\"\n", err.Error(), req.IndexName)
+		return &proto.GetDocumentCountResponse{}, err
+	}
+
+	count, err := index.DocCount()
+
+	return &proto.GetDocumentCountResponse{DocumentCount: count}, err
+}
+
 func (igs *indigoGRPCService) GetStats(ctx context.Context, req *proto.GetStatsRequest) (*proto.GetStatsResponse, error) {
 	index, open := igs.indices[req.IndexName]
 	if !open {

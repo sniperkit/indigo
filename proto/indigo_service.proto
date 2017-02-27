@@ -7,7 +7,8 @@ service Indigo {
     rpc DeleteIndex(DeleteIndexRequest) returns (DeleteIndexResponse) {}
     rpc OpenIndex(OpenIndexRequest) returns (OpenIndexResponse) {}
     rpc CloseIndex(CloseIndexRequest) returns (CloseIndexResponse) {}
-    rpc ListIndex(ListIndexRequest) returns (ListIndexResponse) {}
+//    rpc ListIndex(ListIndexRequest) returns (ListIndexResponse) {}
+    rpc GetDocumentCount(GetDocumentCountRequest) returns (GetDocumentCountResponse) {}
     rpc GetStats(GetStatsRequest) returns (GetStatsResponse) {}
     rpc GetMapping(GetMappingRequest) returns (GetMappingResponse) {}
     rpc PutDocument(PutDocumentRequest) returns (PutDocumentResponse) {}
@@ -54,11 +55,19 @@ message CloseIndexResponse {
     string indexName = 1;
 }
 
-message ListIndexRequest {
+//message ListIndexRequest {
+//}
+
+//message ListIndexResponse {
+//    repeated string indexName = 1;
+//}
+
+message GetDocumentCountRequest {
+    string indexName = 1;
 }
 
-message ListIndexResponse {
-    repeated string indexName = 1;
+message GetDocumentCountResponse {
+    uint64 documentCount = 1;
 }
 
 message GetStatsRequest {
