@@ -289,46 +289,6 @@ func (igs *indigoGRPCService) GetIndex(ctx context.Context, req *proto.GetIndexR
 	}, err
 }
 
-func (igs *indigoGRPCService) GetStats(ctx context.Context, req *proto.GetStatsRequest) (*proto.GetStatsResponse, error) {
-	index, open := igs.indices[req.IndexName]
-	if !open {
-		err := errors.New("index is not open")
-		log.Printf("error: %s indexName=\"%s\"\n", err.Error(), req.IndexName)
-		return &proto.GetStatsResponse{}, err
-	}
-
-	bytesIndexStat, err := index.Stats().MarshalJSON()
-	if err == nil {
-		log.Printf("info: succeeded in creating index stats indexName=\"%s\"\n", req.IndexName)
-	} else {
-		log.Printf("error: %s indexName=\"%s\"\n", err.Error(), req.IndexName)
-	}
-
-	return &proto.GetStatsResponse{
-		IndexStats: bytesIndexStat,
-	}, err
-}
-
-func (igs *indigoGRPCService) GetMapping(ctx context.Context, req *proto.GetMappingRequest) (*proto.GetMappingResponse, error) {
-	index, open := igs.indices[req.IndexName]
-	if !open {
-		err := errors.New("index is not open")
-		log.Printf("error: %s indexName=\"%s\"\n", err.Error(), req.IndexName)
-		return &proto.GetMappingResponse{}, err
-	}
-
-	indexMapping, err := json.Marshal(index.Mapping())
-	if err == nil {
-		log.Printf("info: succeeded in creating index mapping indexName=\"%s\"\n", req.IndexName)
-	} else {
-		log.Printf("error: %s indexName=\"%s\"\n", err.Error(), req.IndexName)
-	}
-
-	return &proto.GetMappingResponse{
-		IndexMapping: indexMapping,
-	}, err
-}
-
 func (igs *indigoGRPCService) PutDocument(ctx context.Context, req *proto.PutDocumentRequest) (*proto.PutDocumentResponse, error) {
 	index, open := igs.indices[req.IndexName]
 	if !open {
@@ -517,7 +477,7 @@ func (igs *indigoGRPCService) Bulk(ctx context.Context, req *proto.BulkRequest) 
 				log.Printf("debug: document exists in request indexName=\"%s\" num=%d\n", req.IndexName, num)
 				doc = request["document"]
 			} else {
-				log.Printf("error: document does not exist in request indexName=\"%s\" num=%d error=\"%s\"\n", req.IndexName, num)
+				log.Printf("error: document does not exist in request indexName=\"%s\" num=%d\n", req.IndexName, num)
 				continue
 			}
 

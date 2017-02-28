@@ -9,6 +9,11 @@ Indigo gRPC Server communicates with the client using [gRPC](http://www.grpc.io)
 Indigo REST Server provides JSON API ([HTTP/1.1](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol) + [JSON](http://www.json.org)) that communicate with Indigo gRPC Server. If you want to access to Indigo gRPC Server using traditional JSON API, you can access via Indigo REST Server.
 
 
+## Features
+
+- TODO
+
+
 ## The Indigo Command Line Interface
 
 The Indigo provides some commands for controlling the Indigo Server.

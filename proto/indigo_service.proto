@@ -5,12 +5,10 @@ package proto;
 service Indigo {
     rpc ListIndex(ListIndexRequest) returns (ListIndexResponse) {}
     rpc CreateIndex(CreateIndexRequest) returns (CreateIndexResponse) {}
-    rpc DeleteIndex(DeleteIndexRequest) returns (DeleteIndexResponse) {}
     rpc OpenIndex(OpenIndexRequest) returns (OpenIndexResponse) {}
-    rpc CloseIndex(CloseIndexRequest) returns (CloseIndexResponse) {}
     rpc GetIndex(GetIndexRequest) returns (GetIndexResponse) {}
-    rpc GetStats(GetStatsRequest) returns (GetStatsResponse) {}
-    rpc GetMapping(GetMappingRequest) returns (GetMappingResponse) {}
+    rpc CloseIndex(CloseIndexRequest) returns (CloseIndexResponse) {}
+    rpc DeleteIndex(DeleteIndexRequest) returns (DeleteIndexResponse) {}
     rpc PutDocument(PutDocumentRequest) returns (PutDocumentResponse) {}
     rpc GetDocument(GetDocumentRequest) returns (GetDocumentResponse) {}
     rpc DeleteDocument(DeleteDocumentRequest) returns (DeleteDocumentResponse) {}
@@ -37,28 +35,12 @@ message CreateIndexResponse {
     string indexName = 1;
 }
 
-message DeleteIndexRequest {
-    string indexName = 1;
-}
-
-message DeleteIndexResponse {
-    string indexName = 1;
-}
-
 message OpenIndexRequest {
     string indexName = 1;
     bytes runtimeConfig = 2;
 }
 
 message OpenIndexResponse {
-    string indexName = 1;
-}
-
-message CloseIndexRequest {
-    string indexName = 1;
-}
-
-message CloseIndexResponse {
     string indexName = 1;
 }
 
@@ -72,20 +54,20 @@ message GetIndexResponse {
     bytes indexMapping = 3;
 }
 
-message GetStatsRequest {
+message CloseIndexRequest {
     string indexName = 1;
 }
 
-message GetStatsResponse {
-    bytes indexStats = 1;
-}
-
-message GetMappingRequest {
+message CloseIndexResponse {
     string indexName = 1;
 }
 
-message GetMappingResponse {
-    bytes indexMapping = 1;
+message DeleteIndexRequest {
+    string indexName = 1;
+}
+
+message DeleteIndexResponse {
+    string indexName = 1;
 }
 
 message PutDocumentRequest {
