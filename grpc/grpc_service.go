@@ -327,12 +327,12 @@ func (igs *indigoGRPCService) GetDocument(ctx context.Context, req *proto.GetDoc
 		return &proto.GetDocumentResponse{}, err
 	}
 
-	doc := make(map[string]interface{})
-	if d, err := index.Document(req.DocumentID); err == nil {
-		if d != nil {
-			log.Printf("ingo: succeeded in getting document indexName=\"%s\" documentID=\"%s\"\n", req.IndexName, req.DocumentID)
+	fields := make(map[string]interface{})
+	if doc, err := index.Document(req.Id); err == nil {
+		if doc != nil {
+			log.Printf("ingo: succeeded in getting document indexName=\"%s\" documentID=\"%s\"\n", req.IndexName, req.Id)
 
-			for _, field := range d.Fields {
+			for _, field := range doc.Fields {
 				var value interface{}
 
 				switch field := field.(type) {
@@ -351,38 +351,39 @@ func (igs *indigoGRPCService) GetDocument(ctx context.Context, req *proto.GetDoc
 					}
 				}
 
-				existedField, existed := doc[field.Name()]
+				existedField, existed := fields[field.Name()]
 				if existed {
 					switch existedField := existedField.(type) {
 					case []interface{}:
-						doc[field.Name()] = append(existedField, value)
+						fields[field.Name()] = append(existedField, value)
 					case interface{}:
 						arr := make([]interface{}, 2)
 						arr[0] = existedField
 						arr[1] = value
-						doc[field.Name()] = arr
+						fields[field.Name()] = arr
 					}
 				} else {
-					doc[field.Name()] = value
+					fields[field.Name()] = value
 				}
 			}
 		} else {
-			log.Printf("info: document does not exist indexName=\"%s\" documentID=\"%s\"\n", req.IndexName, req.DocumentID)
+			log.Printf("info: document does not exist indexName=\"%s\" documentID=\"%s\"\n", req.IndexName, req.Id)
 		}
 	} else {
-		log.Printf("error: %s indexName=\"%s\" documentID=\"%s\"\n", err.Error(), req.IndexName, req.DocumentID)
+		log.Printf("error: %s indexName=\"%s\" documentID=\"%s\"\n", err.Error(), req.IndexName, req.Id)
 		return &proto.GetDocumentResponse{}, err
 	}
 
-	bytesDoc, err := json.Marshal(doc)
+	bytesFields, err := json.Marshal(fields)
 	if err == nil {
-		log.Printf("debug: succeeded in creating document indexName=\"%s\" documentID=\"%s\"\n", req.IndexName, req.DocumentID)
+		log.Printf("debug: succeeded in creating document indexName=\"%s\" documentID=\"%s\"\n", req.IndexName, req.Id)
 	} else {
-		log.Printf("error: %s index_name=\"%s\" document_id=\"%s\"\n", err.Error(), req.IndexName, req.DocumentID)
+		log.Printf("error: %s index_name=\"%s\" document_id=\"%s\"\n", err.Error(), req.IndexName, req.Id)
 	}
 
 	return &proto.GetDocumentResponse{
-		Document: bytesDoc,
+		Id:     req.Id,
+		Fields: bytesFields,
 	}, err
 }
 

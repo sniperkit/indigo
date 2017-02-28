@@ -82,11 +82,12 @@ message PutDocumentResponse {
 
 message GetDocumentRequest {
     string indexName = 1;
-    string documentID = 2;
+    string id = 2;
 }
 
 message GetDocumentResponse {
-    bytes document = 1;
+    string id = 1;
+    bytes fields = 2;
 }
 
 message DeleteDocumentRequest {

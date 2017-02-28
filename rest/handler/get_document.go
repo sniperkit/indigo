@@ -3,7 +3,6 @@ package handler
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"github.com/gorilla/mux"
 	"github.com/mosuka/indigo/proto"
 	"golang.org/x/net/context"
@@ -29,7 +28,7 @@ func (h *GetDocumentHandler) ServeHTTP(w http.ResponseWriter, req *http.Request)
 	indexName := vars["indexName"]
 	id := vars["id"]
 
-	resp, err := h.client.GetDocument(context.Background(), &proto.GetDocumentRequest{IndexName: indexName, DocumentID: id})
+	resp, err := h.client.GetDocument(context.Background(), &proto.GetDocumentRequest{IndexName: indexName, Id: id})
 	if err != nil {
 		log.Printf("error: %s\n", err.Error())
 		http.Error(w, err.Error(), http.StatusServiceUnavailable)
@@ -39,13 +38,13 @@ func (h *GetDocumentHandler) ServeHTTP(w http.ResponseWriter, req *http.Request)
 
 	result := make(map[string]interface{})
 
-	document := make(map[string]interface{})
-	if err := json.Unmarshal(resp.Document, &document); err != nil {
+	fields := make(map[string]interface{})
+	if err := json.Unmarshal(resp.Fields, &fields); err != nil {
 		log.Printf("error: %s\n", err.Error())
 		http.Error(w, err.Error(), http.StatusServiceUnavailable)
 		return
 	}
-	result["document"] = document
+	result["fields"] = fields
 
 	output, err := json.MarshalIndent(result, "", "  ")
 	if err != nil {
@@ -58,8 +57,9 @@ func (h *GetDocumentHandler) ServeHTTP(w http.ResponseWriter, req *http.Request)
 	buf := new(bytes.Buffer)
 	buf.ReadFrom(bytes.NewReader(output))
 
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(http.StatusOK)
-	fmt.Fprintf(w, "%s\n", buf.String())
+	w.Write(buf.Bytes())
 
 	return
 }
