@@ -22,8 +22,6 @@ The `start grpc` command starts the Indigo gRPC Server.
 $ indigo start grpc -l trace
 ```
 
-The result of the above `create index` command is:
-
 
 ### Create the index to the Indigo gRPC Server
 
