@@ -1,8 +1,11 @@
 # Indigo
 
 The Indigo is a full text search and indexing server written in [Go](https://golang.org) based on [Bleve](http://www.blevesearch.com).  
+
 Indigo includes a full text search and indexing server, it also includes a web server that provides a [RESTful](https://en.wikipedia.org/wiki/Representational_state_transfer) interface for Indigo gRPC server.  
+
 Indigo gRPC Server communicates with the client using [gRPC](http://www.grpc.io) ([HTTP/2](https://en.wikipedia.org/wiki/HTTP/2) + [Protocol Buffers](https://developers.google.com/protocol-buffers/)). You can access to the Indigo gRPC Server using gRPC directly.  
+
 Indigo REST Server provides JSON API ([HTTP/1.1](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol) + [JSON](http://www.json.org)) that communicate with Indigo gRPC Server. If you want to access to Indigo gRPC Server using traditional JSON API, you can access via Indigo REST Server.
 
 

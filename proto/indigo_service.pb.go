@@ -9,6 +9,8 @@ It is generated from these files:
 	proto/indigo_service.proto
 
 It has these top-level messages:
+	ListIndexRequest
+	ListIndexResponse
 	CreateIndexRequest
 	CreateIndexResponse
 	DeleteIndexRequest
@@ -17,8 +19,8 @@ It has these top-level messages:
 	OpenIndexResponse
 	CloseIndexRequest
 	CloseIndexResponse
-	GetDocumentCountRequest
-	GetDocumentCountResponse
+	GetIndexRequest
+	GetIndexResponse
 	GetStatsRequest
 	GetStatsResponse
 	GetMappingRequest
@@ -56,6 +58,30 @@ var _ = math.Inf
 // proto package needs to be updated.
 const _ = proto1.ProtoPackageIsVersion2 // please upgrade the proto package
 
+type ListIndexRequest struct {
+}
+
+func (m *ListIndexRequest) Reset()                    { *m = ListIndexRequest{} }
+func (m *ListIndexRequest) String() string            { return proto1.CompactTextString(m) }
+func (*ListIndexRequest) ProtoMessage()               {}
+func (*ListIndexRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{0} }
+
+type ListIndexResponse struct {
+	IndexNames []string `protobuf:"bytes,1,rep,name=indexNames" json:"indexNames,omitempty"`
+}
+
+func (m *ListIndexResponse) Reset()                    { *m = ListIndexResponse{} }
+func (m *ListIndexResponse) String() string            { return proto1.CompactTextString(m) }
+func (*ListIndexResponse) ProtoMessage()               {}
+func (*ListIndexResponse) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{1} }
+
+func (m *ListIndexResponse) GetIndexNames() []string {
+	if m != nil {
+		return m.IndexNames
+	}
+	return nil
+}
+
 type CreateIndexRequest struct {
 	IndexName    string `protobuf:"bytes,1,opt,name=indexName" json:"indexName,omitempty"`
 	IndexMapping []byte `protobuf:"bytes,2,opt,name=indexMapping,proto3" json:"indexMapping,omitempty"`
@@ -67,7 +93,7 @@ type CreateIndexRequest struct {
 func (m *CreateIndexRequest) Reset()                    { *m = CreateIndexRequest{} }
 func (m *CreateIndexRequest) String() string            { return proto1.CompactTextString(m) }
 func (*CreateIndexRequest) ProtoMessage()               {}
-func (*CreateIndexRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{0} }
+func (*CreateIndexRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{2} }
 
 func (m *CreateIndexRequest) GetIndexName() string {
 	if m != nil {
@@ -111,7 +137,7 @@ type CreateIndexResponse struct {
 func (m *CreateIndexResponse) Reset()                    { *m = CreateIndexResponse{} }
 func (m *CreateIndexResponse) String() string            { return proto1.CompactTextString(m) }
 func (*CreateIndexResponse) ProtoMessage()               {}
-func (*CreateIndexResponse) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{1} }
+func (*CreateIndexResponse) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{3} }
 
 func (m *CreateIndexResponse) GetIndexName() string {
 	if m != nil {
@@ -127,7 +153,7 @@ type DeleteIndexRequest struct {
 func (m *DeleteIndexRequest) Reset()                    { *m = DeleteIndexRequest{} }
 func (m *DeleteIndexRequest) String() string            { return proto1.CompactTextString(m) }
 func (*DeleteIndexRequest) ProtoMessage()               {}
-func (*DeleteIndexRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{2} }
+func (*DeleteIndexRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{4} }
 
 func (m *DeleteIndexRequest) GetIndexName() string {
 	if m != nil {
@@ -143,7 +169,7 @@ type DeleteIndexResponse struct {
 func (m *DeleteIndexResponse) Reset()                    { *m = DeleteIndexResponse{} }
 func (m *DeleteIndexResponse) String() string            { return proto1.CompactTextString(m) }
 func (*DeleteIndexResponse) ProtoMessage()               {}
-func (*DeleteIndexResponse) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{3} }
+func (*DeleteIndexResponse) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{5} }
 
 func (m *DeleteIndexResponse) GetIndexName() string {
 	if m != nil {
@@ -160,7 +186,7 @@ type OpenIndexRequest struct {
 func (m *OpenIndexRequest) Reset()                    { *m = OpenIndexRequest{} }
 func (m *OpenIndexRequest) String() string            { return proto1.CompactTextString(m) }
 func (*OpenIndexRequest) ProtoMessage()               {}
-func (*OpenIndexRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{4} }
+func (*OpenIndexRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{6} }
 
 func (m *OpenIndexRequest) GetIndexName() string {
 	if m != nil {
@@ -183,7 +209,7 @@ type OpenIndexResponse struct {
 func (m *OpenIndexResponse) Reset()                    { *m = OpenIndexResponse{} }
 func (m *OpenIndexResponse) String() string            { return proto1.CompactTextString(m) }
 func (*OpenIndexResponse) ProtoMessage()               {}
-func (*OpenIndexResponse) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{5} }
+func (*OpenIndexResponse) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{7} }
 
 func (m *OpenIndexResponse) GetIndexName() string {
 	if m != nil {
@@ -199,7 +225,7 @@ type CloseIndexRequest struct {
 func (m *CloseIndexRequest) Reset()                    { *m = CloseIndexRequest{} }
 func (m *CloseIndexRequest) String() string            { return proto1.CompactTextString(m) }
 func (*CloseIndexRequest) ProtoMessage()               {}
-func (*CloseIndexRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{6} }
+func (*CloseIndexRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{8} }
 
 func (m *CloseIndexRequest) GetIndexName() string {
 	if m != nil {
@@ -215,7 +241,7 @@ type CloseIndexResponse struct {
 func (m *CloseIndexResponse) Reset()                    { *m = CloseIndexResponse{} }
 func (m *CloseIndexResponse) String() string            { return proto1.CompactTextString(m) }
 func (*CloseIndexResponse) ProtoMessage()               {}
-func (*CloseIndexResponse) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{7} }
+func (*CloseIndexResponse) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{9} }
 
 func (m *CloseIndexResponse) GetIndexName() string {
 	if m != nil {
@@ -224,36 +250,52 @@ func (m *CloseIndexResponse) GetIndexName() string {
 	return ""
 }
 
-type GetDocumentCountRequest struct {
+type GetIndexRequest struct {
 	IndexName string `protobuf:"bytes,1,opt,name=indexName" json:"indexName,omitempty"`
 }
 
-func (m *GetDocumentCountRequest) Reset()                    { *m = GetDocumentCountRequest{} }
-func (m *GetDocumentCountRequest) String() string            { return proto1.CompactTextString(m) }
-func (*GetDocumentCountRequest) ProtoMessage()               {}
-func (*GetDocumentCountRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{8} }
+func (m *GetIndexRequest) Reset()                    { *m = GetIndexRequest{} }
+func (m *GetIndexRequest) String() string            { return proto1.CompactTextString(m) }
+func (*GetIndexRequest) ProtoMessage()               {}
+func (*GetIndexRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{10} }
 
-func (m *GetDocumentCountRequest) GetIndexName() string {
+func (m *GetIndexRequest) GetIndexName() string {
 	if m != nil {
 		return m.IndexName
 	}
 	return ""
 }
 
-type GetDocumentCountResponse struct {
+type GetIndexResponse struct {
 	DocumentCount uint64 `protobuf:"varint,1,opt,name=documentCount" json:"documentCount,omitempty"`
+	IndexStats    []byte `protobuf:"bytes,2,opt,name=indexStats,proto3" json:"indexStats,omitempty"`
+	IndexMapping  []byte `protobuf:"bytes,3,opt,name=indexMapping,proto3" json:"indexMapping,omitempty"`
 }
 
-func (m *GetDocumentCountResponse) Reset()                    { *m = GetDocumentCountResponse{} }
-func (m *GetDocumentCountResponse) String() string            { return proto1.CompactTextString(m) }
-func (*GetDocumentCountResponse) ProtoMessage()               {}
-func (*GetDocumentCountResponse) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{9} }
+func (m *GetIndexResponse) Reset()                    { *m = GetIndexResponse{} }
+func (m *GetIndexResponse) String() string            { return proto1.CompactTextString(m) }
+func (*GetIndexResponse) ProtoMessage()               {}
+func (*GetIndexResponse) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{11} }
 
-func (m *GetDocumentCountResponse) GetDocumentCount() uint64 {
+func (m *GetIndexResponse) GetDocumentCount() uint64 {
 	if m != nil {
 		return m.DocumentCount
 	}
 	return 0
+}
+
+func (m *GetIndexResponse) GetIndexStats() []byte {
+	if m != nil {
+		return m.IndexStats
+	}
+	return nil
+}
+
+func (m *GetIndexResponse) GetIndexMapping() []byte {
+	if m != nil {
+		return m.IndexMapping
+	}
+	return nil
 }
 
 type GetStatsRequest struct {
@@ -263,7 +305,7 @@ type GetStatsRequest struct {
 func (m *GetStatsRequest) Reset()                    { *m = GetStatsRequest{} }
 func (m *GetStatsRequest) String() string            { return proto1.CompactTextString(m) }
 func (*GetStatsRequest) ProtoMessage()               {}
-func (*GetStatsRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{10} }
+func (*GetStatsRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{12} }
 
 func (m *GetStatsRequest) GetIndexName() string {
 	if m != nil {
@@ -279,7 +321,7 @@ type GetStatsResponse struct {
 func (m *GetStatsResponse) Reset()                    { *m = GetStatsResponse{} }
 func (m *GetStatsResponse) String() string            { return proto1.CompactTextString(m) }
 func (*GetStatsResponse) ProtoMessage()               {}
-func (*GetStatsResponse) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{11} }
+func (*GetStatsResponse) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{13} }
 
 func (m *GetStatsResponse) GetIndexStats() []byte {
 	if m != nil {
@@ -295,7 +337,7 @@ type GetMappingRequest struct {
 func (m *GetMappingRequest) Reset()                    { *m = GetMappingRequest{} }
 func (m *GetMappingRequest) String() string            { return proto1.CompactTextString(m) }
 func (*GetMappingRequest) ProtoMessage()               {}
-func (*GetMappingRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{12} }
+func (*GetMappingRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{14} }
 
 func (m *GetMappingRequest) GetIndexName() string {
 	if m != nil {
@@ -311,7 +353,7 @@ type GetMappingResponse struct {
 func (m *GetMappingResponse) Reset()                    { *m = GetMappingResponse{} }
 func (m *GetMappingResponse) String() string            { return proto1.CompactTextString(m) }
 func (*GetMappingResponse) ProtoMessage()               {}
-func (*GetMappingResponse) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{13} }
+func (*GetMappingResponse) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{15} }
 
 func (m *GetMappingResponse) GetIndexMapping() []byte {
 	if m != nil {
@@ -329,7 +371,7 @@ type PutDocumentRequest struct {
 func (m *PutDocumentRequest) Reset()                    { *m = PutDocumentRequest{} }
 func (m *PutDocumentRequest) String() string            { return proto1.CompactTextString(m) }
 func (*PutDocumentRequest) ProtoMessage()               {}
-func (*PutDocumentRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{14} }
+func (*PutDocumentRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{16} }
 
 func (m *PutDocumentRequest) GetIndexName() string {
 	if m != nil {
@@ -359,7 +401,7 @@ type PutDocumentResponse struct {
 func (m *PutDocumentResponse) Reset()                    { *m = PutDocumentResponse{} }
 func (m *PutDocumentResponse) String() string            { return proto1.CompactTextString(m) }
 func (*PutDocumentResponse) ProtoMessage()               {}
-func (*PutDocumentResponse) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{15} }
+func (*PutDocumentResponse) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{17} }
 
 func (m *PutDocumentResponse) GetSuccess() bool {
 	if m != nil {
@@ -376,7 +418,7 @@ type GetDocumentRequest struct {
 func (m *GetDocumentRequest) Reset()                    { *m = GetDocumentRequest{} }
 func (m *GetDocumentRequest) String() string            { return proto1.CompactTextString(m) }
 func (*GetDocumentRequest) ProtoMessage()               {}
-func (*GetDocumentRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{16} }
+func (*GetDocumentRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{18} }
 
 func (m *GetDocumentRequest) GetIndexName() string {
 	if m != nil {
@@ -399,7 +441,7 @@ type GetDocumentResponse struct {
 func (m *GetDocumentResponse) Reset()                    { *m = GetDocumentResponse{} }
 func (m *GetDocumentResponse) String() string            { return proto1.CompactTextString(m) }
 func (*GetDocumentResponse) ProtoMessage()               {}
-func (*GetDocumentResponse) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{17} }
+func (*GetDocumentResponse) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{19} }
 
 func (m *GetDocumentResponse) GetDocument() []byte {
 	if m != nil {
@@ -416,7 +458,7 @@ type DeleteDocumentRequest struct {
 func (m *DeleteDocumentRequest) Reset()                    { *m = DeleteDocumentRequest{} }
 func (m *DeleteDocumentRequest) String() string            { return proto1.CompactTextString(m) }
 func (*DeleteDocumentRequest) ProtoMessage()               {}
-func (*DeleteDocumentRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{18} }
+func (*DeleteDocumentRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{20} }
 
 func (m *DeleteDocumentRequest) GetIndexName() string {
 	if m != nil {
@@ -439,7 +481,7 @@ type DeleteDocumentResponse struct {
 func (m *DeleteDocumentResponse) Reset()                    { *m = DeleteDocumentResponse{} }
 func (m *DeleteDocumentResponse) String() string            { return proto1.CompactTextString(m) }
 func (*DeleteDocumentResponse) ProtoMessage()               {}
-func (*DeleteDocumentResponse) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{19} }
+func (*DeleteDocumentResponse) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{21} }
 
 func (m *DeleteDocumentResponse) GetSuccess() bool {
 	if m != nil {
@@ -457,7 +499,7 @@ type BulkRequest struct {
 func (m *BulkRequest) Reset()                    { *m = BulkRequest{} }
 func (m *BulkRequest) String() string            { return proto1.CompactTextString(m) }
 func (*BulkRequest) ProtoMessage()               {}
-func (*BulkRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{20} }
+func (*BulkRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{22} }
 
 func (m *BulkRequest) GetIndexName() string {
 	if m != nil {
@@ -489,7 +531,7 @@ type BulkResponse struct {
 func (m *BulkResponse) Reset()                    { *m = BulkResponse{} }
 func (m *BulkResponse) String() string            { return proto1.CompactTextString(m) }
 func (*BulkResponse) ProtoMessage()               {}
-func (*BulkResponse) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{21} }
+func (*BulkResponse) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{23} }
 
 func (m *BulkResponse) GetPutCount() int32 {
 	if m != nil {
@@ -520,7 +562,7 @@ type SearchRequest struct {
 func (m *SearchRequest) Reset()                    { *m = SearchRequest{} }
 func (m *SearchRequest) String() string            { return proto1.CompactTextString(m) }
 func (*SearchRequest) ProtoMessage()               {}
-func (*SearchRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{22} }
+func (*SearchRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{24} }
 
 func (m *SearchRequest) GetIndexName() string {
 	if m != nil {
@@ -543,7 +585,7 @@ type SearchResponse struct {
 func (m *SearchResponse) Reset()                    { *m = SearchResponse{} }
 func (m *SearchResponse) String() string            { return proto1.CompactTextString(m) }
 func (*SearchResponse) ProtoMessage()               {}
-func (*SearchResponse) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{23} }
+func (*SearchResponse) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{25} }
 
 func (m *SearchResponse) GetSearchResult() []byte {
 	if m != nil {
@@ -553,6 +595,8 @@ func (m *SearchResponse) GetSearchResult() []byte {
 }
 
 func init() {
+	proto1.RegisterType((*ListIndexRequest)(nil), "proto.ListIndexRequest")
+	proto1.RegisterType((*ListIndexResponse)(nil), "proto.ListIndexResponse")
 	proto1.RegisterType((*CreateIndexRequest)(nil), "proto.CreateIndexRequest")
 	proto1.RegisterType((*CreateIndexResponse)(nil), "proto.CreateIndexResponse")
 	proto1.RegisterType((*DeleteIndexRequest)(nil), "proto.DeleteIndexRequest")
@@ -561,8 +605,8 @@ func init() {
 	proto1.RegisterType((*OpenIndexResponse)(nil), "proto.OpenIndexResponse")
 	proto1.RegisterType((*CloseIndexRequest)(nil), "proto.CloseIndexRequest")
 	proto1.RegisterType((*CloseIndexResponse)(nil), "proto.CloseIndexResponse")
-	proto1.RegisterType((*GetDocumentCountRequest)(nil), "proto.GetDocumentCountRequest")
-	proto1.RegisterType((*GetDocumentCountResponse)(nil), "proto.GetDocumentCountResponse")
+	proto1.RegisterType((*GetIndexRequest)(nil), "proto.GetIndexRequest")
+	proto1.RegisterType((*GetIndexResponse)(nil), "proto.GetIndexResponse")
 	proto1.RegisterType((*GetStatsRequest)(nil), "proto.GetStatsRequest")
 	proto1.RegisterType((*GetStatsResponse)(nil), "proto.GetStatsResponse")
 	proto1.RegisterType((*GetMappingRequest)(nil), "proto.GetMappingRequest")
@@ -590,12 +634,12 @@ const _ = grpc.SupportPackageIsVersion4
 // Client API for Indigo service
 
 type IndigoClient interface {
+	ListIndex(ctx context.Context, in *ListIndexRequest, opts ...grpc.CallOption) (*ListIndexResponse, error)
 	CreateIndex(ctx context.Context, in *CreateIndexRequest, opts ...grpc.CallOption) (*CreateIndexResponse, error)
 	DeleteIndex(ctx context.Context, in *DeleteIndexRequest, opts ...grpc.CallOption) (*DeleteIndexResponse, error)
 	OpenIndex(ctx context.Context, in *OpenIndexRequest, opts ...grpc.CallOption) (*OpenIndexResponse, error)
 	CloseIndex(ctx context.Context, in *CloseIndexRequest, opts ...grpc.CallOption) (*CloseIndexResponse, error)
-	//    rpc ListIndex(ListIndexRequest) returns (ListIndexResponse) {}
-	GetDocumentCount(ctx context.Context, in *GetDocumentCountRequest, opts ...grpc.CallOption) (*GetDocumentCountResponse, error)
+	GetIndex(ctx context.Context, in *GetIndexRequest, opts ...grpc.CallOption) (*GetIndexResponse, error)
 	GetStats(ctx context.Context, in *GetStatsRequest, opts ...grpc.CallOption) (*GetStatsResponse, error)
 	GetMapping(ctx context.Context, in *GetMappingRequest, opts ...grpc.CallOption) (*GetMappingResponse, error)
 	PutDocument(ctx context.Context, in *PutDocumentRequest, opts ...grpc.CallOption) (*PutDocumentResponse, error)
@@ -611,6 +655,15 @@ type indigoClient struct {
 
 func NewIndigoClient(cc *grpc.ClientConn) IndigoClient {
 	return &indigoClient{cc}
+}
+
+func (c *indigoClient) ListIndex(ctx context.Context, in *ListIndexRequest, opts ...grpc.CallOption) (*ListIndexResponse, error) {
+	out := new(ListIndexResponse)
+	err := grpc.Invoke(ctx, "/proto.Indigo/ListIndex", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
 }
 
 func (c *indigoClient) CreateIndex(ctx context.Context, in *CreateIndexRequest, opts ...grpc.CallOption) (*CreateIndexResponse, error) {
@@ -649,9 +702,9 @@ func (c *indigoClient) CloseIndex(ctx context.Context, in *CloseIndexRequest, op
 	return out, nil
 }
 
-func (c *indigoClient) GetDocumentCount(ctx context.Context, in *GetDocumentCountRequest, opts ...grpc.CallOption) (*GetDocumentCountResponse, error) {
-	out := new(GetDocumentCountResponse)
-	err := grpc.Invoke(ctx, "/proto.Indigo/GetDocumentCount", in, out, c.cc, opts...)
+func (c *indigoClient) GetIndex(ctx context.Context, in *GetIndexRequest, opts ...grpc.CallOption) (*GetIndexResponse, error) {
+	out := new(GetIndexResponse)
+	err := grpc.Invoke(ctx, "/proto.Indigo/GetIndex", in, out, c.cc, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -724,12 +777,12 @@ func (c *indigoClient) Search(ctx context.Context, in *SearchRequest, opts ...gr
 // Server API for Indigo service
 
 type IndigoServer interface {
+	ListIndex(context.Context, *ListIndexRequest) (*ListIndexResponse, error)
 	CreateIndex(context.Context, *CreateIndexRequest) (*CreateIndexResponse, error)
 	DeleteIndex(context.Context, *DeleteIndexRequest) (*DeleteIndexResponse, error)
 	OpenIndex(context.Context, *OpenIndexRequest) (*OpenIndexResponse, error)
 	CloseIndex(context.Context, *CloseIndexRequest) (*CloseIndexResponse, error)
-	//    rpc ListIndex(ListIndexRequest) returns (ListIndexResponse) {}
-	GetDocumentCount(context.Context, *GetDocumentCountRequest) (*GetDocumentCountResponse, error)
+	GetIndex(context.Context, *GetIndexRequest) (*GetIndexResponse, error)
 	GetStats(context.Context, *GetStatsRequest) (*GetStatsResponse, error)
 	GetMapping(context.Context, *GetMappingRequest) (*GetMappingResponse, error)
 	PutDocument(context.Context, *PutDocumentRequest) (*PutDocumentResponse, error)
@@ -741,6 +794,24 @@ type IndigoServer interface {
 
 func RegisterIndigoServer(s *grpc.Server, srv IndigoServer) {
 	s.RegisterService(&_Indigo_serviceDesc, srv)
+}
+
+func _Indigo_ListIndex_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListIndexRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(IndigoServer).ListIndex(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/proto.Indigo/ListIndex",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(IndigoServer).ListIndex(ctx, req.(*ListIndexRequest))
+	}
+	return interceptor(ctx, in, info, handler)
 }
 
 func _Indigo_CreateIndex_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -815,20 +886,20 @@ func _Indigo_CloseIndex_Handler(srv interface{}, ctx context.Context, dec func(i
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Indigo_GetDocumentCount_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetDocumentCountRequest)
+func _Indigo_GetIndex_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetIndexRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(IndigoServer).GetDocumentCount(ctx, in)
+		return srv.(IndigoServer).GetIndex(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/proto.Indigo/GetDocumentCount",
+		FullMethod: "/proto.Indigo/GetIndex",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(IndigoServer).GetDocumentCount(ctx, req.(*GetDocumentCountRequest))
+		return srv.(IndigoServer).GetIndex(ctx, req.(*GetIndexRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -964,6 +1035,10 @@ var _Indigo_serviceDesc = grpc.ServiceDesc{
 	HandlerType: (*IndigoServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
+			MethodName: "ListIndex",
+			Handler:    _Indigo_ListIndex_Handler,
+		},
+		{
 			MethodName: "CreateIndex",
 			Handler:    _Indigo_CreateIndex_Handler,
 		},
@@ -980,8 +1055,8 @@ var _Indigo_serviceDesc = grpc.ServiceDesc{
 			Handler:    _Indigo_CloseIndex_Handler,
 		},
 		{
-			MethodName: "GetDocumentCount",
-			Handler:    _Indigo_GetDocumentCount_Handler,
+			MethodName: "GetIndex",
+			Handler:    _Indigo_GetIndex_Handler,
 		},
 		{
 			MethodName: "GetStats",
@@ -1019,51 +1094,53 @@ var _Indigo_serviceDesc = grpc.ServiceDesc{
 func init() { proto1.RegisterFile("proto/indigo_service.proto", fileDescriptor0) }
 
 var fileDescriptor0 = []byte{
-	// 726 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x09, 0x6e, 0x88, 0x02, 0xff, 0xac, 0x55, 0xdf, 0x4e, 0xdb, 0x3e,
-	0x14, 0x26, 0xfc, 0x68, 0xa1, 0x87, 0xc2, 0x0f, 0xdc, 0x01, 0x21, 0x62, 0x0c, 0x59, 0x5c, 0x70,
-	0x05, 0x6a, 0x99, 0xc4, 0x6e, 0x26, 0xa1, 0x95, 0xad, 0xea, 0xc5, 0xc6, 0x94, 0x8e, 0xdd, 0x4e,
-	0x69, 0xea, 0x95, 0xa8, 0x6d, 0x92, 0x25, 0x4e, 0xb5, 0xed, 0x91, 0xf6, 0x22, 0x7b, 0xad, 0x29,
-	0xb6, 0xe3, 0xd8, 0x49, 0xbb, 0xa5, 0x12, 0x57, 0xd1, 0xf9, 0x7c, 0xce, 0x77, 0xfe, 0xc4, 0xe7,
-	0x33, 0x58, 0x61, 0x14, 0xd0, 0xe0, 0xca, 0xf3, 0x47, 0xde, 0x38, 0xf8, 0x12, 0x93, 0x68, 0xee,
-	0xb9, 0xe4, 0x92, 0x81, 0xa8, 0xc6, 0x3e, 0xf8, 0x97, 0x01, 0xa8, 0x1b, 0x11, 0x87, 0x92, 0xbe,
-	0x3f, 0x22, 0xdf, 0x6d, 0xf2, 0x2d, 0x21, 0x31, 0x45, 0x27, 0xd0, 0xf0, 0x52, 0xfb, 0x83, 0x33,
-	0x23, 0xa6, 0x71, 0x66, 0x5c, 0x34, 0xec, 0x1c, 0x40, 0x18, 0x9a, 0xcc, 0x78, 0xef, 0x84, 0xa1,
-	0xe7, 0x8f, 0xcd, 0xf5, 0x33, 0xe3, 0xa2, 0x69, 0x6b, 0x98, 0x64, 0xf8, 0xf4, 0x23, 0x24, 0xe6,
-	0x7f, 0x0a, 0x43, 0x0a, 0x20, 0x13, 0x36, 0x27, 0xf3, 0x01, 0x0d, 0x22, 0x62, 0x6e, 0xb0, 0xb3,
-	0xcc, 0x44, 0x16, 0x6c, 0x4d, 0xe6, 0xdd, 0xc0, 0xff, 0xea, 0x8d, 0xcd, 0x1a, 0xe3, 0x95, 0x36,
-	0xbe, 0x86, 0x96, 0x56, 0x6b, 0x1c, 0x06, 0x7e, 0x4c, 0xfe, 0x5e, 0x2c, 0xee, 0x00, 0xba, 0x23,
-	0x53, 0xb2, 0x4a, 0x83, 0x69, 0x22, 0x2d, 0xa6, 0x52, 0xa2, 0xcf, 0xb0, 0x77, 0x1f, 0x12, 0x7f,
-	0x85, 0x39, 0x9e, 0xc3, 0x4e, 0x94, 0xf8, 0xd4, 0x9b, 0x11, 0xd1, 0x30, 0x1f, 0xa4, 0x0e, 0xe2,
-	0x36, 0xec, 0x2b, 0xbc, 0x95, 0x4a, 0x69, 0xc3, 0x7e, 0x77, 0x1a, 0xc4, 0xab, 0xb4, 0xdc, 0x01,
-	0xa4, 0x86, 0x54, 0x4a, 0x73, 0x03, 0x47, 0x3d, 0x42, 0xef, 0x02, 0x37, 0x99, 0x11, 0x9f, 0x76,
-	0x83, 0xc4, 0xa7, 0xd5, 0x92, 0xdd, 0x82, 0x59, 0x0e, 0x14, 0x29, 0xcf, 0x61, 0x67, 0xa4, 0x1e,
-	0xb0, 0xe8, 0x0d, 0x5b, 0x07, 0xf1, 0x15, 0xfc, 0xdf, 0x23, 0x74, 0x40, 0x1d, 0x1a, 0x57, 0xed,
-	0x6f, 0x2f, 0x0f, 0x10, 0xa9, 0x4e, 0x01, 0x98, 0x03, 0x43, 0x59, 0x48, 0xd3, 0x56, 0x90, 0x74,
-	0x8c, 0x3d, 0x42, 0xc5, 0x8d, 0xae, 0x96, 0xe6, 0x15, 0x20, 0x35, 0x44, 0x24, 0x2a, 0x2e, 0x8c,
-	0x51, 0x5e, 0x18, 0xec, 0x03, 0xfa, 0x98, 0xc8, 0x99, 0x54, 0xbb, 0x40, 0xa7, 0x00, 0xd9, 0x58,
-	0xfa, 0x77, 0xec, 0xf6, 0x34, 0x6c, 0x05, 0x49, 0x97, 0x29, 0xb3, 0xd8, 0x0e, 0x36, 0x6d, 0x69,
-	0xe3, 0x2b, 0x68, 0x69, 0xf9, 0x44, 0xa9, 0x26, 0x6c, 0xc6, 0x89, 0xeb, 0x92, 0x98, 0x0f, 0x64,
-	0xcb, 0xce, 0x4c, 0x6c, 0xb3, 0xd6, 0x9e, 0xb4, 0x40, 0xdc, 0x86, 0x96, 0xc6, 0x29, 0x8a, 0x50,
-	0xeb, 0x36, 0x0a, 0x75, 0x3f, 0xc0, 0x01, 0xdf, 0xcd, 0xa7, 0xad, 0xa4, 0x03, 0x87, 0x45, 0xda,
-	0x7f, 0x4e, 0x64, 0x02, 0xdb, 0x6f, 0x92, 0xe9, 0xa4, 0x5a, 0x01, 0x67, 0xb0, 0x3d, 0xcc, 0x9d,
-	0xc5, 0xaa, 0xab, 0x50, 0x1a, 0x3f, 0x74, 0xa8, 0xfb, 0x38, 0xf0, 0x7e, 0x72, 0xc9, 0xac, 0xd9,
-	0x39, 0x80, 0x23, 0x68, 0xf2, 0x64, 0xf9, 0x8c, 0xc2, 0x44, 0x59, 0x91, 0x9a, 0x2d, 0xed, 0x74,
-	0x87, 0xc2, 0x84, 0xbe, 0x8d, 0xa2, 0x20, 0xe2, 0x0e, 0xeb, 0xcc, 0x41, 0x07, 0xd3, 0x8a, 0x46,
-	0xac, 0x65, 0xee, 0xc3, 0x33, 0xaa, 0x10, 0x1e, 0xc0, 0xce, 0x80, 0x38, 0x91, 0xfb, 0x58, 0x59,
-	0xcf, 0x62, 0xd5, 0x3d, 0xd3, 0x33, 0x0d, 0xc4, 0x2f, 0x61, 0x37, 0x23, 0xcd, 0xd7, 0x23, 0x73,
-	0x89, 0x93, 0x69, 0xf6, 0xcb, 0x35, 0xac, 0xf3, 0xbb, 0x0e, 0xf5, 0x3e, 0x7b, 0xc8, 0xd0, 0x3b,
-	0xd8, 0x56, 0x9e, 0x01, 0x74, 0xcc, 0x5f, 0xb4, 0xcb, 0xf2, 0x33, 0x66, 0x59, 0x8b, 0x8e, 0x78,
-	0x52, 0xbc, 0x96, 0xf2, 0x28, 0x2a, 0x2f, 0x79, 0xca, 0xaf, 0x85, 0xe4, 0x59, 0xf0, 0x28, 0xe0,
-	0x35, 0x74, 0x0b, 0x0d, 0x29, 0xd0, 0xe8, 0x48, 0xb8, 0x16, 0x9f, 0x02, 0xcb, 0x2c, 0x1f, 0x48,
-	0x86, 0x2e, 0x40, 0x2e, 0xbe, 0x28, 0xf3, 0x2c, 0x49, 0xb8, 0x75, 0xbc, 0xe0, 0x44, 0x92, 0x3c,
-	0x30, 0x85, 0xd3, 0x44, 0x15, 0x9d, 0x8a, 0x80, 0x25, 0x32, 0x6d, 0xbd, 0x58, 0x7a, 0x2e, 0x69,
-	0x5f, 0xc3, 0x56, 0x26, 0x9c, 0xe8, 0x30, 0x77, 0x57, 0xa5, 0xd7, 0x3a, 0x2a, 0xe1, 0x6a, 0x6b,
-	0xb9, 0x20, 0xca, 0xd6, 0x4a, 0xb2, 0x2a, 0x5b, 0x2b, 0xab, 0x27, 0xff, 0x53, 0x8a, 0x56, 0xc9,
-	0x3f, 0x55, 0xd6, 0x4b, 0xf9, 0xa7, 0x16, 0x48, 0x1b, 0xe7, 0x51, 0x3a, 0x45, 0xc7, 0xe5, 0xee,
-	0x8b, 0x3c, 0x0b, 0xd4, 0x09, 0xaf, 0xa1, 0x7b, 0xd8, 0xd5, 0xc5, 0x02, 0x9d, 0x68, 0x37, 0xa4,
-	0xc8, 0xf6, 0x7c, 0xc9, 0xa9, 0x24, 0x6c, 0xc3, 0x46, 0xba, 0xdc, 0x08, 0x09, 0x47, 0x45, 0x56,
-	0xac, 0x96, 0x86, 0xc9, 0x90, 0x1b, 0xa8, 0xf3, 0x35, 0x42, 0xcf, 0x84, 0x83, 0xb6, 0xaa, 0xd6,
-	0x41, 0x01, 0xcd, 0x02, 0x87, 0x75, 0x86, 0x5f, 0xff, 0x09, 0x00, 0x00, 0xff, 0xff, 0xe0, 0xd8,
-	0x31, 0xb5, 0x1e, 0x0a, 0x00, 0x00,
+	// 762 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x09, 0x6e, 0x88, 0x02, 0xff, 0xac, 0x55, 0xdd, 0x6e, 0xd3, 0x30,
+	0x14, 0x6e, 0xb6, 0xb5, 0x5b, 0xcf, 0x7e, 0xe8, 0x4e, 0xd9, 0x96, 0x45, 0x63, 0xaa, 0xac, 0x5d,
+	0xec, 0x6a, 0x53, 0x3b, 0x24, 0xb8, 0x41, 0x42, 0x74, 0x30, 0x4d, 0x02, 0x86, 0x52, 0xe0, 0x16,
+	0x75, 0xad, 0xd9, 0xa2, 0x76, 0x49, 0x48, 0x9c, 0x0a, 0x10, 0x4f, 0xc4, 0xdb, 0xf1, 0x06, 0x28,
+	0xb6, 0xe3, 0xd8, 0x49, 0x07, 0xa9, 0xb4, 0xab, 0xc8, 0x9f, 0xcf, 0xf9, 0xce, 0x4f, 0x7c, 0xbe,
+	0x03, 0x4e, 0x18, 0x05, 0x2c, 0x38, 0xf5, 0xfc, 0xb1, 0x77, 0x13, 0x7c, 0x89, 0x69, 0x34, 0xf3,
+	0x46, 0xf4, 0x84, 0x83, 0x58, 0xe7, 0x1f, 0x82, 0xd0, 0x7a, 0xeb, 0xc5, 0xec, 0xd2, 0x1f, 0xd3,
+	0xef, 0x2e, 0xfd, 0x96, 0xd0, 0x98, 0x91, 0x33, 0xd8, 0xd6, 0xb0, 0x38, 0x0c, 0xfc, 0x98, 0xe2,
+	0x21, 0x80, 0x97, 0x02, 0xef, 0x87, 0x77, 0x34, 0xb6, 0xad, 0xce, 0xf2, 0x71, 0xd3, 0xd5, 0x10,
+	0xf2, 0xdb, 0x02, 0xec, 0x47, 0x74, 0xc8, 0xa8, 0xce, 0x85, 0x07, 0xd0, 0x54, 0x46, 0xb6, 0xd5,
+	0xb1, 0x8e, 0x9b, 0x6e, 0x0e, 0x20, 0x81, 0x0d, 0x7e, 0x78, 0x37, 0x0c, 0x43, 0xcf, 0xbf, 0xb1,
+	0x97, 0x3a, 0xd6, 0xf1, 0x86, 0x6b, 0x60, 0x8a, 0xe1, 0xe3, 0x8f, 0x90, 0xda, 0xcb, 0x1a, 0x43,
+	0x0a, 0xa0, 0x0d, 0xab, 0x93, 0xd9, 0x80, 0x05, 0x11, 0xb5, 0x57, 0xf8, 0x5d, 0x76, 0x44, 0x07,
+	0xd6, 0x26, 0xb3, 0x7e, 0xe0, 0x7f, 0xf5, 0x6e, 0xec, 0x3a, 0xe7, 0x55, 0x67, 0x72, 0x06, 0x6d,
+	0x23, 0x57, 0x59, 0xe3, 0x3f, 0x93, 0x25, 0x3d, 0xc0, 0x73, 0x3a, 0xa5, 0x8b, 0x14, 0x98, 0x06,
+	0x32, 0x7c, 0x2a, 0x05, 0xfa, 0x0c, 0xad, 0xab, 0x90, 0xfa, 0x0b, 0xf4, 0xf1, 0x08, 0x36, 0xa3,
+	0xc4, 0x67, 0xde, 0x1d, 0x95, 0x05, 0x8b, 0x46, 0x9a, 0x20, 0xe9, 0xc2, 0xb6, 0xc6, 0x5b, 0x29,
+	0x95, 0x2e, 0x6c, 0xf7, 0xa7, 0x41, 0xbc, 0x48, 0xc9, 0x3d, 0x40, 0xdd, 0xa5, 0x52, 0x98, 0x53,
+	0x78, 0x74, 0x41, 0xd9, 0x02, 0x41, 0x7e, 0x41, 0x2b, 0x77, 0x90, 0x21, 0x8e, 0x60, 0x73, 0x1c,
+	0x8c, 0x92, 0x3b, 0xea, 0xb3, 0x7e, 0x90, 0xf8, 0x8c, 0x7b, 0xad, 0xb8, 0x26, 0xa8, 0xde, 0xf1,
+	0x80, 0x0d, 0x59, 0x2c, 0xfb, 0xa4, 0x21, 0xa5, 0x27, 0xb9, 0x5c, 0x7e, 0x92, 0x32, 0x5d, 0x6e,
+	0x5f, 0xb5, 0x27, 0xad, 0xdc, 0xa1, 0x30, 0x50, 0x22, 0x11, 0xab, 0x98, 0x48, 0xda, 0xfa, 0x0b,
+	0xca, 0x64, 0xc8, 0x6a, 0x61, 0x9e, 0x03, 0xea, 0x2e, 0x32, 0x50, 0xb1, 0x22, 0x6b, 0x4e, 0x45,
+	0x3e, 0xe0, 0x87, 0x84, 0x9d, 0xcb, 0x4e, 0x55, 0x7b, 0x74, 0x87, 0x00, 0x59, 0x6b, 0x2f, 0xcf,
+	0x79, 0x27, 0x9b, 0xae, 0x86, 0xa4, 0x03, 0x98, 0x9d, 0x64, 0x17, 0xd5, 0x99, 0x9c, 0x42, 0xdb,
+	0x88, 0x27, 0x53, 0xb5, 0x61, 0x35, 0x4e, 0x46, 0x23, 0x1a, 0x8b, 0x86, 0xac, 0xb9, 0xd9, 0x91,
+	0xb8, 0xbc, 0xb4, 0x07, 0x4d, 0x90, 0x74, 0xa1, 0x6d, 0x70, 0xca, 0x24, 0xf4, 0xbc, 0xad, 0x42,
+	0xde, 0x9f, 0x60, 0x47, 0xcc, 0xf3, 0xc3, 0x66, 0xd2, 0x83, 0xdd, 0x22, 0xed, 0x7f, 0x3b, 0x32,
+	0x81, 0xf5, 0x57, 0xc9, 0x74, 0x52, 0x2d, 0x81, 0x0e, 0xac, 0x5f, 0xe7, 0xc6, 0xf2, 0xd9, 0xeb,
+	0x50, 0xea, 0x7f, 0x3d, 0x64, 0xa3, 0xdb, 0x81, 0xf7, 0x53, 0xc8, 0x6c, 0xdd, 0xcd, 0x01, 0x12,
+	0xc1, 0x86, 0x08, 0x96, 0xf7, 0x28, 0x4c, 0xb4, 0x31, 0xab, 0xbb, 0xea, 0x9c, 0xce, 0x61, 0x98,
+	0xb0, 0xd7, 0x51, 0x14, 0x44, 0xc2, 0x60, 0x89, 0x1b, 0x98, 0x60, 0x9a, 0xd1, 0x98, 0x97, 0x2c,
+	0x6c, 0x44, 0x44, 0x1d, 0x22, 0x03, 0xd8, 0x1c, 0xd0, 0x61, 0x34, 0xba, 0xad, 0xac, 0x81, 0xb1,
+	0x6e, 0x9e, 0x69, 0xa0, 0x01, 0x92, 0xa7, 0xb0, 0x95, 0x91, 0xe6, 0xe3, 0x91, 0x99, 0xc4, 0xc9,
+	0x34, 0xfb, 0xe5, 0x06, 0xd6, 0xfb, 0xd3, 0x80, 0xc6, 0x25, 0xdf, 0xa2, 0xf8, 0x12, 0x9a, 0x6a,
+	0x39, 0xe2, 0x9e, 0x58, 0xa6, 0x27, 0xc5, 0x15, 0xea, 0xd8, 0xe5, 0x0b, 0x11, 0x8e, 0xd4, 0xf0,
+	0x0d, 0xac, 0x6b, 0xcb, 0x07, 0xf7, 0xa5, 0x69, 0x79, 0x79, 0x3a, 0xce, 0xbc, 0x2b, 0x9d, 0x47,
+	0xdb, 0x2d, 0x8a, 0xa7, 0xbc, 0xa3, 0x14, 0xcf, 0x9c, 0x55, 0x44, 0x6a, 0x69, 0x45, 0x6a, 0x2d,
+	0xa8, 0x8a, 0x8a, 0x0b, 0x48, 0x55, 0x54, 0xda, 0x20, 0xa4, 0x86, 0x7d, 0x80, 0x5c, 0xf2, 0x31,
+	0xb3, 0x2c, 0x2d, 0x0e, 0x67, 0x7f, 0xce, 0x8d, 0x22, 0x79, 0x01, 0x6b, 0x99, 0xa4, 0xe3, 0xae,
+	0x34, 0x2c, 0x2c, 0x05, 0x67, 0xaf, 0x84, 0x17, 0xdc, 0x85, 0x86, 0x6b, 0xee, 0xba, 0x48, 0xeb,
+	0xee, 0x86, 0x16, 0x8b, 0x12, 0x72, 0xe9, 0x54, 0x25, 0x94, 0x04, 0x58, 0x95, 0x50, 0xd6, 0x59,
+	0xf1, 0x47, 0x34, 0x55, 0x53, 0x7f, 0xa4, 0xac, 0xac, 0xea, 0x8f, 0xcc, 0x11, 0x41, 0xc1, 0xa3,
+	0x09, 0x13, 0x6a, 0x31, 0xef, 0xe3, 0x99, 0xa3, 0x63, 0xa4, 0x86, 0x57, 0xb0, 0x65, 0xca, 0x0a,
+	0x1e, 0x18, 0x2f, 0xa1, 0xc8, 0xf6, 0xe4, 0x9e, 0x5b, 0x45, 0xd8, 0x85, 0x95, 0x54, 0x06, 0x10,
+	0xa5, 0xa1, 0x26, 0x40, 0x4e, 0xdb, 0xc0, 0x94, 0xcb, 0x33, 0x68, 0x88, 0x81, 0xc3, 0xc7, 0xd2,
+	0xc0, 0x18, 0x6a, 0x67, 0xa7, 0x80, 0x66, 0x8e, 0xd7, 0x0d, 0x8e, 0x9f, 0xfd, 0x0d, 0x00, 0x00,
+	0xff, 0xff, 0x24, 0xd0, 0x3a, 0x2b, 0xc5, 0x0a, 0x00, 0x00,
 }

@@ -3,12 +3,12 @@ syntax = "proto3";
 package proto;
 
 service Indigo {
+    rpc ListIndex(ListIndexRequest) returns (ListIndexResponse) {}
     rpc CreateIndex(CreateIndexRequest) returns (CreateIndexResponse) {}
     rpc DeleteIndex(DeleteIndexRequest) returns (DeleteIndexResponse) {}
     rpc OpenIndex(OpenIndexRequest) returns (OpenIndexResponse) {}
     rpc CloseIndex(CloseIndexRequest) returns (CloseIndexResponse) {}
-//    rpc ListIndex(ListIndexRequest) returns (ListIndexResponse) {}
-    rpc GetDocumentCount(GetDocumentCountRequest) returns (GetDocumentCountResponse) {}
+    rpc GetIndex(GetIndexRequest) returns (GetIndexResponse) {}
     rpc GetStats(GetStatsRequest) returns (GetStatsResponse) {}
     rpc GetMapping(GetMappingRequest) returns (GetMappingResponse) {}
     rpc PutDocument(PutDocumentRequest) returns (PutDocumentResponse) {}
@@ -16,6 +16,13 @@ service Indigo {
     rpc DeleteDocument(DeleteDocumentRequest) returns (DeleteDocumentResponse) {}
     rpc Bulk(BulkRequest) returns (BulkResponse) {}
     rpc Search(SearchRequest) returns (SearchResponse) {}
+}
+
+message ListIndexRequest {
+}
+
+message ListIndexResponse {
+    repeated string indexNames = 1;
 }
 
 message CreateIndexRequest {
@@ -55,19 +62,14 @@ message CloseIndexResponse {
     string indexName = 1;
 }
 
-//message ListIndexRequest {
-//}
-
-//message ListIndexResponse {
-//    repeated string indexName = 1;
-//}
-
-message GetDocumentCountRequest {
+message GetIndexRequest {
     string indexName = 1;
 }
 
-message GetDocumentCountResponse {
+message GetIndexResponse {
     uint64 documentCount = 1;
+    bytes indexStats = 2;
+    bytes indexMapping = 3;
 }
 
 message GetStatsRequest {

@@ -246,17 +246,47 @@ func (igs *indigoGRPCService) CloseIndex(ctx context.Context, req *proto.CloseIn
 	}, err
 }
 
-func (igs *indigoGRPCService) GetDocumentCount(ctx context.Context, req *proto.GetDocumentCountRequest) (*proto.GetDocumentCountResponse, error) {
+func (igs *indigoGRPCService) ListIndex(ctx context.Context, req *proto.ListIndexRequest) (*proto.ListIndexResponse, error) {
+	indexNames := make([]string, 0)
+
+	for indexName := range igs.indices {
+		indexNames = append(indexNames, indexName)
+	}
+
+	return &proto.ListIndexResponse{
+		IndexNames: indexNames,
+	}, nil
+}
+
+func (igs *indigoGRPCService) GetIndex(ctx context.Context, req *proto.GetIndexRequest) (*proto.GetIndexResponse, error) {
 	index, open := igs.indices[req.IndexName]
 	if !open {
 		err := errors.New("index is not open")
 		log.Printf("error: %s indexName=\"%s\"\n", err.Error(), req.IndexName)
-		return &proto.GetDocumentCountResponse{}, err
+		return &proto.GetIndexResponse{}, err
 	}
 
 	count, err := index.DocCount()
 
-	return &proto.GetDocumentCountResponse{DocumentCount: count}, err
+	bytesIndexStat, err := index.Stats().MarshalJSON()
+	if err == nil {
+		log.Printf("info: succeeded in creating index stats indexName=\"%s\"\n", req.IndexName)
+	} else {
+		log.Printf("error: %s indexName=\"%s\"\n", err.Error(), req.IndexName)
+	}
+
+	indexMapping, err := json.Marshal(index.Mapping())
+	if err == nil {
+		log.Printf("info: succeeded in creating index mapping indexName=\"%s\"\n", req.IndexName)
+	} else {
+		log.Printf("error: %s indexName=\"%s\"\n", err.Error(), req.IndexName)
+	}
+
+	return &proto.GetIndexResponse{
+		DocumentCount: count,
+		IndexStats:    bytesIndexStat,
+		IndexMapping:  indexMapping,
+	}, err
 }
 
 func (igs *indigoGRPCService) GetStats(ctx context.Context, req *proto.GetStatsRequest) (*proto.GetStatsResponse, error) {
