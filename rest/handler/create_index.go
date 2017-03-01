@@ -30,10 +30,8 @@ func (h *CreateIndexHandler) ServeHTTP(w http.ResponseWriter, req *http.Request)
 	indexName := vars["indexName"]
 
 	indexMapping, err := ioutil.ReadAll(req.Body)
-	if err == nil {
-		log.Print("debug: read request body")
-	} else {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+	if err != nil {
+		Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
@@ -47,10 +45,10 @@ func (h *CreateIndexHandler) ServeHTTP(w http.ResponseWriter, req *http.Request)
 		indexStore = constant.DefaultKVStore
 	}
 
-	resp, err := h.client.CreateIndex(context.Background(), &proto.CreateIndexRequest{IndexName: indexName, IndexMapping: indexMapping, IndexType: indexType, KvStore: indexStore})
+	resp, err := h.client.CreateIndex(context.Background(), &proto.CreateIndexRequest{IndexName: indexName, IndexMapping: indexMapping, IndexType: indexType, Kvstore: indexStore, Kvconfig: nil})
 	if err != nil {
 		log.Printf("error: %s\n", err.Error())
-		http.Error(w, err.Error(), http.StatusServiceUnavailable)
+		Error(w, err.Error(), http.StatusServiceUnavailable)
 		return
 	}
 	log.Print("debug: succeeded in requesting to the Indigo gRPC Server\n")
@@ -58,7 +56,7 @@ func (h *CreateIndexHandler) ServeHTTP(w http.ResponseWriter, req *http.Request)
 	output, err := json.MarshalIndent(resp, "", "  ")
 	if err != nil {
 		log.Printf("error: %s\n", err.Error())
-		http.Error(w, err.Error(), http.StatusServiceUnavailable)
+		Error(w, err.Error(), http.StatusServiceUnavailable)
 		return
 	}
 	log.Print("debug: succeeded in creating response JSON\n")

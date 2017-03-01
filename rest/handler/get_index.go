@@ -29,35 +29,35 @@ func (h *GetIndexHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	resp, err := h.client.GetIndex(context.Background(), &proto.GetIndexRequest{IndexName: indexName})
 	if err != nil {
 		log.Printf("error: %s\n", err.Error())
-		http.Error(w, err.Error(), http.StatusServiceUnavailable)
+		Error(w, err.Error(), http.StatusServiceUnavailable)
 		return
 	}
 	log.Print("debug: succeeded in requesting to the Indigo gRPC Server\n")
 
 	result := make(map[string]interface{})
 
-	result["documentCount"] = resp.DocumentCount
+	result["document_count"] = resp.DocumentCount
 
 	indexStats := make(map[string]interface{})
 	if err := json.Unmarshal(resp.IndexStats, &indexStats); err != nil {
 		log.Printf("error: %s\n", err.Error())
-		http.Error(w, err.Error(), http.StatusServiceUnavailable)
+		Error(w, err.Error(), http.StatusServiceUnavailable)
 		return
 	}
-	result["indexStats"] = indexStats
+	result["index_stats"] = indexStats
 
 	indexMapping := make(map[string]interface{})
 	if err := json.Unmarshal(resp.IndexMapping, &indexMapping); err != nil {
 		log.Printf("error: %s\n", err.Error())
-		http.Error(w, err.Error(), http.StatusServiceUnavailable)
+		Error(w, err.Error(), http.StatusServiceUnavailable)
 		return
 	}
-	result["indexMapping"] = indexMapping
+	result["index_mapping"] = indexMapping
 
 	output, err := json.MarshalIndent(result, "", "  ")
 	if err != nil {
 		log.Printf("error: %s\n", err.Error())
-		http.Error(w, err.Error(), http.StatusServiceUnavailable)
+		Error(w, err.Error(), http.StatusServiceUnavailable)
 		return
 	}
 	log.Print("debug: succeeded in creating response JSON\n")

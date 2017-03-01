@@ -28,10 +28,10 @@ func (h *DeleteDocumentHandler) ServeHTTP(w http.ResponseWriter, req *http.Reque
 	indexName := vars["indexName"]
 	id := vars["id"]
 
-	resp, err := h.client.DeleteDocument(context.Background(), &proto.DeleteDocumentRequest{IndexName: indexName, DocumentID: id})
+	resp, err := h.client.DeleteDocument(context.Background(), &proto.DeleteDocumentRequest{IndexName: indexName, Id: id})
 	if err != nil {
 		log.Printf("error: %s\n", err.Error())
-		http.Error(w, err.Error(), http.StatusServiceUnavailable)
+		Error(w, err.Error(), http.StatusServiceUnavailable)
 		return
 	}
 	log.Print("debug: succeeded in requesting to the Indigo gRPC Server\n")
@@ -39,7 +39,7 @@ func (h *DeleteDocumentHandler) ServeHTTP(w http.ResponseWriter, req *http.Reque
 	output, err := json.MarshalIndent(resp, "", "  ")
 	if err != nil {
 		log.Printf("error: %s\n", err.Error())
-		http.Error(w, err.Error(), http.StatusServiceUnavailable)
+		Error(w, err.Error(), http.StatusServiceUnavailable)
 		return
 	}
 	log.Print("debug: succeeded in creating response JSON\n")

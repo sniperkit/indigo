@@ -2,7 +2,7 @@
   {
     "method" : "put",
     "id": "1",
-    "document": {
+    "fields": {
       "name": "Bleve",
       "description": "Bleve is a full-text search and indexing library for Go.",
       "category": "Library",
@@ -14,7 +14,7 @@
   {
     "method" : "put",
     "id": "2",
-    "document": {
+    "fields": {
       "name": "Lucene",
       "description": "Apache Lucene is a high-performance, full-featured text search engine library written entirely in Java.",
       "category": "Library",
@@ -26,7 +26,7 @@
   {
     "method" : "put",
     "id": "3",
-    "document": {
+    "fields": {
       "name": "Whoosh",
       "description": "Whoosh is a fast, featureful full-text indexing and searching library implemented in pure Python. ",
       "category": "Library",
@@ -38,7 +38,7 @@
   {
     "method" : "put",
     "id": "4",
-    "document": {
+    "fields": {
       "name": "Ferret",
       "description": "Ferret is a super fast, highly configurable search library written in Ruby.",
       "category": "Library",
@@ -50,7 +50,7 @@
   {
     "method" : "put",
     "id": "5",
-    "document": {
+    "fields": {
       "name": "Solr",
       "description": "Solr is an open source enterprise search platform, written in Java, from the Apache Lucene project.",
       "category": "Server",
@@ -62,7 +62,7 @@
   {
     "method" : "put",
     "id": "6",
-    "document": {
+    "fields": {
       "name": "Elasticsearch",
       "description": "Elasticsearch is a search engine based on Lucene, written in Java.",
       "category": "Server",
@@ -74,7 +74,7 @@
   {
     "method" : "put",
     "id": "7",
-    "document": {
+    "fields": {
       "name": "Indigo",
       "description": "Indigo is a full-text search and indexing server written in Go, built on top of Bleve.",
       "category": "Server",

@@ -30,7 +30,7 @@ func (h *CloseIndexHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) 
 	resp, err := h.client.CloseIndex(context.Background(), &proto.CloseIndexRequest{IndexName: indexName})
 	if err != nil {
 		log.Printf("error: %s\n", err.Error())
-		http.Error(w, err.Error(), http.StatusServiceUnavailable)
+		Error(w, err.Error(), http.StatusServiceUnavailable)
 		return
 	}
 	log.Print("debug: succeeded in requesting to the Indigo gRPC Server\n")
@@ -38,7 +38,7 @@ func (h *CloseIndexHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) 
 	output, err := json.MarshalIndent(resp, "", "  ")
 	if err != nil {
 		log.Printf("error: %s\n", err.Error())
-		http.Error(w, err.Error(), http.StatusServiceUnavailable)
+		Error(w, err.Error(), http.StatusServiceUnavailable)
 		return
 	}
 	log.Print("debug: succeeded in creating response JSON\n")

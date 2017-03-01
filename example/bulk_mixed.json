@@ -2,7 +2,7 @@
   {
     "method" : "put",
     "id": "1",
-    "document": {
+    "fields": {
       "name": "Bleve",
       "description": "Bleve is a full-text search and indexing library for Go.",
       "category": "Library",
@@ -34,7 +34,7 @@
   {
     "method" : "put",
     "id": "7",
-    "document": {
+    "fields": {
       "name": "Indigo",
       "description": "Indigo is a full-text search and indexing server written in Go, built on top of Bleve.",
       "category": "Server",

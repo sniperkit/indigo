@@ -48,11 +48,8 @@ var getDocumentCmd = &cobra.Command{
 			Fields map[string]interface{} `json:"fields"`
 		}{
 			ID:     documentID,
-			Fields: make(map[string]interface{}),
+			Fields: fields,
 		}
-
-		r.ID = documentID
-		r.Fields = fields
 
 		switch outputFormat {
 		case "text":

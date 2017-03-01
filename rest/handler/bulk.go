@@ -31,33 +31,28 @@ func (h *BulkHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	indexName := vars["indexName"]
 
 	bulkRequest, err := ioutil.ReadAll(req.Body)
-	if err == nil {
-		log.Print("debug: read request body")
-	} else {
-		log.Printf("error: failed to read request body (%s)\n", err.Error())
-
-		w.WriteHeader(http.StatusBadRequest)
+	if err != nil {
+		log.Printf("error: %s\n", err.Error())
+		Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
 	batchSize := constant.DefaultBatchSize
 	bs, err := strconv.Atoi(req.URL.Query().Get("batchSize"))
 	if err == nil {
-		log.Printf("debug: convert string to int batchSize=\"%s\"\n", batchSize)
 		if bs > 0 {
-			log.Printf("debug: batch size batchSize=%d\n", bs)
 			batchSize = int32(bs)
 		} else {
 			log.Printf("warn: unexpected batch size batchSize=%d\n", bs)
 		}
 	} else {
-		log.Printf("warn: failed to convert string to int (%s) batchSize=\"%s\"\n", err.Error(), batchSize)
+		log.Printf("warn: %s\n", err.Error())
 	}
 
 	resp, err := h.client.Bulk(context.Background(), &proto.BulkRequest{IndexName: indexName, BulkRequest: bulkRequest, BatchSize: batchSize})
 	if err != nil {
 		log.Printf("error: %s\n", err.Error())
-		http.Error(w, err.Error(), http.StatusServiceUnavailable)
+		Error(w, err.Error(), http.StatusServiceUnavailable)
 		return
 	}
 	log.Print("debug: succeeded in requesting to the Indigo gRPC Server\n")
@@ -65,7 +60,7 @@ func (h *BulkHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	output, err := json.MarshalIndent(resp, "", "  ")
 	if err != nil {
 		log.Printf("error: %s\n", err.Error())
-		http.Error(w, err.Error(), http.StatusServiceUnavailable)
+		Error(w, err.Error(), http.StatusServiceUnavailable)
 		return
 	}
 	log.Print("debug: succeeded in creating response JSON\n")

@@ -16,7 +16,7 @@ var closeIndexCmd = &cobra.Command{
 	Long:  `The close index command closes the index to the Indigo gRPC Server.`,
 	PreRunE: func(cmd *cobra.Command, args []string) error {
 		if indexName == "" {
-			return fmt.Errorf("required flag: --%s", cmd.Flag("name").Name)
+			return fmt.Errorf("required flag: --%s", cmd.Flag("index-name").Name)
 		}
 
 		return nil
@@ -52,7 +52,7 @@ var closeIndexCmd = &cobra.Command{
 }
 
 func init() {
-	closeIndexCmd.Flags().StringVarP(&indexName, "name", "n", constant.DefaultIndexName, "index name")
+	closeIndexCmd.Flags().StringVarP(&indexName, "index-name", "n", constant.DefaultIndexName, "index name")
 
 	closeCmd.AddCommand(closeIndexCmd)
 }

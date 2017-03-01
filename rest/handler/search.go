@@ -29,19 +29,16 @@ func (h *SearchHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	indexName := vars["indexName"]
 
 	searchRequest, err := ioutil.ReadAll(req.Body)
-	if err == nil {
-		log.Print("debug: read request body")
-	} else {
-		log.Printf("error: failed to read request body (%s)\n", err.Error())
-
-		w.WriteHeader(http.StatusBadRequest)
+	if err != nil {
+		log.Printf("error: %s\n", err.Error())
+		Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
 	resp, err := h.client.Search(context.Background(), &proto.SearchRequest{IndexName: indexName, SearchRequest: searchRequest})
 	if err != nil {
 		log.Printf("error: %s\n", err.Error())
-		http.Error(w, err.Error(), http.StatusServiceUnavailable)
+		Error(w, err.Error(), http.StatusServiceUnavailable)
 		return
 	}
 	log.Print("debug: succeeded in requesting to the Indigo gRPC Server\n")
@@ -51,15 +48,15 @@ func (h *SearchHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	searchResult := make(map[string]interface{})
 	if err := json.Unmarshal(resp.SearchResult, &searchResult); err != nil {
 		log.Printf("error: %s\n", err.Error())
-		http.Error(w, err.Error(), http.StatusServiceUnavailable)
+		Error(w, err.Error(), http.StatusServiceUnavailable)
 		return
 	}
-	result["searchResult"] = searchResult
+	result["search_result"] = searchResult
 
 	output, err := json.MarshalIndent(result, "", "  ")
 	if err != nil {
 		log.Printf("error: %s\n", err.Error())
-		http.Error(w, err.Error(), http.StatusServiceUnavailable)
+		Error(w, err.Error(), http.StatusServiceUnavailable)
 		return
 	}
 	log.Print("debug: succeeded in creating response JSON\n")

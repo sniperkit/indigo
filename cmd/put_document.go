@@ -26,7 +26,7 @@ var putDocumentCmd = &cobra.Command{
 		}
 
 		if documentFile == "" {
-			return fmt.Errorf("required flag: --%s", cmd.Flag("document").Name)
+			return fmt.Errorf("required flag: --%s", cmd.Flag("fields").Name)
 		}
 
 		return nil
@@ -51,7 +51,7 @@ var putDocumentCmd = &cobra.Command{
 		defer conn.Close()
 
 		client := proto.NewIndigoClient(conn)
-		resp, err := client.PutDocument(context.Background(), &proto.PutDocumentRequest{IndexName: indexName, DocumentID: documentID, Document: document})
+		resp, err := client.PutDocument(context.Background(), &proto.PutDocumentRequest{IndexName: indexName, Id: documentID, Fields: document})
 		if err != nil {
 			return err
 		}
@@ -76,7 +76,7 @@ var putDocumentCmd = &cobra.Command{
 func init() {
 	putDocumentCmd.Flags().StringVarP(&indexName, "index-name", "n", constant.DefaultIndexName, "index name")
 	putDocumentCmd.Flags().StringVarP(&documentID, "document-id", "i", constant.DefaultDocumentID, "document id")
-	putDocumentCmd.Flags().StringVarP(&documentFile, "document", "d", constant.DefaultDocumentFile, "document file")
+	putDocumentCmd.Flags().StringVarP(&documentFile, "fields", "F", constant.DefaultDocumentFile, "fields file")
 
 	putCmd.AddCommand(putDocumentCmd)
 }

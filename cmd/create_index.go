@@ -18,7 +18,7 @@ var createIndexCmd = &cobra.Command{
 	Long:  `The create index command creates the index to the Indigo gRPC Server.`,
 	PreRunE: func(cmd *cobra.Command, args []string) error {
 		if indexName == "" {
-			return fmt.Errorf("required flag: --%s", cmd.Flag("name").Name)
+			return fmt.Errorf("required flag: --%s", cmd.Flag("index-name").Name)
 		}
 
 		return nil
@@ -60,7 +60,7 @@ var createIndexCmd = &cobra.Command{
 		defer conn.Close()
 
 		client := proto.NewIndigoClient(conn)
-		resp, err := client.CreateIndex(context.Background(), &proto.CreateIndexRequest{IndexName: indexName, IndexMapping: indexMapping, IndexType: indexType, KvStore: kvStore, KvConfig: kvConfig})
+		resp, err := client.CreateIndex(context.Background(), &proto.CreateIndexRequest{IndexName: indexName, IndexMapping: indexMapping, IndexType: indexType, Kvstore: kvStore, Kvconfig: kvConfig})
 		if err != nil {
 			return err
 		}
@@ -83,11 +83,11 @@ var createIndexCmd = &cobra.Command{
 }
 
 func init() {
-	createIndexCmd.Flags().StringVarP(&indexName, "name", "n", constant.DefaultIndexName, "index name")
-	createIndexCmd.Flags().StringVarP(&indexMappingFile, "mapping", "m", constant.DefaultIndexMappingFile, "index mapping file")
-	createIndexCmd.Flags().StringVarP(&indexType, "type", "t", constant.DefaultIndexType, "index type")
-	createIndexCmd.Flags().StringVarP(&kvStore, "kv-store", "s", constant.DefaultKVStore, "kv store")
-	createIndexCmd.Flags().StringVarP(&kvConfigFile, "kv-config", "k", constant.DefaultKVConfigFile, "kv config file")
+	createIndexCmd.Flags().StringVarP(&indexName, "index-name", "n", constant.DefaultIndexName, "index name")
+	createIndexCmd.Flags().StringVarP(&indexMappingFile, "index-mapping", "m", constant.DefaultIndexMappingFile, "index mapping file")
+	createIndexCmd.Flags().StringVarP(&indexType, "index-type", "t", constant.DefaultIndexType, "index type")
+	createIndexCmd.Flags().StringVarP(&kvStore, "kvstore", "s", constant.DefaultKVStore, "kvstore")
+	createIndexCmd.Flags().StringVarP(&kvConfigFile, "kvconfig", "c", constant.DefaultKVConfigFile, "kvconfig file")
 
 	createCmd.AddCommand(createIndexCmd)
 }

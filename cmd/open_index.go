@@ -18,7 +18,7 @@ var openIndexCmd = &cobra.Command{
 	Long:  `The open index command opens the index to the Indigo gRPC Server.`,
 	PreRunE: func(cmd *cobra.Command, args []string) error {
 		if indexName == "" {
-			return fmt.Errorf("required flag: --%s", cmd.Flag("name").Name)
+			return fmt.Errorf("required flag: --%s", cmd.Flag("index-name").Name)
 		}
 
 		return nil
@@ -69,7 +69,7 @@ var openIndexCmd = &cobra.Command{
 }
 
 func init() {
-	openIndexCmd.Flags().StringVarP(&indexName, "name", "n", constant.DefaultIndexName, "index name")
+	openIndexCmd.Flags().StringVarP(&indexName, "index-name", "n", constant.DefaultIndexName, "index name")
 	openIndexCmd.Flags().StringVarP(&runtimeConfigFile, "runtime-config", "r", constant.DefaultRuntimeConfigFile, "runtime config file")
 
 	openCmd.AddCommand(openIndexCmd)

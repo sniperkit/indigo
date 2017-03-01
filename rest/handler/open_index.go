@@ -29,17 +29,16 @@ func (h *OpenIndexHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	indexName := vars["indexName"]
 
 	runtimeConfig, err := ioutil.ReadAll(req.Body)
-	if err == nil {
-		log.Print("debug: read request body")
-	} else {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+	if err != nil {
+		log.Printf("error: %s\n", err.Error())
+		Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
 	resp, err := h.client.OpenIndex(context.Background(), &proto.OpenIndexRequest{IndexName: indexName, RuntimeConfig: runtimeConfig})
 	if err != nil {
 		log.Printf("error: %s\n", err.Error())
-		http.Error(w, err.Error(), http.StatusServiceUnavailable)
+		Error(w, err.Error(), http.StatusServiceUnavailable)
 		return
 	}
 	log.Print("debug: succeeded in requesting to the Indigo gRPC Server\n")
@@ -47,7 +46,7 @@ func (h *OpenIndexHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	output, err := json.MarshalIndent(resp, "", "  ")
 	if err != nil {
 		log.Printf("error: %s\n", err.Error())
-		http.Error(w, err.Error(), http.StatusServiceUnavailable)
+		Error(w, err.Error(), http.StatusServiceUnavailable)
 		return
 	}
 	log.Print("debug: succeeded in creating response JSON\n")

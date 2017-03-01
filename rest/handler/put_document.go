@@ -29,20 +29,17 @@ func (h *PutDocumentHandler) ServeHTTP(w http.ResponseWriter, req *http.Request)
 	indexName := vars["indexName"]
 	id := vars["id"]
 
-	document, err := ioutil.ReadAll(req.Body)
-	if err == nil {
-		log.Print("debug: read request body")
-	} else {
-		log.Printf("error: failed to read request body (%s)\n", err.Error())
-
-		w.WriteHeader(http.StatusBadRequest)
+	fields, err := ioutil.ReadAll(req.Body)
+	if err != nil {
+		log.Printf("error: %s\n", err.Error())
+		Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	resp, err := h.client.PutDocument(context.Background(), &proto.PutDocumentRequest{IndexName: indexName, DocumentID: id, Document: document})
+	resp, err := h.client.PutDocument(context.Background(), &proto.PutDocumentRequest{IndexName: indexName, Id: id, Fields: fields})
 	if err != nil {
 		log.Printf("error: %s\n", err.Error())
-		http.Error(w, err.Error(), http.StatusServiceUnavailable)
+		Error(w, err.Error(), http.StatusServiceUnavailable)
 		return
 	}
 	log.Print("debug: succeeded in requesting to the Indigo gRPC Server\n")
@@ -50,7 +47,7 @@ func (h *PutDocumentHandler) ServeHTTP(w http.ResponseWriter, req *http.Request)
 	output, err := json.MarshalIndent(resp, "", "  ")
 	if err != nil {
 		log.Printf("error: %s\n", err.Error())
-		http.Error(w, err.Error(), http.StatusServiceUnavailable)
+		Error(w, err.Error(), http.StatusServiceUnavailable)
 		return
 	}
 	log.Print("debug: succeeded in creating response JSON\n")
