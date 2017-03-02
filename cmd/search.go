@@ -53,19 +53,22 @@ var searchCmd = &cobra.Command{
 			return err
 		}
 
+		searchResult := make(map[string]interface{})
+		if err := json.Unmarshal(resp.SearchResult, &searchResult); err != nil {
+			return err
+		}
+
+		r := struct {
+			SearchResult map[string]interface{} `json:"search_result"`
+		}{
+			SearchResult: searchResult,
+		}
+
 		switch outputFormat {
 		case "text":
 			fmt.Printf("%s\n", resp.String())
 		case "json":
-			result := make(map[string]interface{})
-
-			searchResult := make(map[string]interface{})
-			if err := json.Unmarshal(resp.SearchResult, &searchResult); err != nil {
-				return err
-			}
-			result["searchResult"] = searchResult
-
-			output, err := json.MarshalIndent(result, "", "  ")
+			output, err := json.MarshalIndent(r, "", "  ")
 			if err != nil {
 				return err
 			}

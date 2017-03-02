@@ -3,6 +3,8 @@ package handler
 import (
 	"bytes"
 	"encoding/json"
+	"github.com/blevesearch/bleve"
+	"github.com/blevesearch/bleve/mapping"
 	"github.com/gorilla/mux"
 	"github.com/mosuka/indigo/proto"
 	"golang.org/x/net/context"
@@ -34,27 +36,31 @@ func (h *GetIndexHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	}
 	log.Print("debug: succeeded in requesting to the Indigo gRPC Server\n")
 
-	result := make(map[string]interface{})
-
-	result["document_count"] = resp.DocumentCount
-
 	indexStats := make(map[string]interface{})
 	if err := json.Unmarshal(resp.IndexStats, &indexStats); err != nil {
 		log.Printf("error: %s\n", err.Error())
 		Error(w, err.Error(), http.StatusServiceUnavailable)
 		return
 	}
-	result["index_stats"] = indexStats
 
-	indexMapping := make(map[string]interface{})
+	indexMapping := bleve.NewIndexMapping()
 	if err := json.Unmarshal(resp.IndexMapping, &indexMapping); err != nil {
 		log.Printf("error: %s\n", err.Error())
 		Error(w, err.Error(), http.StatusServiceUnavailable)
 		return
 	}
-	result["index_mapping"] = indexMapping
 
-	output, err := json.MarshalIndent(result, "", "  ")
+	r := struct {
+		DocumentCount uint64                    `json:"document_count"`
+		IndexStats    map[string]interface{}    `json:"index_stats"`
+		IndexMapping  *mapping.IndexMappingImpl `json:"index_mapping"`
+	}{
+		DocumentCount: resp.DocumentCount,
+		IndexStats:    indexStats,
+		IndexMapping:  indexMapping,
+	}
+
+	output, err := json.MarshalIndent(r, "", "  ")
 	if err != nil {
 		log.Printf("error: %s\n", err.Error())
 		Error(w, err.Error(), http.StatusServiceUnavailable)

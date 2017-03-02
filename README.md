@@ -24,21 +24,22 @@ The Indigo provides some commands for controlling the Indigo Server.
 The `start grpc` command starts the Indigo gRPC Server.
 
 ```sh
-$ indigo start grpc -l trace
+$ ./indigo start grpc -l trace -f color
 ```
 
 
 ### Create the index to the Indigo gRPC Server
 
 ```sh
-$ indigo create index -n example -m example/index_mapping.json -s boltdb -t upside_down -f json
+$ ./indigo create index -n example -m example/index_mapping.json -s boltdb -t upside_down -f json
 ```
 
 The result of the above `create index` command is:
 
 ```json
 {
-  "indexName": "example"
+  "index_name": "example",
+  "index_dir": "data/example"
 }
 ```
 
@@ -46,59 +47,31 @@ The result of the above `create index` command is:
 ### Open the index to the Indigo gRPC Server
 
 ```sh
-$ indigo open index -n example -f json
+$ ./indigo open index -n example -f json
 ```
 
 The result of the above `open index` command is:
 
 ```json
 {
-  "indexName": "example"
+  "index_name": "example",
+  "index_dir": "data/example"
 }
 ```
 
 
-### Close the index from the Indigo gRPC Server
+### Get the index information from the Indigo gRPC Server
 
 ```sh
-$ indigo close index -n example -f json
+$ ./indigo get index -n example -f json
 ```
 
-The result of the above `close index` command is:
+The result of the above `get index` command is:
 
 ```json
 {
-  "indexName": "example"
-}
-```
-
-
-### Delete the index from the Indigo gRPC Server
-
-```sh
-$ indigo delete index -n example -f json
-```
-
-The result of the above `delete index` command is:
-
-```json
-{
-  "indexName": "example"
-}
-```
-
-
-### Get the index stats from the Indigo gRPC Server
-
-```sh
-$ indigo get stats -n example -f json
-```
-
-The result of the above `get stats` command is:
-
-```json
-{
-  "indexStats": {
+  "document_count": 0,
+  "index_stats": {
     "index": {
       "analysis_time": 0,
       "batches": 0,
@@ -112,22 +85,8 @@ The result of the above `get stats` command is:
     },
     "search_time": 0,
     "searches": 0
-  }
-}
-```
-
-
-### Get the index mapping from the Indigo gRPC Server
-
-```sh
-$ indigo get mapping -n example -f
-```
-
-The result of the above `get mapping` command is:
-
-```json
-{
-  "indexMapping": {
+  },
+  "index_mapping": {
     "types": {
       "document": {
         "enabled": true,
@@ -241,10 +200,57 @@ The result of the above `get mapping` command is:
 ```
 
 
+### Close the index from the Indigo gRPC Server
+
+```sh
+$ ./indigo close index -n example -f json
+```
+
+The result of the above `close index` command is:
+
+```json
+{
+  "index_name": "example"
+}
+```
+
+
+### Delete the index from the Indigo gRPC Server
+
+```sh
+$ ./indigo delete index -n example -f json
+```
+
+The result of the above `delete index` command is:
+
+```json
+{
+  "index_name": "example"
+}
+```
+
+
+### List the indices from the Indigo gRPC Server
+
+```sh
+$ ./indigo list index -f json
+```
+
+The result of the above `list index` command is:
+
+```json
+{
+  "indices": [
+    "example"
+  ]
+}
+```
+
+
 ### Put the document to the Indigo gRPC Server
 
 ```sh
-$ indigo put document -n example -i 1 -d example/document_1.json -f json
+$ ./indigo put document -n example -i 1 -F example/document_1.json -f json
 ```
 
 The result of the above `put document` command is:
@@ -259,18 +265,19 @@ The result of the above `put document` command is:
 ### Get the document from the Indigo gRPC Server
 
 ```sh
-$ indigo get document -n example -i 1 -f json
+$ ./indigo get document -n example -i 1 -f json
 ```
 
 The result of the above `get document` command is:
 
 ```json
 {
-  "document": {
+  "id": "1",
+  "fields": {
     "category": "Library",
-    "description": "Full-text search library written in Go.",
+    "description": "Bleve is a full-text search and indexing library for Go.",
     "name": "Bleve",
-    "popularity": 1,
+    "popularity": 3,
     "release": "2014-04-18T00:00:00Z",
     "type": "document"
   }
@@ -281,7 +288,7 @@ The result of the above `get document` command is:
 ### Delete the document from the Indigo gRPC Server
 
 ```sh
-$ indigo delete document -n example -i 1 -f json
+$ ./indigo delete document -n example -i 1 -f json
 ```
 
 The result of the above `delete document` command is:
@@ -296,14 +303,16 @@ The result of the above `delete document` command is:
 ### Index the documents in bulk to the Indigo gRPC Server
 
 ```sh
-$ indigo bulk -n example -b example/bulk_put.json -f json
+$ ./indigo bulk -n example -b example/bulk_put.json -f json
 ```
 
 The result of the above `bulk` command is:
 
-```text
+```json
 {
-  "putCount": 7
+  "put_count": 7,
+  "put_error_count": 0,
+  "delete_count": 0
 }
 ```
 
@@ -315,14 +324,14 @@ See [Queries](http://www.blevesearch.com/docs/Query/), [Query String Query](http
 #### Simple query
 
 ```sh
-$ indigo search -n example -s example/simple_query.json -f json
+$ ./indigo search -n example -s example/simple_query.json -f json
 ```
 
 The result of the above `search` command is:
 
 ```json
 {
-  "searchResult": {
+  "search_result": {
     "facets": {},
     "hits": [
       {
@@ -466,7 +475,7 @@ The result of the above `search` command is:
       "successful": 1,
       "total": 1
     },
-    "took": 2.543262e+06,
+    "took": 7725035,
     "total_hits": 7
   }
 }

@@ -43,17 +43,20 @@ func (h *SearchHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	}
 	log.Print("debug: succeeded in requesting to the Indigo gRPC Server\n")
 
-	result := make(map[string]interface{})
-
 	searchResult := make(map[string]interface{})
 	if err := json.Unmarshal(resp.SearchResult, &searchResult); err != nil {
 		log.Printf("error: %s\n", err.Error())
 		Error(w, err.Error(), http.StatusServiceUnavailable)
 		return
 	}
-	result["search_result"] = searchResult
 
-	output, err := json.MarshalIndent(result, "", "  ")
+	r := struct {
+		SearchResult map[string]interface{} `json:"search_result"`
+	}{
+		SearchResult: searchResult,
+	}
+
+	output, err := json.MarshalIndent(r, "", "  ")
 	if err != nil {
 		log.Printf("error: %s\n", err.Error())
 		Error(w, err.Error(), http.StatusServiceUnavailable)

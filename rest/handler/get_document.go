@@ -36,19 +36,22 @@ func (h *GetDocumentHandler) ServeHTTP(w http.ResponseWriter, req *http.Request)
 	}
 	log.Print("debug: succeeded in requesting to the Indigo gRPC Server\n")
 
-	result := make(map[string]interface{})
-
-	result["id"] = resp.Id
-
 	fields := make(map[string]interface{})
 	if err := json.Unmarshal(resp.Fields, &fields); err != nil {
 		log.Printf("error: %s\n", err.Error())
 		Error(w, err.Error(), http.StatusServiceUnavailable)
 		return
 	}
-	result["fields"] = fields
 
-	output, err := json.MarshalIndent(result, "", "  ")
+	r := struct {
+		ID     string                 `json:"id"`
+		Fields map[string]interface{} `json:"fields"`
+	}{
+		ID:     resp.Id,
+		Fields: fields,
+	}
+
+	output, err := json.MarshalIndent(r, "", "  ")
 	if err != nil {
 		log.Printf("error: %s\n", err.Error())
 		Error(w, err.Error(), http.StatusServiceUnavailable)
