@@ -166,7 +166,7 @@ func (igs *indigoGRPCService) OpenIndex(ctx context.Context, req *proto.OpenInde
 
 	runtimeConfig := make(map[string]interface{})
 	if req.RuntimeConfig != nil {
-		err := json.Unmarshal(req.RuntimeConfig, runtimeConfig)
+		err := json.Unmarshal(req.RuntimeConfig, &runtimeConfig)
 		if err == nil {
 			log.Printf("debug: succeeded in creating runtime config index_name=\"%s\"\n", req.IndexName)
 		} else {

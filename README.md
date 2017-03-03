@@ -495,70 +495,73 @@ $ indigo start rest
 ### Create the index to the Indigo gRPC Server via the Indigo REST Server
 
 ```sh
-$ curl -X PUT "http://localhost:2289/api/example?indexType=upside_down&indexStore=boltdb" -H "Content-Type: application/json" --data-binary @example/index_mapping.json -s
+$ curl -s -X PUT -H "Content-Type: application/json" --data-binary @example/index_mapping.json "http://localhost:2289/api/example?indexType=upside_down&indexStore=boltdb"
 ```
 
 The result of the above command is:
 
 ```json
 {
-  "indexName": "example"
+  "index_name": "example",
+  "index_dir": "data/example"
 }
 ```
 
 ### Open the index to the Indigo gRPC Server via the Indigo REST Server
 
 ```sh
-$ curl -X POST "http://localhost:2289/api/example/_open" -H "Content-Type: application/json" --data-binary @example/runtime_config.json -s
+$ curl -s -H "Content-Type: application/json" --data-binary @example/runtime_config.json -X POST "http://localhost:2289/api/example/_open"
 ```
 
 The result of the above command is:
 
 ```json
 {
-  "indexName": "example"
+  "index_name": "example",
+  "index_dir": "data/example"
 }
 ```
 
 ### Close the index to the Indigo gRPC Server via the Indigo REST Server
 
 ```sh
-$ curl -X POST "http://localhost:2289/api/example/_close" -s
+$ curl -s -X POST "http://localhost:2289/api/example/_close"
 ```
 
 The result of the above command is:
 
 ```json
 {
-  "indexName": "example"
+  "index_name": "example"
 }
 ```
 
 ### Delete the index to the Indigo gRPC Server via the Indigo REST Server
 
 ```sh
-$ curl -X DELETE "http://localhost:2289/api/example" -s
+$ curl -s -X DELETE "http://localhost:2289/api/example"
 ```
 
 The result of the above command is:
 
 ```json
 {
-  "indexName": "example"
+  "index_name": "example"
 }
 ```
 
-### Get the index stats from the Indigo gRPC Server via the Indigo REST Server
+### Get the index information from the Indigo gRPC Server via the Indigo REST Server
 
 ```sh
-$ curl -X GET "http://localhost:2289/api/example/_stats" -s
+$ curl -s -X GET "http://localhost:2289/api/example"
 ```
 
 The result of the above command is:
 
 ```json
 {
-  "indexStats": {
+  "document_count": 0,
+  "index_stats": {
     "index": {
       "analysis_time": 0,
       "batches": 0,
@@ -572,137 +575,125 @@ The result of the above command is:
     },
     "search_time": 0,
     "searches": 0
-  }
-}
-```
-
-### Get the index mapping from the Indigo gRPC Server via the Indigo REST Server
-
-```sh
-$ curl -X GET "http://localhost:2289/api/example/_mapping" -s
-```
-
-The result of the above command is:
-
-```json
-{
-  "indexMapping": {
-    "analysis": {},
+  },
+  "index_mapping": {
+    "types": {
+      "document": {
+        "enabled": true,
+        "dynamic": true,
+        "properties": {
+          "category": {
+            "enabled": true,
+            "dynamic": true,
+            "fields": [
+              {
+                "type": "text",
+                "analyzer": "keyword",
+                "store": true,
+                "index": true,
+                "include_term_vectors": true,
+                "include_in_all": true
+              }
+            ],
+            "default_analyzer": ""
+          },
+          "description": {
+            "enabled": true,
+            "dynamic": true,
+            "fields": [
+              {
+                "type": "text",
+                "analyzer": "en",
+                "store": true,
+                "index": true,
+                "include_term_vectors": true,
+                "include_in_all": true
+              }
+            ],
+            "default_analyzer": ""
+          },
+          "name": {
+            "enabled": true,
+            "dynamic": true,
+            "fields": [
+              {
+                "type": "text",
+                "analyzer": "en",
+                "store": true,
+                "index": true,
+                "include_term_vectors": true,
+                "include_in_all": true
+              }
+            ],
+            "default_analyzer": ""
+          },
+          "popularity": {
+            "enabled": true,
+            "dynamic": true,
+            "fields": [
+              {
+                "type": "number",
+                "store": true,
+                "index": true,
+                "include_in_all": true
+              }
+            ],
+            "default_analyzer": ""
+          },
+          "release": {
+            "enabled": true,
+            "dynamic": true,
+            "fields": [
+              {
+                "type": "datetime",
+                "store": true,
+                "index": true,
+                "include_in_all": true
+              }
+            ],
+            "default_analyzer": ""
+          },
+          "type": {
+            "enabled": true,
+            "dynamic": true,
+            "fields": [
+              {
+                "type": "text",
+                "analyzer": "keyword",
+                "store": true,
+                "index": true,
+                "include_term_vectors": true,
+                "include_in_all": true
+              }
+            ],
+            "default_analyzer": ""
+          }
+        },
+        "default_analyzer": ""
+      }
+    },
+    "default_mapping": {
+      "enabled": true,
+      "dynamic": true,
+      "default_analyzer": ""
+    },
+    "type_field": "type",
+    "default_type": "document",
     "default_analyzer": "standard",
     "default_datetime_parser": "dateTimeOptional",
     "default_field": "_all",
-    "default_mapping": {
-      "default_analyzer": "",
-      "dynamic": true,
-      "enabled": true
-    },
-    "default_type": "document",
-    "index_dynamic": true,
     "store_dynamic": true,
-    "type_field": "type",
-    "types": {
-      "document": {
-        "default_analyzer": "",
-        "dynamic": true,
-        "enabled": true,
-        "properties": {
-          "category": {
-            "default_analyzer": "",
-            "dynamic": true,
-            "enabled": true,
-            "fields": [
-              {
-                "analyzer": "keyword",
-                "include_in_all": true,
-                "include_term_vectors": true,
-                "index": true,
-                "store": true,
-                "type": "text"
-              }
-            ]
-          },
-          "description": {
-            "default_analyzer": "",
-            "dynamic": true,
-            "enabled": true,
-            "fields": [
-              {
-                "analyzer": "en",
-                "include_in_all": true,
-                "include_term_vectors": true,
-                "index": true,
-                "store": true,
-                "type": "text"
-              }
-            ]
-          },
-          "name": {
-            "default_analyzer": "",
-            "dynamic": true,
-            "enabled": true,
-            "fields": [
-              {
-                "analyzer": "en",
-                "include_in_all": true,
-                "include_term_vectors": true,
-                "index": true,
-                "store": true,
-                "type": "text"
-              }
-            ]
-          },
-          "popularity": {
-            "default_analyzer": "",
-            "dynamic": true,
-            "enabled": true,
-            "fields": [
-              {
-                "include_in_all": true,
-                "index": true,
-                "store": true,
-                "type": "number"
-              }
-            ]
-          },
-          "release": {
-            "default_analyzer": "",
-            "dynamic": true,
-            "enabled": true,
-            "fields": [
-              {
-                "include_in_all": true,
-                "index": true,
-                "store": true,
-                "type": "datetime"
-              }
-            ]
-          },
-          "type": {
-            "default_analyzer": "",
-            "dynamic": true,
-            "enabled": true,
-            "fields": [
-              {
-                "analyzer": "keyword",
-                "include_in_all": true,
-                "include_term_vectors": true,
-                "index": true,
-                "store": true,
-                "type": "text"
-              }
-            ]
-          }
-        }
-      }
-    }
+    "index_dynamic": true,
+    "analysis": {}
   }
 }
 ```
+
 
 ### Put the document to the Indigo gRPC Server via the Indigo REST Server
 
 ```sh
-$ curl -X PUT "http://localhost:2289/api/example/1" -H "Content-Type: application/json" --data-binary @example/document_1.json -s
+$ curl -s -X PUT -H "Content-Type: application/json" --data-binary @example/document_1.json "http://localhost:2289/api/example/1"
 ```
 
 The result of the above command is:
@@ -716,14 +707,15 @@ The result of the above command is:
 ### Get the document to the Indigo gRPC Server via the Indigo REST Server
 
 ```sh
-$ curl -X GET "http://localhost:2289/api/example/1" -s
+$ curl -s -X GET "http://localhost:2289/api/example/1"
 ```
 
 The result of the above command is:
 
 ```json
 {
-  "document": {
+  "id": "1",
+  "fields": {
     "category": "Library",
     "description": "Bleve is a full-text search and indexing library for Go.",
     "name": "Bleve",
@@ -737,7 +729,7 @@ The result of the above command is:
 ### Delete the document from the Indigo gRPC Server via the Indigo REST Server
 
 ```sh
-$ curl -X DELETE "http://localhost:2289/api/example/1" -s
+$ curl -s -X DELETE "http://localhost:2289/api/example/1"
 ```
 
 The result of the above command is:
@@ -751,14 +743,14 @@ The result of the above command is:
 ### Index the documents in bulk to the Indigo gRPC Server via the Indigo REST Server
 
 ```sh
-$ curl -X POST "http://localhost:2289/api/example/_bulk" -H "Content-Type: application/json" --data-binary @example/bulk_put.json -s
+$ curl -s -X POST -H "Content-Type: application/json" --data-binary @example/bulk_put.json "http://localhost:2289/api/example/_bulk"
 ```
 
 The result of the above command is:
 
 ```text
 {
-  "putCount": 7
+  "put_count": 7
 }
 ```
 
@@ -768,14 +760,14 @@ The result of the above command is:
 #### Simple query
 
 ```sh
-$ curl -X POST "http://localhost:2289/api/example/_search" -H "Content-Type: application/json" --data-binary @example/simple_query.json -s
+$ curl -s -X POST -H "Content-Type: application/json" --data-binary @example/simple_query.json "http://localhost:2289/api/example/_search"
 ```
 
-The result of the above `search documents` command is:
+The result of the above command is:
 
 ```json
 {
-  "searchResult": {
+  "search_result": {
     "facets": {},
     "hits": [
       {
@@ -919,7 +911,7 @@ The result of the above `search documents` command is:
       "successful": 1,
       "total": 1
     },
-    "took": 2.766836e+06,
+    "took": 38819452,
     "total_hits": 7
   }
 }
