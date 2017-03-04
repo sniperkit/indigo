@@ -319,10 +319,6 @@ The result of the above `bulk` command is:
 
 ### Search the documents frmo the Indigo gRPC Server
 
-See [Queries](http://www.blevesearch.com/docs/Query/), [Query String Query](http://www.blevesearch.com/docs/Query-String-Query/) and [type SearchRequest](https://godoc.org/github.com/blevesearch/bleve#SearchRequest) for more details.
-
-#### Simple query
-
 ```sh
 $ ./indigo search -n example -s example/simple_query.json -f json
 ```
@@ -550,6 +546,22 @@ The result of the above command is:
 }
 ```
 
+### List the index to the Indigo gRPC Server via the Indigo REST Server
+
+```sh
+$ curl -s -X GET "http://localhost:2289/api/_list"
+```
+
+The result of the above command is:
+
+```json
+{
+  "indices": [
+    "example"
+  ]
+}
+```
+
 ### Get the index information from the Indigo gRPC Server via the Indigo REST Server
 
 ```sh
@@ -757,8 +769,6 @@ The result of the above command is:
 
 ### Search the documents from the Indigo gRPC Server via the Indigo REST Server
 
-#### Simple query
-
 ```sh
 $ curl -s -X POST -H "Content-Type: application/json" --data-binary @example/simple_query.json "http://localhost:2289/api/example/_search"
 ```
@@ -920,12 +930,11 @@ The result of the above command is:
 
 ## The index mapping
 
-The index mapping describes how to your data model should be indexed. See following example.
+The index mapping describes how to your data model should be indexed. See following example.  
+The index_mapping.json file contains all of the details about which fields your documents can contain, and how those fields should be dealt with when adding documents to the index, or when querying those fields.  
+See [Introduction to Index Mappings](http://www.blevesearch.com/docs/Index-Mapping/) and [type IndexMappingImpl](https://godoc.org/github.com/blevesearch/bleve/mapping#IndexMappingImpl) for more details.  
 
-#### index_mapping.json
-
-The index_mapping.json file contains all of the details about which fields your documents can contain, and how those fields should be dealt with when adding documents to the index, or when querying those fields.
-See [Introduction to Index Mappings](http://www.blevesearch.com/docs/Index-Mapping/) and [type IndexMappingImpl](https://godoc.org/github.com/blevesearch/bleve/mapping#IndexMappingImpl) for more details.
+### example
 
 ```json
 {
@@ -1040,6 +1049,161 @@ See [Introduction to Index Mappings](http://www.blevesearch.com/docs/Index-Mappi
 }
 ```
 
+## document mapping
+
+### example
+
+```json
+{
+  "name": "Bleve",
+  "description": "Bleve is a full-text search and indexing library for Go.",
+  "category": "Library",
+  "popularity": 3.0,
+  "release": "2014-04-18T00:00:00Z",
+  "type": "document"
+}
+```
+
+## Bulk request format
+
+### example
+
+```json
+[
+  {
+    "method" : "put",
+    "id": "1",
+    "fields": {
+      "name": "Bleve",
+      "description": "Bleve is a full-text search and indexing library for Go.",
+      "category": "Library",
+      "popularity": 3.0,
+      "release": "2014-04-18T00:00:00Z",
+      "type": "document"
+    }
+  },
+  {
+    "method" : "delete",
+    "id": "2"
+  },
+  {
+    "method" : "delete",
+    "id": "3"
+  },
+  {
+    "method" : "delete",
+    "id": "4"
+  },
+  {
+    "method" : "delete",
+    "id": "5"
+  },
+  {
+    "method" : "delete",
+    "id": "6"
+  },
+  {
+    "method" : "put",
+    "id": "7",
+    "fields": {
+      "name": "Indigo",
+      "description": "Indigo is a full-text search and indexing server written in Go, built on top of Bleve.",
+      "category": "Server",
+      "popularity": 1.0,
+      "release": "2017-01-13T00:00:00Z",
+      "type": "document"
+    }
+  }
+]
+```
+
+
+## Search request format
+
+See [Queries](http://www.blevesearch.com/docs/Query/), [Query String Query](http://www.blevesearch.com/docs/Query-String-Query/) and [type SearchRequest](https://godoc.org/github.com/blevesearch/bleve#SearchRequest) for more details.
+
+### example
+
+```json
+{
+  "query": {
+    "query": "description:search"
+  },
+  "size": 10,
+  "from": 0,
+  "fields": [
+    "name",
+    "description",
+    "category",
+    "popularity",
+    "release",
+    "type"
+  ],
+  "facets": {
+    "Category count": {
+      "size": 10,
+      "field": "category"
+    },
+    "Popularity range": {
+      "size": 10,
+      "field": "popularity",
+      "numeric_ranges": [
+        {
+          "name": "less than 1",
+          "max": 1
+        },
+        {
+          "name": "more than or equal to 1 and less than 2",
+          "min": 1,
+          "max": 2
+        },
+        {
+          "name": "more than or equal to 2 and less than 3",
+          "min": 2,
+          "max": 3
+        },
+        {
+          "name": "more than or equal to 3 and less than 4",
+          "min": 3,
+          "max": 4
+        },
+        {
+          "name": "more than or equal to 4 and less than 5",
+          "min": 4,
+          "max": 5
+        },
+        {
+          "name": "more than or equal to 5",
+          "min": 5
+        }
+      ]
+    },
+    "Release date range": {
+      "size": 10,
+      "field": "release",
+      "date_ranges": [
+        {
+          "name": "2001 - 2010",
+          "start": "2001-01-01T00:00:00Z",
+          "end": "2010-12-31T23:59:59Z"
+        },
+        {
+          "name": "2011 - 2020",
+          "start": "2011-01-01T00:00:00Z",
+          "end": "2020-12-31T23:59:59Z"
+        }
+      ]
+    }
+  },
+  "highlight": {
+    "style": "html",
+    "fields": [
+      "name",
+      "description"
+    ]
+  }
+}
+```
 
 ## License
 

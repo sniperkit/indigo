@@ -52,21 +52,11 @@ var bulkCmd = &cobra.Command{
 			return err
 		}
 
-		r := struct {
-			PutCount      int32 `json:"put_count"`
-			PutErrorCount int32 `json:"put_error_count"`
-			DeleteCount   int32 `json:"delete_count"`
-		}{
-			PutCount:      resp.PutCount,
-			PutErrorCount: resp.PutErrorCount,
-			DeleteCount:   resp.DeleteCount,
-		}
-
 		switch outputFormat {
 		case "text":
 			fmt.Printf("%s\n", resp.String())
 		case "json":
-			output, err := json.MarshalIndent(r, "", "  ")
+			output, err := json.MarshalIndent(resp, "", "  ")
 			if err != nil {
 				return err
 			}
