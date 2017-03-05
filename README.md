@@ -1,27 +1,29 @@
 # Indigo
 
-The Indigo is a full text search and indexing server written in [Go](https://golang.org) based on [Bleve](http://www.blevesearch.com).  
+Indigo is a full text search and indexing server written in [Go](https://golang.org) based on [Bleve](http://www.blevesearch.com).  
 
 Indigo includes a full text search and indexing server, it also includes a web server that provides a [RESTful](https://en.wikipedia.org/wiki/Representational_state_transfer) interface for Indigo gRPC server.  
 
-Indigo gRPC Server communicates with the client using [gRPC](http://www.grpc.io) ([HTTP/2](https://en.wikipedia.org/wiki/HTTP/2) + [Protocol Buffers](https://developers.google.com/protocol-buffers/)). You can access to the Indigo gRPC Server using gRPC directly.  
+Indigo gRPC Server communicates with the client using [gRPC](http://www.grpc.io) ([HTTP/2](https://en.wikipedia.org/wiki/HTTP/2) + [Protocol Buffers](https://developers.google.com/protocol-buffers/)). You can access to Indigo gRPC Server using gRPC directly.  
 
 Indigo REST Server provides JSON API ([HTTP/1.1](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol) + [JSON](http://www.json.org)) that communicate with Indigo gRPC Server. If you want to access to Indigo gRPC Server using traditional JSON API, you can access via Indigo REST Server.
 
 
 ## Features
 
+![](./img/Indigo%20Architecture.png "Indigo")
+
 - TODO
 
 
 ## The Indigo Command Line Interface
 
-The Indigo provides some commands for controlling the Indigo Server.
+Indigo provides some commands for controlling Indigo Server.
 
 
 ### Start Indigo gRPC Server
 
-The `start grpc` command starts the Indigo gRPC Server.
+`start grpc` command starts Indigo gRPC Server. You can display a help message by specifying `-h` or `--help` option.
 
 ```sh
 $ ./indigo start grpc -l trace -f color
@@ -29,6 +31,124 @@ $ ./indigo start grpc -l trace -f color
 
 
 ### Create the index to the Indigo gRPC Server
+
+`create index` command creates the Index to the Indigo gRPC Server. Indigo provides support for multiple indices, including executing operations across several indices. You can display a help message by specifying `-h` or `--help` option.  
+You can specify the index mapping describes how to your data model should be indexed. it contains all of the details about which fields your documents can contain, and how those fields should be dealt with when adding documents to the index, or when querying those fields. The example is following:
+
+```json
+{
+  "types": {
+    "document": {
+      "enabled": true,
+      "dynamic": true,
+      "properties": {
+        "category": {
+          "enabled": true,
+          "dynamic": true,
+          "fields": [
+            {
+              "type": "text",
+              "analyzer": "keyword",
+              "store": true,
+              "index": true,
+              "include_term_vectors": true,
+              "include_in_all": true
+            }
+          ],
+          "default_analyzer": ""
+        },
+        "description": {
+          "enabled": true,
+          "dynamic": true,
+          "fields": [
+            {
+              "type": "text",
+              "analyzer": "en",
+              "store": true,
+              "index": true,
+              "include_term_vectors": true,
+              "include_in_all": true
+            }
+          ],
+          "default_analyzer": ""
+        },
+        "name": {
+          "enabled": true,
+          "dynamic": true,
+          "fields": [
+            {
+              "type": "text",
+              "analyzer": "en",
+              "store": true,
+              "index": true,
+              "include_term_vectors": true,
+              "include_in_all": true
+            }
+          ],
+          "default_analyzer": ""
+        },
+        "popularity": {
+          "enabled": true,
+          "dynamic": true,
+          "fields": [
+            {
+              "type": "number",
+              "store": true,
+              "index": true,
+              "include_in_all": true
+            }
+          ],
+          "default_analyzer": ""
+        },
+        "release": {
+          "enabled": true,
+          "dynamic": true,
+          "fields": [
+            {
+              "type": "datetime",
+              "store": true,
+              "index": true,
+              "include_in_all": true
+            }
+          ],
+          "default_analyzer": ""
+        },
+        "type": {
+          "enabled": true,
+          "dynamic": true,
+          "fields": [
+            {
+              "type": "text",
+              "analyzer": "keyword",
+              "store": true,
+              "index": true,
+              "include_term_vectors": true,
+              "include_in_all": true
+            }
+          ],
+          "default_analyzer": ""
+        }
+      },
+      "default_analyzer": ""
+    }
+  },
+  "default_mapping": {
+    "enabled": true,
+    "dynamic": true,
+    "default_analyzer": ""
+  },
+  "type_field": "type",
+  "default_type": "document",
+  "default_analyzer": "standard",
+  "default_datetime_parser": "dateTimeOptional",
+  "default_field": "_all",
+  "store_dynamic": true,
+  "index_dynamic": true,
+  "analysis": {}
+}
+```
+
+See [Introduction to Index Mappings](http://www.blevesearch.com/docs/Index-Mapping/) and [type IndexMappingImpl](https://godoc.org/github.com/blevesearch/bleve/mapping#IndexMappingImpl) for more details.  
 
 ```sh
 $ ./indigo create index -n example -m example/index_mapping.json -s boltdb -t upside_down -f json
@@ -46,6 +166,8 @@ The result of the above `create index` command is:
 
 ### Open the index to the Indigo gRPC Server
 
+`open index` command opens an existing closed index. You can display a help message by specifying the `- h` or` --help` option.
+
 ```sh
 $ ./indigo open index -n example -f json
 ```
@@ -61,6 +183,8 @@ The result of the above `open index` command is:
 
 
 ### Get the index information from the Indigo gRPC Server
+
+`get index` command retrieves an index information about existing opened index. You can display a help message by specifying the `- h` or` --help` option.
 
 ```sh
 $ ./indigo get index -n example -f json
@@ -202,6 +326,8 @@ The result of the above `get index` command is:
 
 ### Close the index from the Indigo gRPC Server
 
+`close index` command closes an existing opened index. You can display a help message by specifying the `- h` or` --help` option.
+
 ```sh
 $ ./indigo close index -n example -f json
 ```
@@ -217,6 +343,8 @@ The result of the above `close index` command is:
 
 ### Delete the index from the Indigo gRPC Server
 
+`delete index` command deletes an existing closed index. You can display a help message by specifying the `- h` or` --help` option.
+
 ```sh
 $ ./indigo delete index -n example -f json
 ```
@@ -231,6 +359,8 @@ The result of the above `delete index` command is:
 
 
 ### List the indices from the Indigo gRPC Server
+
+`list index` command lists opened indices. You can display a help message by specifying the `- h` or` --help` option.
 
 ```sh
 $ ./indigo list index -f json
@@ -249,6 +379,20 @@ The result of the above `list index` command is:
 
 ### Put the document to the Indigo gRPC Server
 
+`put document` command adds or updates a JSON formatted document in a specified index. You can display a help message by specifying the `- h` or` --help` option.  
+The document example is following:
+
+```json
+{
+  "name": "Bleve",
+  "description": "Bleve is a full-text search and indexing library for Go.",
+  "category": "Library",
+  "popularity": 3.0,
+  "release": "2014-04-18T00:00:00Z",
+  "type": "document"
+}
+```
+
 ```sh
 $ ./indigo put document -n example -i 1 -F example/document_1.json -f json
 ```
@@ -263,6 +407,8 @@ The result of the above `put document` command is:
 
 
 ### Get the document from the Indigo gRPC Server
+
+`get document` command retrieves a JSON formatted document on its id from a specified index. You can display a help message by specifying the `- h` or` --help` option.
 
 ```sh
 $ ./indigo get document -n example -i 1 -f json
@@ -287,6 +433,8 @@ The result of the above `get document` command is:
 
 ### Delete the document from the Indigo gRPC Server
 
+`delete document` command deletes a document on its id from a specified index. You can display a help message by specifying the `- h` or` --help` option.
+
 ```sh
 $ ./indigo delete document -n example -i 1 -f json
 ```
@@ -301,6 +449,58 @@ The result of the above `delete document` command is:
 
 
 ### Index the documents in bulk to the Indigo gRPC Server
+
+`bulk` command makes it possible to perform many put/delete operations in a single command execution. This can greatly increase the indexing speed. You can display a help message by specifying the `- h` or` --help` option.
+The bulk example is following:
+
+```json
+[
+  {
+    "method" : "put",
+    "id": "1",
+    "fields": {
+      "name": "Bleve",
+      "description": "Bleve is a full-text search and indexing library for Go.",
+      "category": "Library",
+      "popularity": 3.0,
+      "release": "2014-04-18T00:00:00Z",
+      "type": "document"
+    }
+  },
+  {
+    "method" : "delete",
+    "id": "2"
+  },
+  {
+    "method" : "delete",
+    "id": "3"
+  },
+  {
+    "method" : "delete",
+    "id": "4"
+  },
+  {
+    "method" : "delete",
+    "id": "5"
+  },
+  {
+    "method" : "delete",
+    "id": "6"
+  },
+  {
+    "method" : "put",
+    "id": "7",
+    "fields": {
+      "name": "Indigo",
+      "description": "Indigo is a full-text search and indexing server written in Go, built on top of Bleve.",
+      "category": "Server",
+      "popularity": 1.0,
+      "release": "2017-01-13T00:00:00Z",
+      "type": "document"
+    }
+  }
+]
+```
 
 ```sh
 $ ./indigo bulk -n example -b example/bulk_put.json -f json
@@ -318,6 +518,30 @@ The result of the above `bulk` command is:
 
 
 ### Search the documents frmo the Indigo gRPC Server
+
+`search` command can be executed with a search request, which includes the Query, within its file. Here is an example:
+
+```json
+{
+  "query": {
+    "query": "description:*"
+  },
+  "size": 10,
+  "from": 0,
+  "fields": [
+    "name",
+    "description",
+    "category",
+    "popularity",
+    "release",
+    "type"
+  ]
+}
+```
+
+See [Queries](http://www.blevesearch.com/docs/Query/), [Query String Query](http://www.blevesearch.com/docs/Query-String-Query/) and [type SearchRequest](https://godoc.org/github.com/blevesearch/bleve#SearchRequest) for more details.
+
+You can display a help message by specifying the `- h` or` --help` option.
 
 ```sh
 $ ./indigo search -n example -s example/simple_query.json -f json
@@ -478,6 +702,12 @@ The result of the above `search` command is:
 ```
 
 See [type SearchResult](https://godoc.org/github.com/blevesearch/bleve#SearchResult) for more details.
+
+
+
+
+
+
 
 
 ### Start Indigo REST Server
@@ -928,282 +1158,6 @@ The result of the above command is:
 ```
 
 
-## The index mapping
-
-The index mapping describes how to your data model should be indexed. See following example.  
-The index_mapping.json file contains all of the details about which fields your documents can contain, and how those fields should be dealt with when adding documents to the index, or when querying those fields.  
-See [Introduction to Index Mappings](http://www.blevesearch.com/docs/Index-Mapping/) and [type IndexMappingImpl](https://godoc.org/github.com/blevesearch/bleve/mapping#IndexMappingImpl) for more details.  
-
-### example
-
-```json
-{
-  "types": {
-    "document": {
-      "enabled": true,
-      "dynamic": true,
-      "properties": {
-        "category": {
-          "enabled": true,
-          "dynamic": true,
-          "fields": [
-            {
-              "type": "text",
-              "analyzer": "keyword",
-              "store": true,
-              "index": true,
-              "include_term_vectors": true,
-              "include_in_all": true
-            }
-          ],
-          "default_analyzer": ""
-        },
-        "description": {
-          "enabled": true,
-          "dynamic": true,
-          "fields": [
-            {
-              "type": "text",
-              "analyzer": "en",
-              "store": true,
-              "index": true,
-              "include_term_vectors": true,
-              "include_in_all": true
-            }
-          ],
-          "default_analyzer": ""
-        },
-        "name": {
-          "enabled": true,
-          "dynamic": true,
-          "fields": [
-            {
-              "type": "text",
-              "analyzer": "en",
-              "store": true,
-              "index": true,
-              "include_term_vectors": true,
-              "include_in_all": true
-            }
-          ],
-          "default_analyzer": ""
-        },
-        "popularity": {
-          "enabled": true,
-          "dynamic": true,
-          "fields": [
-            {
-              "type": "number",
-              "store": true,
-              "index": true,
-              "include_in_all": true
-            }
-          ],
-          "default_analyzer": ""
-        },
-        "release": {
-          "enabled": true,
-          "dynamic": true,
-          "fields": [
-            {
-              "type": "datetime",
-              "store": true,
-              "index": true,
-              "include_in_all": true
-            }
-          ],
-          "default_analyzer": ""
-        },
-        "type": {
-          "enabled": true,
-          "dynamic": true,
-          "fields": [
-            {
-              "type": "text",
-              "analyzer": "keyword",
-              "store": true,
-              "index": true,
-              "include_term_vectors": true,
-              "include_in_all": true
-            }
-          ],
-          "default_analyzer": ""
-        }
-      },
-      "default_analyzer": ""
-    }
-  },
-  "default_mapping": {
-    "enabled": true,
-    "dynamic": true,
-    "default_analyzer": ""
-  },
-  "type_field": "type",
-  "default_type": "document",
-  "default_analyzer": "standard",
-  "default_datetime_parser": "dateTimeOptional",
-  "default_field": "_all",
-  "store_dynamic": true,
-  "index_dynamic": true,
-  "analysis": {}
-}
-```
-
-## document mapping
-
-### example
-
-```json
-{
-  "name": "Bleve",
-  "description": "Bleve is a full-text search and indexing library for Go.",
-  "category": "Library",
-  "popularity": 3.0,
-  "release": "2014-04-18T00:00:00Z",
-  "type": "document"
-}
-```
-
-## Bulk request format
-
-### example
-
-```json
-[
-  {
-    "method" : "put",
-    "id": "1",
-    "fields": {
-      "name": "Bleve",
-      "description": "Bleve is a full-text search and indexing library for Go.",
-      "category": "Library",
-      "popularity": 3.0,
-      "release": "2014-04-18T00:00:00Z",
-      "type": "document"
-    }
-  },
-  {
-    "method" : "delete",
-    "id": "2"
-  },
-  {
-    "method" : "delete",
-    "id": "3"
-  },
-  {
-    "method" : "delete",
-    "id": "4"
-  },
-  {
-    "method" : "delete",
-    "id": "5"
-  },
-  {
-    "method" : "delete",
-    "id": "6"
-  },
-  {
-    "method" : "put",
-    "id": "7",
-    "fields": {
-      "name": "Indigo",
-      "description": "Indigo is a full-text search and indexing server written in Go, built on top of Bleve.",
-      "category": "Server",
-      "popularity": 1.0,
-      "release": "2017-01-13T00:00:00Z",
-      "type": "document"
-    }
-  }
-]
-```
-
-
-## Search request format
-
-See [Queries](http://www.blevesearch.com/docs/Query/), [Query String Query](http://www.blevesearch.com/docs/Query-String-Query/) and [type SearchRequest](https://godoc.org/github.com/blevesearch/bleve#SearchRequest) for more details.
-
-### example
-
-```json
-{
-  "query": {
-    "query": "description:search"
-  },
-  "size": 10,
-  "from": 0,
-  "fields": [
-    "name",
-    "description",
-    "category",
-    "popularity",
-    "release",
-    "type"
-  ],
-  "facets": {
-    "Category count": {
-      "size": 10,
-      "field": "category"
-    },
-    "Popularity range": {
-      "size": 10,
-      "field": "popularity",
-      "numeric_ranges": [
-        {
-          "name": "less than 1",
-          "max": 1
-        },
-        {
-          "name": "more than or equal to 1 and less than 2",
-          "min": 1,
-          "max": 2
-        },
-        {
-          "name": "more than or equal to 2 and less than 3",
-          "min": 2,
-          "max": 3
-        },
-        {
-          "name": "more than or equal to 3 and less than 4",
-          "min": 3,
-          "max": 4
-        },
-        {
-          "name": "more than or equal to 4 and less than 5",
-          "min": 4,
-          "max": 5
-        },
-        {
-          "name": "more than or equal to 5",
-          "min": 5
-        }
-      ]
-    },
-    "Release date range": {
-      "size": 10,
-      "field": "release",
-      "date_ranges": [
-        {
-          "name": "2001 - 2010",
-          "start": "2001-01-01T00:00:00Z",
-          "end": "2010-12-31T23:59:59Z"
-        },
-        {
-          "name": "2011 - 2020",
-          "start": "2011-01-01T00:00:00Z",
-          "end": "2020-12-31T23:59:59Z"
-        }
-      ]
-    }
-  },
-  "highlight": {
-    "style": "html",
-    "fields": [
-      "name",
-      "description"
-    ]
-  }
-}
-```
 
 ## License
 
