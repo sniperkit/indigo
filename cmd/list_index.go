@@ -14,7 +14,7 @@ var listIndexCmd = &cobra.Command{
 	Short: "closes the index to the Indigo gRPC Server",
 	Long:  `The close index command closes the index to the Indigo gRPC Server.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		conn, err := grpc.Dial(gRPCServer, grpc.WithInsecure())
+		conn, err := grpc.Dial(indigoSettings.GetString("grpc_server"), grpc.WithInsecure())
 		if err != nil {
 			return err
 		}
@@ -26,7 +26,7 @@ var listIndexCmd = &cobra.Command{
 			return err
 		}
 
-		switch outputFormat {
+		switch indigoSettings.GetString("output_format") {
 		case "text":
 			fmt.Printf("%s\n", resp.String())
 		case "json":

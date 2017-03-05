@@ -1,25 +1,12 @@
-#
-# Indigo gRPC Server configuration
-#
-grpc:
-    server:
-        name: localhost
-        port: 1289
-    log:
-        file: ./indigo_grpc.log
-        level: trace
-        format: text
-    data:
-        dir: ./data
-#
-# Indigo REST Server configuration
-#
-rest:
-    server:
-        name: localhost
-        port: 2289
-        base_uri: /api
-    log:
-        file: ./indigo_rest.log
-        level: trace
-        format: text
+output_format: "color"
+
+log_output: ""
+log_level: "info"
+
+grpc_port: 1289
+data_dir: "./data"
+open_existing_index: true
+
+rest_port: 2289
+grpc_server: "localhost:1289"
+base_uri: "/api"

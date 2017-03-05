@@ -40,7 +40,7 @@ var bulkCmd = &cobra.Command{
 			return err
 		}
 
-		conn, err := grpc.Dial(gRPCServer, grpc.WithInsecure())
+		conn, err := grpc.Dial(indigoSettings.GetString("grpc_server"), grpc.WithInsecure())
 		if err != nil {
 			return err
 		}
@@ -52,7 +52,7 @@ var bulkCmd = &cobra.Command{
 			return err
 		}
 
-		switch outputFormat {
+		switch indigoSettings.GetString("output_format") {
 		case "text":
 			fmt.Printf("%s\n", resp.String())
 		case "json":
@@ -70,7 +70,9 @@ var bulkCmd = &cobra.Command{
 }
 
 func init() {
-	bulkCmd.Flags().StringVarP(&gRPCServer, "grpc-server", "g", constant.DefaultGRPCServer, "Indigo gRPC Sever")
+	bulkCmd.Flags().StringP("grpc-server", "g", indigoSettings.GetString("grpc_server"), "Indigo gRPC Sever")
+	indigoSettings.BindPFlag("grpc_server", bulkCmd.Flags().Lookup("grpc-server"))
+
 	bulkCmd.Flags().StringVarP(&indexName, "index-name", "n", constant.DefaultIndexName, "index name")
 	bulkCmd.Flags().StringVarP(&bulkRequestFile, "bulk-request", "b", constant.DefaultBulkRequestFile, "bulk request file")
 	bulkCmd.Flags().Int32VarP(&batchSize, "batch-size", "s", constant.DefaultBatchSize, "batch size")

@@ -40,7 +40,7 @@ var searchCmd = &cobra.Command{
 			return err
 		}
 
-		conn, err := grpc.Dial(gRPCServer, grpc.WithInsecure())
+		conn, err := grpc.Dial(indigoSettings.GetString("grpc_server"), grpc.WithInsecure())
 		if err != nil {
 			return err
 		}
@@ -64,7 +64,7 @@ var searchCmd = &cobra.Command{
 			SearchResult: searchResult,
 		}
 
-		switch outputFormat {
+		switch indigoSettings.GetString("output_format") {
 		case "text":
 			fmt.Printf("%s\n", resp.String())
 		case "json":
@@ -82,7 +82,8 @@ var searchCmd = &cobra.Command{
 }
 
 func init() {
-	searchCmd.Flags().StringVarP(&gRPCServer, "grpc-server", "g", constant.DefaultGRPCServer, "Indigo gRPC Sever")
+	searchCmd.Flags().StringP("grpc-server", "g", indigoSettings.GetString("grpc_server"), "Indigo gRPC Sever")
+	indigoSettings.BindPFlag("grpc_server", searchCmd.Flags().Lookup("grpc-server"))
 	searchCmd.Flags().StringVarP(&indexName, "index-name", "n", constant.DefaultIndexName, "index name")
 	searchCmd.Flags().StringVarP(&searchRequestFile, "search-request", "s", constant.DefaultSearchRequestFile, "search request file")
 

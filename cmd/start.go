@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"github.com/comail/colog"
-	"github.com/mosuka/indigo/constant"
 	"github.com/spf13/cobra"
 	"log"
 	"os"
@@ -16,42 +15,8 @@ var startCmd = &cobra.Command{
 	Short: "starts the Indigo Server",
 	Long:  `The start command starts the Indigo Server.`,
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
-		/*
-		 * set log file
-		 */
-		if logOutputFile != "" {
-			logOutput, err := os.OpenFile(logOutputFile, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
-			if err != nil {
-				return err
-			} else {
-				colog.SetOutput(logOutput)
-			}
-		}
-
-		/*
-		 * set log level
-		 */
-		switch logLevel {
-		case "trace":
-			colog.SetMinLevel(colog.LTrace)
-		case "debug":
-			colog.SetMinLevel(colog.LDebug)
-		case "info":
-			colog.SetMinLevel(colog.LInfo)
-		case "warn":
-			colog.SetMinLevel(colog.LWarning)
-		case "error":
-			colog.SetMinLevel(colog.LError)
-		case "alert":
-			colog.SetMinLevel(colog.LAlert)
-		default:
-			colog.SetMinLevel(colog.LInfo)
-		}
-
-		/*
-		 * set log format
-		 */
-		switch outputFormat {
+		//outputFormat = indigoSettings.GetString("output_format")
+		switch indigoSettings.GetString("output_format") {
 		case "text":
 			colog.SetFormatter(&colog.StdFormatter{
 				Colors: false,
@@ -73,6 +38,38 @@ var startCmd = &cobra.Command{
 				Colors: false,
 				Flag:   log.Ldate | log.Ltime | log.Lshortfile,
 			})
+		}
+
+		/*
+		 * set log file
+		 */
+		if indigoSettings.GetString("log_output") != "" {
+			logOutput, err := os.OpenFile(indigoSettings.GetString("log_output"), os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
+			if err != nil {
+				return err
+			} else {
+				colog.SetOutput(logOutput)
+			}
+		}
+
+		/*
+		 * set log level
+		 */
+		switch indigoSettings.GetString("log_level") {
+		case "trace":
+			colog.SetMinLevel(colog.LTrace)
+		case "debug":
+			colog.SetMinLevel(colog.LDebug)
+		case "info":
+			colog.SetMinLevel(colog.LInfo)
+		case "warn":
+			colog.SetMinLevel(colog.LWarning)
+		case "error":
+			colog.SetMinLevel(colog.LError)
+		case "alert":
+			colog.SetMinLevel(colog.LAlert)
+		default:
+			colog.SetMinLevel(colog.LInfo)
 		}
 
 		colog.SetDefaultLevel(colog.LInfo)
@@ -99,7 +96,7 @@ var startCmd = &cobra.Command{
 		return nil
 	},
 	PersistentPostRunE: func(cmd *cobra.Command, args []string) error {
-		if logOutputFile != "" {
+		if indigoSettings.GetString("log_output") != "" {
 			logOutput.Close()
 		}
 
@@ -108,8 +105,11 @@ var startCmd = &cobra.Command{
 }
 
 func init() {
-	startCmd.PersistentFlags().StringVarP(&logOutputFile, "log-output", "o", constant.DefaultLogOutputFile, "log file")
-	startCmd.PersistentFlags().StringVarP(&logLevel, "log-level", "l", constant.DefaultLogLevel, "log level")
+	startCmd.PersistentFlags().StringP("log-output", "o", indigoSettings.GetString("log_output"), "log file")
+	indigoSettings.BindPFlag("log_output", RootCmd.Flags().Lookup("log-output"))
+
+	startCmd.PersistentFlags().StringP("log-level", "l", indigoSettings.GetString("log_level"), "log level")
+	indigoSettings.BindPFlag("log_level", RootCmd.Flags().Lookup("log-level"))
 
 	RootCmd.AddCommand(startCmd)
 }

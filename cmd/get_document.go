@@ -26,7 +26,7 @@ var getDocumentCmd = &cobra.Command{
 		return nil
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
-		conn, err := grpc.Dial(gRPCServer, grpc.WithInsecure())
+		conn, err := grpc.Dial(indigoSettings.GetString("grpc_server"), grpc.WithInsecure())
 		if err != nil {
 			return err
 		}
@@ -51,7 +51,7 @@ var getDocumentCmd = &cobra.Command{
 			Fields: fields,
 		}
 
-		switch outputFormat {
+		switch indigoSettings.GetString("output_format") {
 		case "text":
 			fmt.Printf("%s\n", r)
 		case "json":

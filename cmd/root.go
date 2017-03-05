@@ -5,8 +5,13 @@ import (
 	"github.com/mosuka/indigo/constant"
 	"github.com/mosuka/indigo/version"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 	"os"
 )
+
+var indigoSettings = viper.New()
+
+//var indigoSettings *viper.Viper
 
 var RootCmd = &cobra.Command{
 	Use:   "indigo",
@@ -39,6 +44,87 @@ func Execute() {
 }
 
 func init() {
-	RootCmd.PersistentFlags().StringVarP(&outputFormat, "output-format", "f", constant.DefaultOutputFormat, "output format")
-	RootCmd.PersistentFlags().BoolVarP(&versionFlag, "version", "v", constant.DefaultVersionFlag, "show version numner")
+	fmt.Println("root.init()")
+
+	cobra.OnInitialize(initRootCmd)
+
+	//indigoSettings.SetDefault("output_format", constant.DefaultOutputFormat)
+	//indigoSettings.SetDefault("log_output", constant.DefaultLogOutputFile)
+	//indigoSettings.SetDefault("log_level", constant.DefaultLogLevel)
+	//indigoSettings.SetDefault("grpc_port", constant.DefaultGRPCServerPort)
+	//indigoSettings.SetDefault("data_dir", constant.DefaultDataDir)
+	//indigoSettings.SetDefault("open_existing_index", constant.DefaultOpenExistingIndex)
+	//indigoSettings.SetDefault("rest_port", constant.DefaultRESTServerPort)
+	//indigoSettings.SetDefault("base_uri", constant.DefaultBaseURI)
+	//indigoSettings.SetDefault("grpc_server", constant.DefaultGRPCServer)
+	//
+	//indigoSettings.SetConfigName("indigo")
+	//indigoSettings.SetConfigType("yaml")
+	//indigoSettings.AddConfigPath("/etc/indigo/")
+	//indigoSettings.AddConfigPath("./etc/")
+	//indigoSettings.AddConfigPath("${HOME}/")
+	//indigoSettings.AddConfigPath(".")
+	//err := indigoSettings.ReadInConfig()
+	//if err != nil {
+	//	fmt.Println(err.Error())
+	//}
+	//
+	//indigoSettings.SetEnvPrefix("indigo")
+	//indigoSettings.BindEnv("output_format")
+	//indigoSettings.BindEnv("log_output")
+	//indigoSettings.BindEnv("log_level")
+	//indigoSettings.BindEnv("grpc_port")
+	//indigoSettings.BindEnv("data_dir")
+	//indigoSettings.BindEnv("open_existing_index")
+	//indigoSettings.BindEnv("rest_port")
+	//indigoSettings.BindEnv("base_uri")
+	//indigoSettings.BindEnv("grpc_server")
+
+	RootCmd.PersistentFlags().BoolVarP(&versionFlag, "version", "v", false, "show version numner")
+
+	//RootCmd.PersistentFlags().StringVarP(&outputFormat, "output-format", "f", indigoSettings.GetString("output_format"), "output format")
+	RootCmd.PersistentFlags().StringP("output-format", "f", indigoSettings.GetString("output_format"), "output format")
+	indigoSettings.BindPFlag("output_format", RootCmd.Flags().Lookup("output-format"))
+}
+
+func initRootCmd() {
+	fmt.Println("root.initRootCmd()")
+
+	indigoSettings.SetDefault("output_format", constant.DefaultOutputFormat)
+	indigoSettings.SetDefault("log_output", constant.DefaultLogOutputFile)
+	indigoSettings.SetDefault("log_level", constant.DefaultLogLevel)
+	indigoSettings.SetDefault("grpc_port", constant.DefaultGRPCServerPort)
+	indigoSettings.SetDefault("data_dir", constant.DefaultDataDir)
+	indigoSettings.SetDefault("open_existing_index", constant.DefaultOpenExistingIndex)
+	indigoSettings.SetDefault("rest_port", constant.DefaultRESTServerPort)
+	indigoSettings.SetDefault("grpc_server", constant.DefaultGRPCServer)
+	indigoSettings.SetDefault("base_uri", constant.DefaultBaseURI)
+
+	fmt.Println(indigoSettings.GetString("grpc_server"))
+
+	indigoSettings.SetConfigName("indigo")
+	indigoSettings.SetConfigType("yaml")
+	indigoSettings.AddConfigPath("/etc/indigo/")
+	indigoSettings.AddConfigPath("./etc/")
+	indigoSettings.AddConfigPath("${HOME}/")
+	indigoSettings.AddConfigPath(".")
+	err := indigoSettings.ReadInConfig()
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+
+	fmt.Println(indigoSettings.GetString("grpc_server"))
+
+	indigoSettings.SetEnvPrefix("indigo")
+	indigoSettings.BindEnv("output_format")
+	indigoSettings.BindEnv("log_output")
+	indigoSettings.BindEnv("log_level")
+	indigoSettings.BindEnv("grpc_port")
+	indigoSettings.BindEnv("data_dir")
+	indigoSettings.BindEnv("open_existing_index")
+	indigoSettings.BindEnv("rest_port")
+	indigoSettings.BindEnv("grpc_server")
+	indigoSettings.BindEnv("base_uri")
+
+	fmt.Println(indigoSettings.GetString("grpc_server"))
 }

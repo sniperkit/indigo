@@ -7,16 +7,18 @@ import (
 var (
 	versionFlag bool = constant.DefaultVersionFlag
 
-	logOutputFile string = constant.DefaultLogOutputFile
-	logLevel      string = constant.DefaultLogLevel
+	//outputFormat string = constant.DefaultOutputFormat
 
-	gRPCServerPort    int    = constant.DefaultGRPCServerPort
-	dataDir           string = constant.DefaultDataDir
-	openExistingIndex bool   = constant.DefaultOpenExistingIndex
+	//logOutputFile string = constant.DefaultLogOutputFile
+	//logLevel      string = constant.DefaultLogLevel
 
-	restServerPort int    = constant.DefaultRESTServerPort
-	gRPCServer     string = constant.DefaultGRPCServer
-	baseURI        string = constant.DefaultBaseURI
+	//gRPCServerPort    int    = constant.DefaultGRPCServerPort
+	//dataDir           string = constant.DefaultDataDir
+	//openExistingIndex bool   = constant.DefaultOpenExistingIndex
+
+	//restServerPort int    = constant.DefaultRESTServerPort
+	//gRPCServer     string = constant.DefaultGRPCServer
+	//baseURI        string = constant.DefaultBaseURI
 
 	indexName string = constant.DefaultIndexName
 
@@ -34,6 +36,4 @@ var (
 	batchSize       int32  = constant.DefaultBatchSize
 
 	searchRequestFile string = constant.DefaultSearchRequestFile
-
-	outputFormat string = constant.DefaultOutputFormat
 )

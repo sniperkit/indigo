@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"github.com/mosuka/indigo/constant"
 	"github.com/spf13/cobra"
 )
 
@@ -27,7 +26,8 @@ var openCmd = &cobra.Command{
 }
 
 func init() {
-	openCmd.PersistentFlags().StringVarP(&gRPCServer, "grpc-server", "g", constant.DefaultGRPCServer, "Indigo gRPC Sever")
+	openCmd.PersistentFlags().StringP("grpc-server", "g", indigoSettings.GetString("grpc_server"), "Indigo gRPC Sever")
+	indigoSettings.BindPFlag("grpc_server", openCmd.Flags().Lookup("grpc-server"))
 
 	RootCmd.AddCommand(openCmd)
 }

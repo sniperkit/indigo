@@ -44,7 +44,7 @@ var putDocumentCmd = &cobra.Command{
 			return err
 		}
 
-		conn, err := grpc.Dial(gRPCServer, grpc.WithInsecure())
+		conn, err := grpc.Dial(indigoSettings.GetString("grpc_server"), grpc.WithInsecure())
 		if err != nil {
 			return err
 		}
@@ -56,7 +56,7 @@ var putDocumentCmd = &cobra.Command{
 			return err
 		}
 
-		switch outputFormat {
+		switch indigoSettings.GetString("output_format") {
 		case "text":
 			fmt.Printf("%s\n", resp.String())
 		case "json":
