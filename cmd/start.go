@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"fmt"
 	"github.com/comail/colog"
 	"github.com/mosuka/indigo/setting"
 	"github.com/spf13/cobra"
@@ -17,7 +18,28 @@ var startCmd = &cobra.Command{
 	Short: "starts the Indigo Server",
 	Long:  `The start command starts the Indigo Server.`,
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
-		switch IndigoSettings.GetString("output_format") {
+		fmt.Println("startCmd.PersistentPreRunE")
+
+		return nil
+	},
+	PreRunE: func(cmd *cobra.Command, args []string) error {
+		fmt.Println("startCmd.PreRunE")
+
+		if len(args) < 1 {
+			return cmd.Help()
+		}
+
+		_, _, err := cmd.Find(args)
+		if err != nil {
+			return err
+		}
+
+		return nil
+	},
+	RunE: func(cmd *cobra.Command, args []string) error {
+		fmt.Println("startCmd.RunE")
+
+		switch viper.GetString("output_format") {
 		case "text":
 			colog.SetFormatter(&colog.StdFormatter{
 				Colors: false,
@@ -34,18 +56,15 @@ var startCmd = &cobra.Command{
 				Flag:       log.Lshortfile,
 			})
 		default:
-			// same as text
 			colog.SetFormatter(&colog.StdFormatter{
 				Colors: false,
 				Flag:   log.Ldate | log.Ltime | log.Lshortfile,
 			})
 		}
 
-		/*
-		 * set log file
-		 */
-		if IndigoSettings.GetString("log_output") != "" {
-			logOutput, err := os.OpenFile(IndigoSettings.GetString("log_output"), os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
+		if viper.GetString("log_output") != "" {
+			var err error
+			logOutput, err = os.OpenFile(viper.GetString("log_output"), os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
 			if err != nil {
 				return err
 			} else {
@@ -53,10 +72,7 @@ var startCmd = &cobra.Command{
 			}
 		}
 
-		/*
-		 * set log level
-		 */
-		switch IndigoSettings.GetString("log_level") {
+		switch viper.GetString("log_level") {
 		case "trace":
 			colog.SetMinLevel(colog.LTrace)
 		case "debug":
@@ -81,23 +97,10 @@ var startCmd = &cobra.Command{
 
 		return nil
 	},
-	PreRunE: func(cmd *cobra.Command, args []string) error {
-		if len(args) < 1 {
-			return cmd.Help()
-		}
-
-		_, _, err := cmd.Find(args)
-		if err != nil {
-			return err
-		}
-
-		return nil
-	},
-	RunE: func(cmd *cobra.Command, args []string) error {
-		return nil
-	},
 	PersistentPostRunE: func(cmd *cobra.Command, args []string) error {
-		if IndigoSettings.GetString("log_output") != "" {
+		fmt.Println("startCmd.PersistentPostRunE")
+
+		if logOutputFile != "" {
 			logOutput.Close()
 		}
 
@@ -106,10 +109,10 @@ var startCmd = &cobra.Command{
 }
 
 func init() {
-	startCmd.PersistentFlags().StringP("log-output", "o", setting.DefaultLogOutputFile, "log file")
+	startCmd.PersistentFlags().StringVarP(&logOutputFile, "log-output", "o", setting.DefaultLogOutputFile, "log file")
 	viper.BindPFlag("log_output", RootCmd.Flags().Lookup("log-output"))
 
-	startCmd.PersistentFlags().StringP("log-level", "l", setting.DefaultLogLevel, "log level")
+	startCmd.PersistentFlags().StringVarP(&logLevel, "log-level", "l", setting.DefaultLogLevel, "log level")
 	viper.BindPFlag("log_level", RootCmd.Flags().Lookup("log-level"))
 
 	RootCmd.AddCommand(startCmd)

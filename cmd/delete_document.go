@@ -6,6 +6,7 @@ import (
 	"github.com/mosuka/indigo/proto"
 	"github.com/mosuka/indigo/setting"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 )
@@ -20,13 +21,13 @@ var deleteDocumentCmd = &cobra.Command{
 		}
 
 		if documentID == "" {
-			return fmt.Errorf("required flag: --%s", cmd.Flag("document-id").Name)
+			return fmt.Errorf("required flag: --%s", cmd.Flag("id").Name)
 		}
 
 		return nil
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
-		conn, err := grpc.Dial(IndigoSettings.GetString("grpc_server"), grpc.WithInsecure())
+		conn, err := grpc.Dial(viper.GetString("grpc_server"), grpc.WithInsecure())
 		if err != nil {
 			return err
 		}
@@ -38,7 +39,7 @@ var deleteDocumentCmd = &cobra.Command{
 			return err
 		}
 
-		switch IndigoSettings.GetString("output_format") {
+		switch viper.GetString("output_format") {
 		case "text":
 			fmt.Printf("%s\n", resp.String())
 		case "json":
@@ -57,7 +58,7 @@ var deleteDocumentCmd = &cobra.Command{
 
 func init() {
 	deleteDocumentCmd.Flags().StringVarP(&indexName, "index-name", "n", setting.DefaultIndexName, "index name")
-	deleteDocumentCmd.Flags().StringVarP(&documentID, "document-id", "i", setting.DefaultDocumentID, "document id")
+	deleteDocumentCmd.Flags().StringVarP(&documentID, "id", "i", setting.DefaultDocumentID, "document id")
 
 	deleteCmd.AddCommand(deleteDocumentCmd)
 }

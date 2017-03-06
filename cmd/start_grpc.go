@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"fmt"
 	"github.com/mosuka/indigo/grpc"
 	"github.com/mosuka/indigo/setting"
 	"github.com/spf13/cobra"
@@ -16,15 +17,11 @@ var startGRPCCmd = &cobra.Command{
 	Short: "start Indigo gRPC Server",
 	Long:  `The start grpc command starts the Indigo gRPC Server.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		/*
-		 * start Indigo gRPC Server
-		 */
-		server := grpc.NewIndigoGRPCServer(IndigoSettings.GetInt("grpc_port"), IndigoSettings.GetString("data_dir"))
-		server.Start(IndigoSettings.GetBool("open_existing_index"))
+		fmt.Println("startGRPCCmd.RunE")
 
-		/*
-		 * trap signals
-		 */
+		server := grpc.NewIndigoGRPCServer(viper.GetInt("grpc_port"), viper.GetString("data_dir"))
+		server.Start(viper.GetBool("open_existing_index"))
+
 		signalChan := make(chan os.Signal, 1)
 		signal.Notify(signalChan,
 			syscall.SIGHUP,
@@ -62,12 +59,13 @@ var startGRPCCmd = &cobra.Command{
 }
 
 func init() {
-	startGRPCCmd.Flags().IntP("port", "p", setting.DefaultGRPCPort, "port number")
-	startGRPCCmd.Flags().StringP("data-dir", "d", setting.DefaultDataDir, "data directory")
-	startGRPCCmd.Flags().BoolP("open-existing-index", "O", setting.DefaultOpenExistingIndex, "open existing index")
-
+	startGRPCCmd.Flags().IntVarP(&gRPCPort, "port", "p", setting.DefaultGRPCPort, "port number")
 	viper.BindPFlag("grpc_port", startGRPCCmd.Flags().Lookup("port"))
+
+	startGRPCCmd.Flags().StringVarP(&dataDir, "data-dir", "d", setting.DefaultDataDir, "data directory")
 	viper.BindPFlag("data_dir", startGRPCCmd.Flags().Lookup("data-dir"))
+
+	startGRPCCmd.Flags().BoolVarP(&openExistingIndex, "open-existing-index", "e", setting.DefaultOpenExistingIndex, "open existing index")
 	viper.BindPFlag("open_existing_index", startGRPCCmd.Flags().Lookup("open-existing-index"))
 
 	startCmd.AddCommand(startGRPCCmd)

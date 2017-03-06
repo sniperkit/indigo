@@ -41,7 +41,7 @@ var searchCmd = &cobra.Command{
 			return err
 		}
 
-		conn, err := grpc.Dial(IndigoSettings.GetString("grpc_server"), grpc.WithInsecure())
+		conn, err := grpc.Dial(viper.GetString("grpc_server"), grpc.WithInsecure())
 		if err != nil {
 			return err
 		}
@@ -65,7 +65,7 @@ var searchCmd = &cobra.Command{
 			SearchResult: searchResult,
 		}
 
-		switch IndigoSettings.GetString("output_format") {
+		switch viper.GetString("output_format") {
 		case "text":
 			fmt.Printf("%s\n", resp.String())
 		case "json":

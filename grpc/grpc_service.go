@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/blevesearch/bleve"
 	"github.com/blevesearch/bleve/document"
-	_ "github.com/mosuka/indigo/config"
+	_ "github.com/mosuka/indigo/dependency"
 	"github.com/mosuka/indigo/proto"
 	"github.com/pkg/errors"
 	"golang.org/x/net/context"

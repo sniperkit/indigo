@@ -6,6 +6,7 @@ import (
 	"github.com/mosuka/indigo/proto"
 	"github.com/mosuka/indigo/setting"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"io/ioutil"
@@ -39,7 +40,7 @@ var openIndexCmd = &cobra.Command{
 			}
 		}
 
-		conn, err := grpc.Dial(IndigoSettings.GetString("grpc_server"), grpc.WithInsecure())
+		conn, err := grpc.Dial(viper.GetString("grpc_server"), grpc.WithInsecure())
 		if err != nil {
 			return err
 		}
@@ -51,7 +52,7 @@ var openIndexCmd = &cobra.Command{
 			return err
 		}
 
-		switch IndigoSettings.GetString("output_format") {
+		switch viper.GetString("output_format") {
 		case "text":
 			fmt.Printf("%s\n", resp.String())
 		case "json":
@@ -70,7 +71,7 @@ var openIndexCmd = &cobra.Command{
 
 func init() {
 	openIndexCmd.Flags().StringVarP(&indexName, "index-name", "n", setting.DefaultIndexName, "index name")
-	openIndexCmd.Flags().StringVarP(&runtimeConfigFile, "runtime-config", "r", setting.DefaultRuntimeConfigFile, "runtime config file")
+	openIndexCmd.Flags().StringVarP(&runtimeConfigFile, "runtime-config", "r", setting.DefaultRuntimeConfigFile, "runtime config")
 
 	openCmd.AddCommand(openIndexCmd)
 }

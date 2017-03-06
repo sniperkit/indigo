@@ -1,4 +1,4 @@
-package config
+package dependency
 
 import (
 	_ "github.com/blevesearch/bleve/config"

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/mosuka/indigo/proto"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 )
@@ -14,7 +15,7 @@ var listIndexCmd = &cobra.Command{
 	Short: "closes the index to the Indigo gRPC Server",
 	Long:  `The close index command closes the index to the Indigo gRPC Server.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		conn, err := grpc.Dial(IndigoSettings.GetString("grpc_server"), grpc.WithInsecure())
+		conn, err := grpc.Dial(viper.GetString("grpc_server"), grpc.WithInsecure())
 		if err != nil {
 			return err
 		}
@@ -26,7 +27,7 @@ var listIndexCmd = &cobra.Command{
 			return err
 		}
 
-		switch IndigoSettings.GetString("output_format") {
+		switch viper.GetString("output_format") {
 		case "text":
 			fmt.Printf("%s\n", resp.String())
 		case "json":

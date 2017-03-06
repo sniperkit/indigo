@@ -6,6 +6,7 @@ import (
 
 const (
 	DefaultVersionFlag       bool   = false
+	DefaultConfigFile        string = ""
 	DefaultOutputFormat      string = "text"
 	DefaultLogOutputFile     string = ""
 	DefaultLogLevel          string = "info"
@@ -28,9 +29,8 @@ const (
 	DefaultSearchRequestFile string = ""
 )
 
-//var IndigoSettings = viper.New()
-
 func init() {
+	viper.SetDefault("config", DefaultConfigFile)
 	viper.SetDefault("output_format", DefaultOutputFormat)
 	viper.SetDefault("log_output", DefaultLogOutputFile)
 	viper.SetDefault("log_level", DefaultLogLevel)
@@ -42,6 +42,7 @@ func init() {
 	viper.SetDefault("base_uri", DefaultBaseURI)
 
 	viper.SetEnvPrefix("indigo")
+	viper.BindEnv("config")
 	viper.BindEnv("output_format")
 	viper.BindEnv("log_output")
 	viper.BindEnv("log_level")

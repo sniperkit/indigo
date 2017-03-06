@@ -16,15 +16,9 @@ var startRESTCmd = &cobra.Command{
 	Short: "start Indigo REST Server",
 	Long:  `The start rest command starts the Indigo REST Server.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		/*
-		 * start Indigo REST Server
-		 */
-		server := rest.NewIndigoRESTServer(IndigoSettings.GetInt("rest_port"), IndigoSettings.GetString("base_uri"), IndigoSettings.GetString("grpc_server"))
+		server := rest.NewIndigoRESTServer(viper.GetInt("rest_port"), viper.GetString("base_uri"), viper.GetString("grpc_server"))
 		server.Start()
 
-		/*
-		 * trap signals
-		 */
 		signalChan := make(chan os.Signal, 1)
 		signal.Notify(signalChan,
 			syscall.SIGHUP,
@@ -62,13 +56,14 @@ var startRESTCmd = &cobra.Command{
 }
 
 func init() {
-	startRESTCmd.Flags().IntP("port", "p", setting.DefaultRESTPort, "port number")
-	startRESTCmd.Flags().StringP("base-uri", "b", setting.DefaultBaseURI, "base URI to run Indigo REST Server on")
-	startRESTCmd.Flags().StringP("grpc-server", "g", setting.DefaultGRPCServer, "Indigo gRPC Sever")
-
+	startRESTCmd.Flags().IntVarP(&restPort, "port", "p", setting.DefaultRESTPort, "port number")
 	viper.BindPFlag("rest_port", startRESTCmd.Flags().Lookup("port"))
-	viper.BindPFlag("base_uri", startRESTCmd.Flags().Lookup("base-uri"))
+
+	startRESTCmd.Flags().StringVarP(&gRPCServer, "grpc-server", "g", setting.DefaultGRPCServer, "Indigo gRPC Sever")
 	viper.BindPFlag("grpc_server", startRESTCmd.Flags().Lookup("grpc-server"))
+
+	startRESTCmd.Flags().StringVarP(&baseURI, "base-uri", "b", setting.DefaultBaseURI, "base URI to run Indigo REST Server on")
+	viper.BindPFlag("base_uri", startRESTCmd.Flags().Lookup("base-uri"))
 
 	startCmd.AddCommand(startRESTCmd)
 }
