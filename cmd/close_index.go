@@ -3,8 +3,8 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/mosuka/indigo/constant"
 	"github.com/mosuka/indigo/proto"
+	"github.com/mosuka/indigo/setting"
 	"github.com/spf13/cobra"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
@@ -22,7 +22,7 @@ var closeIndexCmd = &cobra.Command{
 		return nil
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
-		conn, err := grpc.Dial(indigoSettings.GetString("grpc_server"), grpc.WithInsecure())
+		conn, err := grpc.Dial(IndigoSettings.GetString("grpc_server"), grpc.WithInsecure())
 		if err != nil {
 			return err
 		}
@@ -34,7 +34,7 @@ var closeIndexCmd = &cobra.Command{
 			return err
 		}
 
-		switch indigoSettings.GetString("output_format") {
+		switch IndigoSettings.GetString("output_format") {
 		case "text":
 			fmt.Printf("%s\n", resp.String())
 		case "json":
@@ -52,7 +52,7 @@ var closeIndexCmd = &cobra.Command{
 }
 
 func init() {
-	closeIndexCmd.Flags().StringVarP(&indexName, "index-name", "n", constant.DefaultIndexName, "index name")
+	closeIndexCmd.Flags().StringVarP(&indexName, "index-name", "n", setting.DefaultIndexName, "index name")
 
 	closeCmd.AddCommand(closeIndexCmd)
 }

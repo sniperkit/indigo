@@ -3,8 +3,8 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/mosuka/indigo/constant"
 	"github.com/mosuka/indigo/proto"
+	"github.com/mosuka/indigo/setting"
 	"github.com/spf13/cobra"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
@@ -39,7 +39,7 @@ var openIndexCmd = &cobra.Command{
 			}
 		}
 
-		conn, err := grpc.Dial(indigoSettings.GetString("grpc_server"), grpc.WithInsecure())
+		conn, err := grpc.Dial(IndigoSettings.GetString("grpc_server"), grpc.WithInsecure())
 		if err != nil {
 			return err
 		}
@@ -51,7 +51,7 @@ var openIndexCmd = &cobra.Command{
 			return err
 		}
 
-		switch indigoSettings.GetString("output_format") {
+		switch IndigoSettings.GetString("output_format") {
 		case "text":
 			fmt.Printf("%s\n", resp.String())
 		case "json":
@@ -69,8 +69,8 @@ var openIndexCmd = &cobra.Command{
 }
 
 func init() {
-	openIndexCmd.Flags().StringVarP(&indexName, "index-name", "n", constant.DefaultIndexName, "index name")
-	openIndexCmd.Flags().StringVarP(&runtimeConfigFile, "runtime-config", "r", constant.DefaultRuntimeConfigFile, "runtime config file")
+	openIndexCmd.Flags().StringVarP(&indexName, "index-name", "n", setting.DefaultIndexName, "index name")
+	openIndexCmd.Flags().StringVarP(&runtimeConfigFile, "runtime-config", "r", setting.DefaultRuntimeConfigFile, "runtime config file")
 
 	openCmd.AddCommand(openIndexCmd)
 }

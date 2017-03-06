@@ -1,7 +1,9 @@
 package cmd
 
 import (
+	"github.com/mosuka/indigo/setting"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 var deleteCmd = &cobra.Command{
@@ -26,8 +28,8 @@ var deleteCmd = &cobra.Command{
 }
 
 func init() {
-	deleteCmd.PersistentFlags().StringP("grpc-server", "g", indigoSettings.GetString("grpc_server"), "Indigo gRPC Sever")
-	indigoSettings.BindPFlag("grpc_server", deleteCmd.Flags().Lookup("grpc-server"))
+	deleteCmd.PersistentFlags().StringP("grpc-server", "g", setting.DefaultGRPCServer, "Indigo gRPC Sever")
+	viper.BindPFlag("grpc_server", deleteCmd.Flags().Lookup("grpc-server"))
 
 	RootCmd.AddCommand(deleteCmd)
 }

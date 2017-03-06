@@ -3,9 +3,10 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/mosuka/indigo/constant"
 	"github.com/mosuka/indigo/proto"
+	"github.com/mosuka/indigo/setting"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"io/ioutil"
@@ -40,7 +41,7 @@ var searchCmd = &cobra.Command{
 			return err
 		}
 
-		conn, err := grpc.Dial(indigoSettings.GetString("grpc_server"), grpc.WithInsecure())
+		conn, err := grpc.Dial(IndigoSettings.GetString("grpc_server"), grpc.WithInsecure())
 		if err != nil {
 			return err
 		}
@@ -64,7 +65,7 @@ var searchCmd = &cobra.Command{
 			SearchResult: searchResult,
 		}
 
-		switch indigoSettings.GetString("output_format") {
+		switch IndigoSettings.GetString("output_format") {
 		case "text":
 			fmt.Printf("%s\n", resp.String())
 		case "json":
@@ -82,10 +83,11 @@ var searchCmd = &cobra.Command{
 }
 
 func init() {
-	searchCmd.Flags().StringP("grpc-server", "g", indigoSettings.GetString("grpc_server"), "Indigo gRPC Sever")
-	indigoSettings.BindPFlag("grpc_server", searchCmd.Flags().Lookup("grpc-server"))
-	searchCmd.Flags().StringVarP(&indexName, "index-name", "n", constant.DefaultIndexName, "index name")
-	searchCmd.Flags().StringVarP(&searchRequestFile, "search-request", "s", constant.DefaultSearchRequestFile, "search request file")
+	searchCmd.Flags().StringP("grpc-server", "g", setting.DefaultGRPCServer, "Indigo gRPC Sever")
+	searchCmd.Flags().StringVarP(&indexName, "index-name", "n", setting.DefaultIndexName, "index name")
+	searchCmd.Flags().StringVarP(&searchRequestFile, "search-request", "s", setting.DefaultSearchRequestFile, "search request file")
+
+	viper.BindPFlag("grpc_server", searchCmd.Flags().Lookup("grpc-server"))
 
 	RootCmd.AddCommand(searchCmd)
 }

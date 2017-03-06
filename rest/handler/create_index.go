@@ -4,8 +4,8 @@ import (
 	"bytes"
 	"encoding/json"
 	"github.com/gorilla/mux"
-	"github.com/mosuka/indigo/constant"
 	"github.com/mosuka/indigo/proto"
+	"github.com/mosuka/indigo/setting"
 	"golang.org/x/net/context"
 	"io/ioutil"
 	"log"
@@ -37,12 +37,12 @@ func (h *CreateIndexHandler) ServeHTTP(w http.ResponseWriter, req *http.Request)
 
 	indexType := req.URL.Query().Get("indexType")
 	if indexType == "" {
-		indexType = constant.DefaultIndexType
+		indexType = setting.DefaultIndexType
 	}
 
 	indexStore := req.URL.Query().Get("indexStore")
 	if indexStore == "" {
-		indexStore = constant.DefaultKVStore
+		indexStore = setting.DefaultKVStore
 	}
 
 	resp, err := h.client.CreateIndex(context.Background(), &proto.CreateIndexRequest{IndexName: indexName, IndexMapping: indexMapping, IndexType: indexType, Kvstore: indexStore, Kvconfig: nil})

@@ -2,7 +2,9 @@ package cmd
 
 import (
 	"github.com/mosuka/indigo/rest"
+	"github.com/mosuka/indigo/setting"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 	"log"
 	"os"
 	"os/signal"
@@ -17,7 +19,7 @@ var startRESTCmd = &cobra.Command{
 		/*
 		 * start Indigo REST Server
 		 */
-		server := rest.NewIndigoRESTServer(indigoSettings.GetInt("rest_port"), indigoSettings.GetString("base_uri"), indigoSettings.GetString("grpc_server"))
+		server := rest.NewIndigoRESTServer(IndigoSettings.GetInt("rest_port"), IndigoSettings.GetString("base_uri"), IndigoSettings.GetString("grpc_server"))
 		server.Start()
 
 		/*
@@ -60,17 +62,13 @@ var startRESTCmd = &cobra.Command{
 }
 
 func init() {
-	startRESTCmd.Flags().IntP("port", "p", indigoSettings.GetInt("rest_port"), "port number")
-	indigoSettings.BindPFlag("rest_port", startRESTCmd.Flags().Lookup("port"))
+	startRESTCmd.Flags().IntP("port", "p", setting.DefaultRESTPort, "port number")
+	startRESTCmd.Flags().StringP("base-uri", "b", setting.DefaultBaseURI, "base URI to run Indigo REST Server on")
+	startRESTCmd.Flags().StringP("grpc-server", "g", setting.DefaultGRPCServer, "Indigo gRPC Sever")
 
-	startRESTCmd.Flags().StringP("base-uri", "b", indigoSettings.GetString("base_uri"), "base URI to run Indigo REST Server on")
-	indigoSettings.BindPFlag("base_uri", startRESTCmd.Flags().Lookup("base-uri"))
-
-	startRESTCmd.Flags().StringP("grpc-server", "g", indigoSettings.GetString("grpc_server"), "Indigo gRPC Sever")
-	indigoSettings.BindPFlag("grpc_server", startRESTCmd.Flags().Lookup("grpc-server"))
-
-	startRESTCmd.Flags().StringP("grpc-server", "g", indigoSettings.GetString("grpc_server"), "Indigo gRPC Sever")
-	indigoSettings.BindPFlag("grpc_server", startRESTCmd.Flags().Lookup("grpc-server"))
+	viper.BindPFlag("rest_port", startRESTCmd.Flags().Lookup("port"))
+	viper.BindPFlag("base_uri", startRESTCmd.Flags().Lookup("base-uri"))
+	viper.BindPFlag("grpc_server", startRESTCmd.Flags().Lookup("grpc-server"))
 
 	startCmd.AddCommand(startRESTCmd)
 }

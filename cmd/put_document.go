@@ -3,8 +3,8 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/mosuka/indigo/constant"
 	"github.com/mosuka/indigo/proto"
+	"github.com/mosuka/indigo/setting"
 	"github.com/spf13/cobra"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
@@ -44,7 +44,7 @@ var putDocumentCmd = &cobra.Command{
 			return err
 		}
 
-		conn, err := grpc.Dial(indigoSettings.GetString("grpc_server"), grpc.WithInsecure())
+		conn, err := grpc.Dial(IndigoSettings.GetString("grpc_server"), grpc.WithInsecure())
 		if err != nil {
 			return err
 		}
@@ -56,7 +56,7 @@ var putDocumentCmd = &cobra.Command{
 			return err
 		}
 
-		switch indigoSettings.GetString("output_format") {
+		switch IndigoSettings.GetString("output_format") {
 		case "text":
 			fmt.Printf("%s\n", resp.String())
 		case "json":
@@ -74,9 +74,9 @@ var putDocumentCmd = &cobra.Command{
 }
 
 func init() {
-	putDocumentCmd.Flags().StringVarP(&indexName, "index-name", "n", constant.DefaultIndexName, "index name")
-	putDocumentCmd.Flags().StringVarP(&documentID, "document-id", "i", constant.DefaultDocumentID, "document id")
-	putDocumentCmd.Flags().StringVarP(&documentFile, "fields", "F", constant.DefaultDocumentFile, "fields file")
+	putDocumentCmd.Flags().StringVarP(&indexName, "index-name", "n", setting.DefaultIndexName, "index name")
+	putDocumentCmd.Flags().StringVarP(&documentID, "document-id", "i", setting.DefaultDocumentID, "document id")
+	putDocumentCmd.Flags().StringVarP(&documentFile, "fields", "F", setting.DefaultDocumentFile, "fields file")
 
 	putCmd.AddCommand(putDocumentCmd)
 }

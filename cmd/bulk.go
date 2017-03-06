@@ -3,8 +3,8 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/mosuka/indigo/constant"
 	"github.com/mosuka/indigo/proto"
+	"github.com/mosuka/indigo/setting"
 	"github.com/spf13/cobra"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
@@ -40,7 +40,7 @@ var bulkCmd = &cobra.Command{
 			return err
 		}
 
-		conn, err := grpc.Dial(indigoSettings.GetString("grpc_server"), grpc.WithInsecure())
+		conn, err := grpc.Dial(IndigoSettings.GetString("grpc_server"), grpc.WithInsecure())
 		if err != nil {
 			return err
 		}
@@ -52,7 +52,7 @@ var bulkCmd = &cobra.Command{
 			return err
 		}
 
-		switch indigoSettings.GetString("output_format") {
+		switch IndigoSettings.GetString("output_format") {
 		case "text":
 			fmt.Printf("%s\n", resp.String())
 		case "json":
@@ -70,12 +70,12 @@ var bulkCmd = &cobra.Command{
 }
 
 func init() {
-	bulkCmd.Flags().StringP("grpc-server", "g", indigoSettings.GetString("grpc_server"), "Indigo gRPC Sever")
-	indigoSettings.BindPFlag("grpc_server", bulkCmd.Flags().Lookup("grpc-server"))
+	bulkCmd.Flags().StringP("grpc-server", "g", setting.DefaultGRPCServer, "Indigo gRPC Sever")
+	IndigoSettings.BindPFlag("grpc_server", bulkCmd.Flags().Lookup("grpc-server"))
 
-	bulkCmd.Flags().StringVarP(&indexName, "index-name", "n", constant.DefaultIndexName, "index name")
-	bulkCmd.Flags().StringVarP(&bulkRequestFile, "bulk-request", "b", constant.DefaultBulkRequestFile, "bulk request file")
-	bulkCmd.Flags().Int32VarP(&batchSize, "batch-size", "s", constant.DefaultBatchSize, "batch size")
+	bulkCmd.Flags().StringVarP(&indexName, "index-name", "n", setting.DefaultIndexName, "index name")
+	bulkCmd.Flags().StringVarP(&bulkRequestFile, "bulk-request", "b", setting.DefaultBulkRequestFile, "bulk request file")
+	bulkCmd.Flags().Int32VarP(&batchSize, "batch-size", "s", setting.DefaultBatchSize, "batch size")
 
 	RootCmd.AddCommand(bulkCmd)
 }

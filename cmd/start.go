@@ -2,7 +2,9 @@ package cmd
 
 import (
 	"github.com/comail/colog"
+	"github.com/mosuka/indigo/setting"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 	"log"
 	"os"
 	"time"
@@ -15,8 +17,7 @@ var startCmd = &cobra.Command{
 	Short: "starts the Indigo Server",
 	Long:  `The start command starts the Indigo Server.`,
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
-		//outputFormat = indigoSettings.GetString("output_format")
-		switch indigoSettings.GetString("output_format") {
+		switch IndigoSettings.GetString("output_format") {
 		case "text":
 			colog.SetFormatter(&colog.StdFormatter{
 				Colors: false,
@@ -43,8 +44,8 @@ var startCmd = &cobra.Command{
 		/*
 		 * set log file
 		 */
-		if indigoSettings.GetString("log_output") != "" {
-			logOutput, err := os.OpenFile(indigoSettings.GetString("log_output"), os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
+		if IndigoSettings.GetString("log_output") != "" {
+			logOutput, err := os.OpenFile(IndigoSettings.GetString("log_output"), os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
 			if err != nil {
 				return err
 			} else {
@@ -55,7 +56,7 @@ var startCmd = &cobra.Command{
 		/*
 		 * set log level
 		 */
-		switch indigoSettings.GetString("log_level") {
+		switch IndigoSettings.GetString("log_level") {
 		case "trace":
 			colog.SetMinLevel(colog.LTrace)
 		case "debug":
@@ -96,7 +97,7 @@ var startCmd = &cobra.Command{
 		return nil
 	},
 	PersistentPostRunE: func(cmd *cobra.Command, args []string) error {
-		if indigoSettings.GetString("log_output") != "" {
+		if IndigoSettings.GetString("log_output") != "" {
 			logOutput.Close()
 		}
 
@@ -105,11 +106,11 @@ var startCmd = &cobra.Command{
 }
 
 func init() {
-	startCmd.PersistentFlags().StringP("log-output", "o", indigoSettings.GetString("log_output"), "log file")
-	indigoSettings.BindPFlag("log_output", RootCmd.Flags().Lookup("log-output"))
+	startCmd.PersistentFlags().StringP("log-output", "o", setting.DefaultLogOutputFile, "log file")
+	viper.BindPFlag("log_output", RootCmd.Flags().Lookup("log-output"))
 
-	startCmd.PersistentFlags().StringP("log-level", "l", indigoSettings.GetString("log_level"), "log level")
-	indigoSettings.BindPFlag("log_level", RootCmd.Flags().Lookup("log-level"))
+	startCmd.PersistentFlags().StringP("log-level", "l", setting.DefaultLogLevel, "log level")
+	viper.BindPFlag("log_level", RootCmd.Flags().Lookup("log-level"))
 
 	RootCmd.AddCommand(startCmd)
 }

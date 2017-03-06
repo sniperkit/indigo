@@ -1,7 +1,9 @@
 package cmd
 
 import (
+	"github.com/mosuka/indigo/setting"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 var listCmd = &cobra.Command{
@@ -26,8 +28,8 @@ var listCmd = &cobra.Command{
 }
 
 func init() {
-	listCmd.PersistentFlags().StringP("grpc-server", "g", indigoSettings.GetString("grpc_server"), "Indigo gRPC Sever")
-	indigoSettings.BindPFlag("grpc_server", listCmd.Flags().Lookup("grpc-server"))
+	listCmd.PersistentFlags().StringP("grpc-server", "g", setting.DefaultGRPCServer, "Indigo gRPC Sever")
+	viper.BindPFlag("grpc_server", listCmd.Flags().Lookup("grpc-server"))
 
 	RootCmd.AddCommand(listCmd)
 }

@@ -1,39 +1,20 @@
 package cmd
 
 import (
-	"github.com/mosuka/indigo/constant"
+	"github.com/mosuka/indigo/setting"
 )
 
 var (
-	versionFlag bool = constant.DefaultVersionFlag
-
-	//outputFormat string = constant.DefaultOutputFormat
-
-	//logOutputFile string = constant.DefaultLogOutputFile
-	//logLevel      string = constant.DefaultLogLevel
-
-	//gRPCServerPort    int    = constant.DefaultGRPCServerPort
-	//dataDir           string = constant.DefaultDataDir
-	//openExistingIndex bool   = constant.DefaultOpenExistingIndex
-
-	//restServerPort int    = constant.DefaultRESTServerPort
-	//gRPCServer     string = constant.DefaultGRPCServer
-	//baseURI        string = constant.DefaultBaseURI
-
-	indexName string = constant.DefaultIndexName
-
-	indexMappingFile string = constant.DefaultIndexMappingFile
-	indexType        string = constant.DefaultIndexType
-	kvStore          string = constant.DefaultKVStore
-	kvConfigFile     string = constant.DefaultKVConfigFile
-
-	runtimeConfigFile string = constant.DefaultRuntimeConfigFile
-
-	documentID   string = constant.DefaultDocumentID
-	documentFile string = constant.DefaultDocumentFile
-
-	bulkRequestFile string = constant.DefaultBulkRequestFile
-	batchSize       int32  = constant.DefaultBatchSize
-
-	searchRequestFile string = constant.DefaultSearchRequestFile
+	versionFlag       bool   = setting.DefaultVersionFlag
+	indexName         string = setting.DefaultIndexName
+	indexMappingFile  string = setting.DefaultIndexMappingFile
+	indexType         string = setting.DefaultIndexType
+	kvStore           string = setting.DefaultKVStore
+	kvConfigFile      string = setting.DefaultKVConfigFile
+	runtimeConfigFile string = setting.DefaultRuntimeConfigFile
+	documentID        string = setting.DefaultDocumentID
+	documentFile      string = setting.DefaultDocumentFile
+	bulkRequestFile   string = setting.DefaultBulkRequestFile
+	batchSize         int32  = setting.DefaultBatchSize
+	searchRequestFile string = setting.DefaultSearchRequestFile
 )
