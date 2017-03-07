@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/mosuka/indigo/proto"
-	"github.com/mosuka/indigo/setting"
+	"github.com/mosuka/indigo/constant"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"golang.org/x/net/context"
@@ -17,7 +17,7 @@ var searchCmd = &cobra.Command{
 	Use:   "search",
 	Short: "searches the documents from the Indigo gRPC Server",
 	Long:  `The search command searches the documents from the Indigo gRPC Server.`,
-	PreRunE: func(cmd *cobra.Command, args []string) error {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		if indexName == "" {
 			return fmt.Errorf("required flag: --%s", cmd.Flag("index-name").Name)
 		}
@@ -26,9 +26,6 @@ var searchCmd = &cobra.Command{
 			return fmt.Errorf("required flag: --%s", cmd.Flag("search-request").Name)
 		}
 
-		return nil
-	},
-	RunE: func(cmd *cobra.Command, args []string) error {
 		searchRequest := make([]byte, 0)
 		file, err := os.Open(searchRequestFile)
 		if err != nil {
@@ -83,9 +80,9 @@ var searchCmd = &cobra.Command{
 }
 
 func init() {
-	searchCmd.Flags().StringP("grpc-server", "g", setting.DefaultGRPCServer, "Indigo gRPC Sever")
-	searchCmd.Flags().StringVarP(&indexName, "index-name", "n", setting.DefaultIndexName, "index name")
-	searchCmd.Flags().StringVarP(&searchRequestFile, "search-request", "s", setting.DefaultSearchRequestFile, "search request file")
+	searchCmd.Flags().StringP("grpc-server", "g", constant.DefaultGRPCServer, "Indigo gRPC Sever")
+	searchCmd.Flags().StringVarP(&indexName, "index-name", "n", constant.DefaultIndexName, "index name")
+	searchCmd.Flags().StringVarP(&searchRequestFile, "search-request", "s", constant.DefaultSearchRequestFile, "search request file")
 
 	viper.BindPFlag("grpc_server", searchCmd.Flags().Lookup("grpc-server"))
 

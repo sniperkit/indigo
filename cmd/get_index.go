@@ -6,7 +6,7 @@ import (
 	"github.com/blevesearch/bleve"
 	"github.com/blevesearch/bleve/mapping"
 	"github.com/mosuka/indigo/proto"
-	"github.com/mosuka/indigo/setting"
+	"github.com/mosuka/indigo/constant"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"golang.org/x/net/context"
@@ -17,14 +17,11 @@ var getIndexCmd = &cobra.Command{
 	Use:   "index",
 	Short: "gets the index information from the Indigo gRPC Server",
 	Long:  `The get index command gets the index information from the Indigo gRPC Server.`,
-	PreRunE: func(cmd *cobra.Command, args []string) error {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		if indexName == "" {
 			return fmt.Errorf("required flag: --%s", cmd.Flag("index-name").Name)
 		}
 
-		return nil
-	},
-	RunE: func(cmd *cobra.Command, args []string) error {
 		conn, err := grpc.Dial(viper.GetString("grpc_server"), grpc.WithInsecure())
 		if err != nil {
 			return err
@@ -75,7 +72,7 @@ var getIndexCmd = &cobra.Command{
 }
 
 func init() {
-	getIndexCmd.Flags().StringVarP(&indexName, "index-name", "n", setting.DefaultIndexName, "index name")
+	getIndexCmd.Flags().StringVarP(&indexName, "index-name", "n", constant.DefaultIndexName, "index name")
 
 	getCmd.AddCommand(getIndexCmd)
 }

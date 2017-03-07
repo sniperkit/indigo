@@ -1,32 +1,32 @@
 package cmd
 
 import (
-	"github.com/mosuka/indigo/setting"
+	"github.com/mosuka/indigo/constant"
 )
 
 var (
-	versionFlag bool = setting.DefaultVersionFlag
+	versionFlag bool = constant.DefaultVersionFlag
 
-	configFile        string = setting.DefaultConfigFile
-	outputFormat      string = setting.DefaultOutputFormat
-	logOutputFile     string = setting.DefaultLogOutputFile
-	logLevel          string = setting.DefaultLogLevel
-	gRPCPort          int    = setting.DefaultGRPCPort
-	dataDir           string = setting.DefaultDataDir
-	openExistingIndex bool   = setting.DefaultOpenExistingIndex
-	restPort          int    = setting.DefaultRESTPort
-	baseURI           string = setting.DefaultBaseURI
-	gRPCServer        string = setting.DefaultGRPCServer
+	configFile        string = constant.DefaultConfigFile
+	outputFormat      string = constant.DefaultOutputFormat
+	logOutputFile     string = constant.DefaultLogOutputFile
+	logLevel          string = constant.DefaultLogLevel
+	gRPCPort          int    = constant.DefaultGRPCPort
+	dataDir           string = constant.DefaultDataDir
+	openExistingIndex bool   = constant.DefaultOpenExistingIndex
+	restPort          int    = constant.DefaultRESTPort
+	baseURI           string = constant.DefaultBaseURI
+	gRPCServer        string = constant.DefaultGRPCServer
 
-	indexName         string = setting.DefaultIndexName
-	indexMappingFile  string = setting.DefaultIndexMappingFile
-	indexType         string = setting.DefaultIndexType
-	kvStore           string = setting.DefaultKVStore
-	kvConfigFile      string = setting.DefaultKVConfigFile
-	runtimeConfigFile string = setting.DefaultRuntimeConfigFile
-	documentID        string = setting.DefaultDocumentID
-	documentFile      string = setting.DefaultDocumentFile
-	bulkRequestFile   string = setting.DefaultBulkRequestFile
-	batchSize         int32  = setting.DefaultBatchSize
-	searchRequestFile string = setting.DefaultSearchRequestFile
+	indexName         string = constant.DefaultIndexName
+	indexMappingFile  string = constant.DefaultIndexMappingFile
+	indexType         string = constant.DefaultIndexType
+	kvStore           string = constant.DefaultKVStore
+	kvConfigFile      string = constant.DefaultKVConfigFile
+	runtimeConfigFile string = constant.DefaultRuntimeConfigFile
+	documentID        string = constant.DefaultDocumentID
+	documentFile      string = constant.DefaultDocumentFile
+	bulkRequestFile   string = constant.DefaultBulkRequestFile
+	batchSize         int32  = constant.DefaultBatchSize
+	searchRequestFile string = constant.DefaultSearchRequestFile
 )

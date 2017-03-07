@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/mosuka/indigo/proto"
-	"github.com/mosuka/indigo/setting"
+	"github.com/mosuka/indigo/constant"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"golang.org/x/net/context"
@@ -15,14 +15,11 @@ var deleteIndexCmd = &cobra.Command{
 	Use:   "index",
 	Short: "deletes the index from the Indigo gRPC Server",
 	Long:  `The delete index command deletes the index from the Indigo gRPC Server.`,
-	PreRunE: func(cmd *cobra.Command, args []string) error {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		if indexName == "" {
 			return fmt.Errorf("required flag: --%s", cmd.Flag("index-name").Name)
 		}
 
-		return nil
-	},
-	RunE: func(cmd *cobra.Command, args []string) error {
 		conn, err := grpc.Dial(viper.GetString("grpc_server"), grpc.WithInsecure())
 		if err != nil {
 			return err
@@ -53,7 +50,7 @@ var deleteIndexCmd = &cobra.Command{
 }
 
 func init() {
-	deleteIndexCmd.Flags().StringVarP(&indexName, "index-name", "n", setting.DefaultIndexName, "index name")
+	deleteIndexCmd.Flags().StringVarP(&indexName, "index-name", "n", constant.DefaultIndexName, "index name")
 
 	deleteCmd.AddCommand(deleteIndexCmd)
 }

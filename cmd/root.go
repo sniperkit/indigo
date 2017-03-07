@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/mosuka/indigo/setting"
+	"github.com/mosuka/indigo/constant"
 	"github.com/mosuka/indigo/version"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -37,10 +37,6 @@ func Execute() {
 }
 
 func loadConfig() {
-
-	fmt.Printf("config: %s\n", viper.GetString("config"))
-
-	fmt.Printf("config: %s\n", configFile)
 	if viper.GetString("config") != "" {
 		viper.SetConfigFile(viper.GetString("config"))
 	} else {
@@ -61,10 +57,10 @@ func loadConfig() {
 func init() {
 	cobra.OnInitialize(loadConfig)
 
-	RootCmd.PersistentFlags().StringVarP(&configFile, "config", "c", setting.DefaultConfigFile, "config file")
-	viper.BindPFlag("config", RootCmd.PersistentFlags().Lookup("config"))
+	RootCmd.PersistentFlags().StringVarP(&configFile, "config", "c", constant.DefaultConfigFile, "config file")
+	RootCmd.PersistentFlags().StringVarP(&outputFormat, "output-format", "f", constant.DefaultOutputFormat, "output format")
 
-	RootCmd.PersistentFlags().StringVarP(&outputFormat, "output-format", "f", setting.DefaultOutputFormat, "output format")
+	viper.BindPFlag("config", RootCmd.PersistentFlags().Lookup("config"))
 	viper.BindPFlag("output_format", RootCmd.PersistentFlags().Lookup("output-format"))
 
 	RootCmd.PersistentFlags().BoolVarP(&versionFlag, "version", "v", false, "show version numner")

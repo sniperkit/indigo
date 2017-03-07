@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"github.com/gorilla/mux"
 	"github.com/mosuka/indigo/proto"
-	"github.com/mosuka/indigo/setting"
+	"github.com/mosuka/indigo/constant"
 	"golang.org/x/net/context"
 	"io/ioutil"
 	"log"
@@ -37,7 +37,7 @@ func (h *BulkHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	batchSize := setting.DefaultBatchSize
+	batchSize := constant.DefaultBatchSize
 	bs, err := strconv.Atoi(req.URL.Query().Get("batchSize"))
 	if err == nil {
 		if bs > 0 {

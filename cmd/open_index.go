@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/mosuka/indigo/proto"
-	"github.com/mosuka/indigo/setting"
+	"github.com/mosuka/indigo/constant"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"golang.org/x/net/context"
@@ -17,14 +17,11 @@ var openIndexCmd = &cobra.Command{
 	Use:   "index",
 	Short: "opens the index to the Indigo gRPC Server",
 	Long:  `The open index command opens the index to the Indigo gRPC Server.`,
-	PreRunE: func(cmd *cobra.Command, args []string) error {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		if indexName == "" {
 			return fmt.Errorf("required flag: --%s", cmd.Flag("index-name").Name)
 		}
 
-		return nil
-	},
-	RunE: func(cmd *cobra.Command, args []string) error {
 		var runtimeConfig []byte = nil
 
 		if runtimeConfigFile != "" {
@@ -70,8 +67,8 @@ var openIndexCmd = &cobra.Command{
 }
 
 func init() {
-	openIndexCmd.Flags().StringVarP(&indexName, "index-name", "n", setting.DefaultIndexName, "index name")
-	openIndexCmd.Flags().StringVarP(&runtimeConfigFile, "runtime-config", "r", setting.DefaultRuntimeConfigFile, "runtime config")
+	openIndexCmd.Flags().StringVarP(&indexName, "index-name", "n", constant.DefaultIndexName, "index name")
+	openIndexCmd.Flags().StringVarP(&runtimeConfigFile, "runtime-config", "r", constant.DefaultRuntimeConfigFile, "runtime config")
 
 	openCmd.AddCommand(openIndexCmd)
 }

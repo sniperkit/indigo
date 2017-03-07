@@ -3,8 +3,8 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/mosuka/indigo/constant"
 	"github.com/mosuka/indigo/proto"
-	"github.com/mosuka/indigo/setting"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"golang.org/x/net/context"
@@ -17,14 +17,11 @@ var createIndexCmd = &cobra.Command{
 	Use:   "index",
 	Short: "creates the index to the Indigo gRPC Server",
 	Long:  `The create index command creates the index to the Indigo gRPC Server.`,
-	PreRunE: func(cmd *cobra.Command, args []string) error {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		if indexName == "" {
 			return fmt.Errorf("required flag: --%s", cmd.Flag("index-name").Name)
 		}
 
-		return nil
-	},
-	RunE: func(cmd *cobra.Command, args []string) error {
 		var indexMapping []byte = nil
 		var kvConfig []byte = nil
 
@@ -84,11 +81,11 @@ var createIndexCmd = &cobra.Command{
 }
 
 func init() {
-	createIndexCmd.Flags().StringVarP(&indexName, "index-name", "n", setting.DefaultIndexName, "index name")
-	createIndexCmd.Flags().StringVarP(&indexMappingFile, "index-mapping", "m", setting.DefaultIndexMappingFile, "index mapping")
-	createIndexCmd.Flags().StringVarP(&indexType, "index-type", "t", setting.DefaultIndexType, "index type")
-	createIndexCmd.Flags().StringVarP(&kvStore, "kvstore", "s", setting.DefaultKVStore, "kvstore")
-	createIndexCmd.Flags().StringVarP(&kvConfigFile, "kvconfig", "k", setting.DefaultKVConfigFile, "kvconfig")
+	createIndexCmd.Flags().StringVarP(&indexName, "index-name", "n", constant.DefaultIndexName, "index name")
+	createIndexCmd.Flags().StringVarP(&indexMappingFile, "index-mapping", "m", constant.DefaultIndexMappingFile, "index mapping")
+	createIndexCmd.Flags().StringVarP(&indexType, "index-type", "t", constant.DefaultIndexType, "index type")
+	createIndexCmd.Flags().StringVarP(&kvStore, "kvstore", "s", constant.DefaultKVStore, "kvstore")
+	createIndexCmd.Flags().StringVarP(&kvConfigFile, "kvconfig", "k", constant.DefaultKVConfigFile, "kvconfig")
 
 	createCmd.AddCommand(createIndexCmd)
 }

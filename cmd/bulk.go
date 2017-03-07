@@ -3,8 +3,8 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/mosuka/indigo/constant"
 	"github.com/mosuka/indigo/proto"
-	"github.com/mosuka/indigo/setting"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"golang.org/x/net/context"
@@ -17,7 +17,7 @@ var bulkCmd = &cobra.Command{
 	Use:   "bulk",
 	Short: "indexes the documents in bulk to the Indigo gRPC Server",
 	Long:  `The bulk command indexes the documents in bulk to the Indigo gRPC Server.`,
-	PreRunE: func(cmd *cobra.Command, args []string) error {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		if indexName == "" {
 			return fmt.Errorf("required flag: --%s", cmd.Flag("index-name").Name)
 		}
@@ -26,9 +26,6 @@ var bulkCmd = &cobra.Command{
 			return fmt.Errorf("required flag: --%s", cmd.Flag("bulk-request").Name)
 		}
 
-		return nil
-	},
-	RunE: func(cmd *cobra.Command, args []string) error {
 		bulkRequest := make([]byte, 0)
 		file, err := os.Open(bulkRequestFile)
 		if err != nil {
@@ -71,12 +68,12 @@ var bulkCmd = &cobra.Command{
 }
 
 func init() {
-	bulkCmd.Flags().StringP("grpc-server", "g", setting.DefaultGRPCServer, "Indigo gRPC Sever")
+	bulkCmd.Flags().StringP("grpc-server", "g", constant.DefaultGRPCServer, "Indigo gRPC Sever")
 	viper.BindPFlag("grpc_server", bulkCmd.Flags().Lookup("grpc-server"))
 
-	bulkCmd.Flags().StringVarP(&indexName, "index-name", "n", setting.DefaultIndexName, "index name")
-	bulkCmd.Flags().StringVarP(&bulkRequestFile, "bulk-request", "b", setting.DefaultBulkRequestFile, "bulk request")
-	bulkCmd.Flags().Int32VarP(&batchSize, "batch-size", "s", setting.DefaultBatchSize, "batch size")
+	bulkCmd.Flags().StringVarP(&indexName, "index-name", "n", constant.DefaultIndexName, "index name")
+	bulkCmd.Flags().StringVarP(&bulkRequestFile, "bulk-request", "b", constant.DefaultBulkRequestFile, "bulk request")
+	bulkCmd.Flags().Int32VarP(&batchSize, "batch-size", "s", constant.DefaultBatchSize, "batch size")
 
 	RootCmd.AddCommand(bulkCmd)
 }

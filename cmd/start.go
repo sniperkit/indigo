@@ -1,9 +1,8 @@
 package cmd
 
 import (
-	"fmt"
 	"github.com/comail/colog"
-	"github.com/mosuka/indigo/setting"
+	"github.com/mosuka/indigo/constant"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"log"
@@ -18,8 +17,6 @@ var startCmd = &cobra.Command{
 	Short: "starts the Indigo Server",
 	Long:  `The start command starts the Indigo Server.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		fmt.Println("startCmd.RunE")
-
 		if len(args) < 1 {
 			return cmd.Help()
 		}
@@ -29,7 +26,7 @@ var startCmd = &cobra.Command{
 			return err
 		}
 
-		switch outputFormat {
+		switch viper.GetString("output_format") {
 		case "text":
 			colog.SetFormatter(&colog.StdFormatter{
 				Colors: false,
@@ -52,7 +49,7 @@ var startCmd = &cobra.Command{
 			})
 		}
 
-		if logOutputFile != "" {
+		if viper.GetString("log_output") != "" {
 			var err error
 			logOutput, err = os.OpenFile(viper.GetString("log_output"), os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
 			if err != nil {
@@ -62,7 +59,7 @@ var startCmd = &cobra.Command{
 			}
 		}
 
-		switch logLevel {
+		switch viper.GetString("log_level") {
 		case "trace":
 			colog.SetMinLevel(colog.LTrace)
 		case "debug":
@@ -88,9 +85,7 @@ var startCmd = &cobra.Command{
 		return nil
 	},
 	PersistentPostRunE: func(cmd *cobra.Command, args []string) error {
-		fmt.Println("startCmd.PersistentPostRunE")
-
-		if logOutputFile != "" {
+		if viper.GetString("log_output") != "" {
 			logOutput.Close()
 		}
 
@@ -99,13 +94,11 @@ var startCmd = &cobra.Command{
 }
 
 func init() {
-	fmt.Println("startCmd.init()")
+	startCmd.PersistentFlags().StringVarP(&logOutputFile, "log-output", "o", constant.DefaultLogOutputFile, "log file")
+	viper.BindPFlag("log_output", RootCmd.PersistentFlags().Lookup("log-output"))
 
-	startCmd.PersistentFlags().StringVarP(&logOutputFile, "log-output", "o", setting.DefaultLogOutputFile, "log file")
-	viper.BindPFlag("log_output", RootCmd.Flags().Lookup("log-output"))
-
-	startCmd.PersistentFlags().StringVarP(&logLevel, "log-level", "l", setting.DefaultLogLevel, "log level")
-	viper.BindPFlag("log_level", RootCmd.Flags().Lookup("log-level"))
+	startCmd.PersistentFlags().StringVarP(&logLevel, "log-level", "l", constant.DefaultLogLevel, "log level")
+	viper.BindPFlag("log_level", RootCmd.PersistentFlags().Lookup("log-level"))
 
 	RootCmd.AddCommand(startCmd)
 }
