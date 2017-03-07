@@ -14,8 +14,6 @@ var RootCmd = &cobra.Command{
 	Short: "Indigo Command Line Interface",
 	Long:  `The Indigo Command Line Interface controlls the Indigo Server.`,
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
-		fmt.Println("RootCmd.PersistentPreRunE")
-
 		if versionFlag {
 			fmt.Printf("%s\n", version.Version)
 			os.Exit(0)
@@ -23,17 +21,10 @@ var RootCmd = &cobra.Command{
 
 		return nil
 	},
-	PreRunE: func(cmd *cobra.Command, args []string) error {
-		fmt.Println("RootCmd.PreRunE")
-
+	RunE: func(cmd *cobra.Command, args []string) error {
 		if len(args) < 1 {
 			return cmd.Help()
 		}
-
-		return nil
-	},
-	RunE: func(cmd *cobra.Command, args []string) error {
-		fmt.Println("RootCmd.RunE")
 
 		return nil
 	},
@@ -46,17 +37,23 @@ func Execute() {
 }
 
 func loadConfig() {
-	if configFile == "" {
+
+	fmt.Printf("config: %s\n", viper.GetString("config"))
+
+	fmt.Printf("config: %s\n", configFile)
+	if viper.GetString("config") != "" {
+		viper.SetConfigFile(viper.GetString("config"))
+	} else {
 		viper.SetConfigName("indigo")
 		viper.SetConfigType("yaml")
 		viper.AddConfigPath("/etc/")
 		viper.AddConfigPath("${HOME}/")
-		viper.AddConfigPath("./")
-	} else {
-		viper.SetConfigFile(configFile)
+		viper.AddConfigPath(".")
 	}
-	err := viper.ReadInConfig()
-	if err != nil {
+	viper.SetEnvPrefix("indigo")
+	viper.AutomaticEnv()
+
+	if err := viper.ReadInConfig(); err != nil {
 		fmt.Printf("%s\n", err.Error())
 	}
 }
@@ -65,9 +62,10 @@ func init() {
 	cobra.OnInitialize(loadConfig)
 
 	RootCmd.PersistentFlags().StringVarP(&configFile, "config", "c", setting.DefaultConfigFile, "config file")
+	viper.BindPFlag("config", RootCmd.PersistentFlags().Lookup("config"))
 
 	RootCmd.PersistentFlags().StringVarP(&outputFormat, "output-format", "f", setting.DefaultOutputFormat, "output format")
-	viper.BindPFlag("output_format", RootCmd.Flags().Lookup("output-format"))
+	viper.BindPFlag("output_format", RootCmd.PersistentFlags().Lookup("output-format"))
 
 	RootCmd.PersistentFlags().BoolVarP(&versionFlag, "version", "v", false, "show version numner")
 }

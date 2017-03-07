@@ -730,7 +730,7 @@
 			"importpath": "github.com/spf13/viper",
 			"repository": "https://github.com/spf13/viper",
 			"vcs": "git",
-			"revision": "5ed0fc31f7f453625df314d8e66b9791e8d13003",
+			"revision": "7538d73b4eb9511d85a9f1dfef202eeb8ac260f4",
 			"branch": "master",
 			"notests": true
 		},

@@ -1,4 +1,4 @@
-output_format: "color"
+output_format: text
 
 log_output: ""
 log_level: "info"

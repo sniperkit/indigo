@@ -17,13 +17,8 @@ var startCmd = &cobra.Command{
 	Use:   "start",
 	Short: "starts the Indigo Server",
 	Long:  `The start command starts the Indigo Server.`,
-	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
-		fmt.Println("startCmd.PersistentPreRunE")
-
-		return nil
-	},
-	PreRunE: func(cmd *cobra.Command, args []string) error {
-		fmt.Println("startCmd.PreRunE")
+	RunE: func(cmd *cobra.Command, args []string) error {
+		fmt.Println("startCmd.RunE")
 
 		if len(args) < 1 {
 			return cmd.Help()
@@ -34,12 +29,7 @@ var startCmd = &cobra.Command{
 			return err
 		}
 
-		return nil
-	},
-	RunE: func(cmd *cobra.Command, args []string) error {
-		fmt.Println("startCmd.RunE")
-
-		switch viper.GetString("output_format") {
+		switch outputFormat {
 		case "text":
 			colog.SetFormatter(&colog.StdFormatter{
 				Colors: false,
@@ -62,7 +52,7 @@ var startCmd = &cobra.Command{
 			})
 		}
 
-		if viper.GetString("log_output") != "" {
+		if logOutputFile != "" {
 			var err error
 			logOutput, err = os.OpenFile(viper.GetString("log_output"), os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
 			if err != nil {
@@ -72,7 +62,7 @@ var startCmd = &cobra.Command{
 			}
 		}
 
-		switch viper.GetString("log_level") {
+		switch logLevel {
 		case "trace":
 			colog.SetMinLevel(colog.LTrace)
 		case "debug":
@@ -109,6 +99,8 @@ var startCmd = &cobra.Command{
 }
 
 func init() {
+	fmt.Println("startCmd.init()")
+
 	startCmd.PersistentFlags().StringVarP(&logOutputFile, "log-output", "o", setting.DefaultLogOutputFile, "log file")
 	viper.BindPFlag("log_output", RootCmd.Flags().Lookup("log-output"))
 

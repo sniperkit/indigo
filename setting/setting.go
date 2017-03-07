@@ -1,7 +1,7 @@
 package setting
 
 import (
-	"github.com/spf13/viper"
+	"fmt"
 )
 
 const (
@@ -30,26 +30,28 @@ const (
 )
 
 func init() {
-	viper.SetDefault("config", DefaultConfigFile)
-	viper.SetDefault("output_format", DefaultOutputFormat)
-	viper.SetDefault("log_output", DefaultLogOutputFile)
-	viper.SetDefault("log_level", DefaultLogLevel)
-	viper.SetDefault("grpc_port", DefaultGRPCPort)
-	viper.SetDefault("data_dir", DefaultDataDir)
-	viper.SetDefault("open_existing_index", DefaultOpenExistingIndex)
-	viper.SetDefault("rest_port", DefaultRESTPort)
-	viper.SetDefault("grpc_server", DefaultGRPCServer)
-	viper.SetDefault("base_uri", DefaultBaseURI)
+	fmt.Println("setting.init()")
 
-	viper.SetEnvPrefix("indigo")
-	viper.BindEnv("config")
-	viper.BindEnv("output_format")
-	viper.BindEnv("log_output")
-	viper.BindEnv("log_level")
-	viper.BindEnv("grpc_port")
-	viper.BindEnv("data_dir")
-	viper.BindEnv("open_existing_index")
-	viper.BindEnv("rest_port")
-	viper.BindEnv("grpc_server")
-	viper.BindEnv("base_uri")
+	//viper.SetDefault("config", DefaultConfigFile)
+	//viper.SetDefault("output_format", DefaultOutputFormat)
+	//viper.SetDefault("log_output", DefaultLogOutputFile)
+	//viper.SetDefault("log_level", DefaultLogLevel)
+	//viper.SetDefault("grpc_port", DefaultGRPCPort)
+	//viper.SetDefault("data_dir", DefaultDataDir)
+	//viper.SetDefault("open_existing_index", DefaultOpenExistingIndex)
+	//viper.SetDefault("rest_port", DefaultRESTPort)
+	//viper.SetDefault("grpc_server", DefaultGRPCServer)
+	//viper.SetDefault("base_uri", DefaultBaseURI)
+
+	//viper.SetEnvPrefix("indigo")
+	//viper.BindEnv("config")
+	//viper.BindEnv("output_format")
+	//viper.BindEnv("log_output")
+	//viper.BindEnv("log_level")
+	//viper.BindEnv("grpc_port")
+	//viper.BindEnv("data_dir")
+	//viper.BindEnv("open_existing_index")
+	//viper.BindEnv("rest_port")
+	//viper.BindEnv("grpc_server")
+	//viper.BindEnv("base_uri")
 }
