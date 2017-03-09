@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/comail/colog"
 	"github.com/mosuka/indigo/constant"
+	"github.com/mosuka/indigo/version"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"log"
@@ -17,27 +18,11 @@ var startCmd = &cobra.Command{
 	Use:   "start",
 	Short: "starts the Indigo Server",
 	Long:  `The start command starts the Indigo Server.`,
-	PreRunE: func(cmd *cobra.Command, args []string) error {
-		fmt.Println("start startCmd.PreRunE")
-
-		fmt.Println(args)
-
-		if len(args) < 1 {
-			return cmd.Help()
+	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+		if versionFlag {
+			fmt.Printf("%s\n", version.Version)
+			os.Exit(0)
 		}
-
-		_, _, err := cmd.Find(args)
-		if err != nil {
-			return err
-		}
-
-		fmt.Println("end startCmd.PersistentPreRunE")
-		return nil
-	},
-	RunE: func(cmd *cobra.Command, args []string) error {
-		fmt.Println("start startCmd.RunE")
-
-		fmt.Println(viper.GetString("output_format"))
 
 		switch viper.GetString("output_format") {
 		case "text":
@@ -95,17 +80,25 @@ var startCmd = &cobra.Command{
 
 		colog.Register()
 
-		fmt.Println("end startCmd.RunE")
+		return nil
+	},
+	RunE: func(cmd *cobra.Command, args []string) error {
+		if len(args) < 1 {
+			return cmd.Help()
+		}
+
+		_, _, err := cmd.Find(args)
+		if err != nil {
+			return err
+		}
+
 		return nil
 	},
 	PersistentPostRunE: func(cmd *cobra.Command, args []string) error {
-		fmt.Println("start startCmd.PersistentPostRunE")
-
 		if viper.GetString("log_output") != "" {
 			logOutput.Close()
 		}
 
-		fmt.Println("end startCmd.PersistentPostRunE")
 		return nil
 	},
 }

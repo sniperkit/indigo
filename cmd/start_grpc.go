@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"fmt"
 	"github.com/mosuka/indigo/constant"
 	"github.com/mosuka/indigo/grpc"
 	"github.com/spf13/cobra"
@@ -17,8 +16,6 @@ var startGRPCCmd = &cobra.Command{
 	Short: "start Indigo gRPC Server",
 	Long:  `The start grpc command starts the Indigo gRPC Server.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		fmt.Println("start startGRPCCmd.RunE")
-
 		server := grpc.NewIndigoGRPCServer(viper.GetInt("grpc_port"), viper.GetString("data_dir"))
 		server.Start(viper.GetBool("open_existing_index"))
 
@@ -54,7 +51,6 @@ var startGRPCCmd = &cobra.Command{
 			}
 		}
 
-		fmt.Println("end startGRPCCmd.RunE")
 		return nil
 	},
 }
