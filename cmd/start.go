@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"fmt"
 	"github.com/comail/colog"
 	"github.com/mosuka/indigo/constant"
 	"github.com/spf13/cobra"
@@ -16,7 +17,11 @@ var startCmd = &cobra.Command{
 	Use:   "start",
 	Short: "starts the Indigo Server",
 	Long:  `The start command starts the Indigo Server.`,
-	RunE: func(cmd *cobra.Command, args []string) error {
+	PreRunE: func(cmd *cobra.Command, args []string) error {
+		fmt.Println("start startCmd.PreRunE")
+
+		fmt.Println(args)
+
 		if len(args) < 1 {
 			return cmd.Help()
 		}
@@ -25,6 +30,14 @@ var startCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
+
+		fmt.Println("end startCmd.PersistentPreRunE")
+		return nil
+	},
+	RunE: func(cmd *cobra.Command, args []string) error {
+		fmt.Println("start startCmd.RunE")
+
+		fmt.Println(viper.GetString("output_format"))
 
 		switch viper.GetString("output_format") {
 		case "text":
@@ -82,23 +95,27 @@ var startCmd = &cobra.Command{
 
 		colog.Register()
 
+		fmt.Println("end startCmd.RunE")
 		return nil
 	},
 	PersistentPostRunE: func(cmd *cobra.Command, args []string) error {
+		fmt.Println("start startCmd.PersistentPostRunE")
+
 		if viper.GetString("log_output") != "" {
 			logOutput.Close()
 		}
 
+		fmt.Println("end startCmd.PersistentPostRunE")
 		return nil
 	},
 }
 
 func init() {
 	startCmd.PersistentFlags().StringVarP(&logOutputFile, "log-output", "o", constant.DefaultLogOutputFile, "log file")
-	viper.BindPFlag("log_output", RootCmd.PersistentFlags().Lookup("log-output"))
-
 	startCmd.PersistentFlags().StringVarP(&logLevel, "log-level", "l", constant.DefaultLogLevel, "log level")
-	viper.BindPFlag("log_level", RootCmd.PersistentFlags().Lookup("log-level"))
+
+	viper.BindPFlag("log_output", startCmd.PersistentFlags().Lookup("log-output"))
+	viper.BindPFlag("log_level", startCmd.PersistentFlags().Lookup("log-level"))
 
 	RootCmd.AddCommand(startCmd)
 }

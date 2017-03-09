@@ -1,8 +1,8 @@
 package cmd
 
 import (
-	"github.com/mosuka/indigo/rest"
 	"github.com/mosuka/indigo/constant"
+	"github.com/mosuka/indigo/rest"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"log"
@@ -57,12 +57,11 @@ var startRESTCmd = &cobra.Command{
 
 func init() {
 	startRESTCmd.Flags().IntVarP(&restPort, "port", "p", constant.DefaultRESTPort, "port number")
-	viper.BindPFlag("rest_port", startRESTCmd.Flags().Lookup("port"))
-
 	startRESTCmd.Flags().StringVarP(&gRPCServer, "grpc-server", "g", constant.DefaultGRPCServer, "Indigo gRPC Sever")
-	viper.BindPFlag("grpc_server", startRESTCmd.Flags().Lookup("grpc-server"))
-
 	startRESTCmd.Flags().StringVarP(&baseURI, "base-uri", "b", constant.DefaultBaseURI, "base URI to run Indigo REST Server on")
+
+	viper.BindPFlag("rest_port", startRESTCmd.Flags().Lookup("port"))
+	viper.BindPFlag("grpc_server", startRESTCmd.Flags().Lookup("grpc-server"))
 	viper.BindPFlag("base_uri", startRESTCmd.Flags().Lookup("base-uri"))
 
 	startCmd.AddCommand(startRESTCmd)

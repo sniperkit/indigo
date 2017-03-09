@@ -69,11 +69,11 @@ var bulkCmd = &cobra.Command{
 
 func init() {
 	bulkCmd.Flags().StringP("grpc-server", "g", constant.DefaultGRPCServer, "Indigo gRPC Sever")
-	viper.BindPFlag("grpc_server", bulkCmd.Flags().Lookup("grpc-server"))
-
 	bulkCmd.Flags().StringVarP(&indexName, "index-name", "n", constant.DefaultIndexName, "index name")
 	bulkCmd.Flags().StringVarP(&bulkRequestFile, "bulk-request", "b", constant.DefaultBulkRequestFile, "bulk request")
 	bulkCmd.Flags().Int32VarP(&batchSize, "batch-size", "s", constant.DefaultBatchSize, "batch size")
+
+	viper.BindPFlag("grpc_server", bulkCmd.Flags().Lookup("grpc-server"))
 
 	RootCmd.AddCommand(bulkCmd)
 }
