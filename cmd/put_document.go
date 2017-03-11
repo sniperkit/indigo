@@ -18,20 +18,20 @@ var putDocumentCmd = &cobra.Command{
 	Short: "puts the document to the Indigo gRPC Server",
 	Long:  `The index document command puts the document to the Indigo gRPC Server.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		if indexName == "" {
-			return fmt.Errorf("required flag: --%s", cmd.Flag("index-name").Name)
+		if viper.GetString("index") == "" {
+			return fmt.Errorf("required flag: --%s", cmd.Flag("index").Name)
 		}
 
-		if documentID == "" {
-			return fmt.Errorf("required flag: --%s", cmd.Flag("id").Name)
+		if docID == "" {
+			return fmt.Errorf("required flag: --%s", cmd.Flag("doc-id").Name)
 		}
 
-		if documentFile == "" {
-			return fmt.Errorf("required flag: --%s", cmd.Flag("fields").Name)
+		if docFields == "" {
+			return fmt.Errorf("required flag: --%s", cmd.Flag("doc-fields").Name)
 		}
 
 		document := make([]byte, 0)
-		file, err := os.Open(documentFile)
+		file, err := os.Open(docFields)
 		if err != nil {
 			return err
 		}
@@ -49,7 +49,7 @@ var putDocumentCmd = &cobra.Command{
 		defer conn.Close()
 
 		client := proto.NewIndigoClient(conn)
-		resp, err := client.PutDocument(context.Background(), &proto.PutDocumentRequest{IndexName: indexName, Id: documentID, Fields: document})
+		resp, err := client.PutDocument(context.Background(), &proto.PutDocumentRequest{IndexName: viper.GetString("index"), Id: docID, Fields: document})
 		if err != nil {
 			return err
 		}
@@ -72,11 +72,12 @@ var putDocumentCmd = &cobra.Command{
 }
 
 func init() {
-	putDocumentCmd.Flags().StringVarP(&indexName, "index-name", "n", constant.DefaultIndexName, "index name")
+	putDocumentCmd.Flags().StringP("index", "i", constant.DefaultIndex, "index name")
+	viper.BindPFlag("index", putDocumentCmd.Flags().Lookup("index"))
 
-	putDocumentCmd.Flags().StringVarP(&documentID, "id", "i", constant.DefaultDocumentID, "document id")
+	putDocumentCmd.Flags().StringVarP(&docID, "doc-id", "d", constant.DefaultDocID, "document id")
 
-	putDocumentCmd.Flags().StringVarP(&documentFile, "fields", "F", constant.DefaultDocumentFile, "fields file")
+	putDocumentCmd.Flags().StringVarP(&docFields, "doc-fields", "F", constant.DefaultDocFields, "document fields")
 
 	putCmd.AddCommand(putDocumentCmd)
 }

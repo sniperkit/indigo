@@ -18,22 +18,22 @@ var bulkCmd = &cobra.Command{
 	Short: "indexes the documents in bulk to the Indigo gRPC Server",
 	Long:  `The bulk command indexes the documents in bulk to the Indigo gRPC Server.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		if indexName == "" {
-			return fmt.Errorf("required flag: --%s", cmd.Flag("index-name").Name)
+		if viper.GetString("index") == "" {
+			return fmt.Errorf("required flag: --%s", cmd.Flag("index").Name)
 		}
 
-		if bulkRequestFile == "" {
+		if bulkRequest == "" {
 			return fmt.Errorf("required flag: --%s", cmd.Flag("bulk-request").Name)
 		}
 
-		bulkRequest := make([]byte, 0)
-		file, err := os.Open(bulkRequestFile)
+		br := make([]byte, 0)
+		file, err := os.Open(bulkRequest)
 		if err != nil {
 			return err
 		}
 		defer file.Close()
 
-		bulkRequest, err = ioutil.ReadAll(file)
+		br, err = ioutil.ReadAll(file)
 		if err != nil {
 			return err
 		}
@@ -45,7 +45,7 @@ var bulkCmd = &cobra.Command{
 		defer conn.Close()
 
 		client := proto.NewIndigoClient(conn)
-		resp, err := client.Bulk(context.Background(), &proto.BulkRequest{IndexName: indexName, BulkRequest: bulkRequest, BatchSize: int32(viper.GetInt("batch_size"))})
+		resp, err := client.Bulk(context.Background(), &proto.BulkRequest{IndexName: viper.GetString("index"), BulkRequest: br, BatchSize: int32(viper.GetInt("batch_size"))})
 		if err != nil {
 			return err
 		}
@@ -74,9 +74,10 @@ func init() {
 	bulkCmd.Flags().Int32P("batch-size", "s", constant.DefaultBatchSize, "batch size")
 	viper.BindPFlag("batch_size", bulkCmd.Flags().Lookup("batch-size"))
 
-	bulkCmd.Flags().StringVarP(&indexName, "index-name", "n", constant.DefaultIndexName, "index name")
+	bulkCmd.Flags().StringP("index", "i", constant.DefaultIndex, "index name")
+	viper.BindPFlag("index", bulkCmd.Flags().Lookup("index"))
 
-	bulkCmd.Flags().StringVarP(&bulkRequestFile, "bulk-request", "b", constant.DefaultBulkRequestFile, "bulk request")
+	bulkCmd.Flags().StringVarP(&bulkRequest, "bulk-request", "b", constant.DefaultBulkRequest, "bulk request")
 
 	RootCmd.AddCommand(bulkCmd)
 }

@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/mosuka/indigo/constant"
 	"github.com/mosuka/indigo/version"
@@ -37,6 +38,18 @@ func Execute() {
 }
 
 func loadConfig() {
+	viper.SetDefault("output_format", constant.DefaultOutputFormat)
+	viper.SetDefault("log_output", constant.DefaultLogOutput)
+	viper.SetDefault("log_level", constant.DefaultLogLevel)
+	viper.SetDefault("grpc_port", constant.DefaultGRPCPort)
+	viper.SetDefault("data_dir", constant.DefaultDataDir)
+	viper.SetDefault("open_existing_index", constant.DefaultOpenExistingIndex)
+	viper.SetDefault("batch_size", constant.DefaultBatchSize)
+	viper.SetDefault("index", constant.DefaultIndex)
+	viper.SetDefault("rest_port", constant.DefaultRESTPort)
+	viper.SetDefault("grpc_server", constant.DefaultGRPCServer)
+	viper.SetDefault("base_uri", constant.DefaultBaseURI)
+
 	if viper.GetString("config") != "" {
 		viper.SetConfigFile(viper.GetString("config"))
 	} else {
@@ -49,19 +62,27 @@ func loadConfig() {
 	viper.SetEnvPrefix("indigo")
 	viper.AutomaticEnv()
 
-	if err := viper.ReadInConfig(); err != nil {
+	err := viper.ReadInConfig()
+	if err != nil {
 		fmt.Printf("%s\n", err.Error())
+	}
+
+	configSettings, err := json.MarshalIndent(viper.AllSettings(), "", "  ")
+	if err == nil {
+		fmt.Printf("%s\n", configSettings)
+	} else {
+		fmt.Println(err.Error())
 	}
 }
 
 func init() {
 	cobra.OnInitialize(loadConfig)
 
-	//RootCmd.PersistentFlags().StringVarP(&configFile, "config", "c", constant.DefaultConfigFile, "config file")
+	//RootCmd.PersistentFlags().StringVarP(&configFile, "config", "c", constant.DefaultConfig, "config file")
 	//RootCmd.PersistentFlags().StringVarP(&outputFormat, "output-format", "f", constant.DefaultOutputFormat, "output format")
 	//RootCmd.PersistentFlags().BoolVarP(&versionFlag, "version", "v", constant.DefaultVersionFlag, "show version numner")
 
-	RootCmd.PersistentFlags().StringP("config", "c", constant.DefaultConfigFile, "config file")
+	RootCmd.PersistentFlags().StringP("config", "c", constant.DefaultConfig, "config file")
 	viper.BindPFlag("config", RootCmd.PersistentFlags().Lookup("config"))
 
 	RootCmd.PersistentFlags().StringP("output-format", "f", constant.DefaultOutputFormat, "output format")

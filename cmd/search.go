@@ -18,22 +18,22 @@ var searchCmd = &cobra.Command{
 	Short: "searches the documents from the Indigo gRPC Server",
 	Long:  `The search command searches the documents from the Indigo gRPC Server.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		if indexName == "" {
-			return fmt.Errorf("required flag: --%s", cmd.Flag("index-name").Name)
+		if viper.GetString("index") == "" {
+			return fmt.Errorf("required flag: --%s", cmd.Flag("index").Name)
 		}
 
-		if searchRequestFile == "" {
+		if searchRequest == "" {
 			return fmt.Errorf("required flag: --%s", cmd.Flag("search-request").Name)
 		}
 
-		searchRequest := make([]byte, 0)
-		file, err := os.Open(searchRequestFile)
+		sr := make([]byte, 0)
+		file, err := os.Open(searchRequest)
 		if err != nil {
 			return err
 		}
 		defer file.Close()
 
-		searchRequest, err = ioutil.ReadAll(file)
+		sr, err = ioutil.ReadAll(file)
 		if err != nil {
 			return err
 		}
@@ -46,7 +46,7 @@ var searchCmd = &cobra.Command{
 
 		client := proto.NewIndigoClient(conn)
 
-		resp, err := client.Search(context.Background(), &proto.SearchRequest{IndexName: indexName, SearchRequest: searchRequest})
+		resp, err := client.Search(context.Background(), &proto.SearchRequest{IndexName: viper.GetString("index"), SearchRequest: sr})
 		if err != nil {
 			return err
 		}
@@ -83,9 +83,10 @@ func init() {
 	searchCmd.Flags().StringP("grpc-server", "g", constant.DefaultGRPCServer, "Indigo gRPC Sever")
 	viper.BindPFlag("grpc_server", searchCmd.Flags().Lookup("grpc-server"))
 
-	searchCmd.Flags().StringVarP(&indexName, "index-name", "n", constant.DefaultIndexName, "index name")
+	searchCmd.Flags().StringP("index", "i", constant.DefaultIndex, "index name")
+	viper.BindPFlag("index", searchCmd.Flags().Lookup("index"))
 
-	searchCmd.Flags().StringVarP(&searchRequestFile, "search-request", "s", constant.DefaultSearchRequestFile, "search request file")
+	searchCmd.Flags().StringVarP(&searchRequest, "search-request", "s", constant.DefaultSearchRequestFile, "search request file")
 
 	RootCmd.AddCommand(searchCmd)
 }

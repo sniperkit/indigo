@@ -16,12 +16,12 @@ var deleteDocumentCmd = &cobra.Command{
 	Short: "deletes the document from the Indigo gRPC Server",
 	Long:  `The delete document command deletes the document from the Indigo gRPC Server.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		if indexName == "" {
-			return fmt.Errorf("required flag: --%s", cmd.Flag("index-name").Name)
+		if viper.GetString("index") == "" {
+			return fmt.Errorf("required flag: --%s", cmd.Flag("index").Name)
 		}
 
-		if documentID == "" {
-			return fmt.Errorf("required flag: --%s", cmd.Flag("id").Name)
+		if docID == "" {
+			return fmt.Errorf("required flag: --%s", cmd.Flag("doc-id").Name)
 		}
 
 		conn, err := grpc.Dial(viper.GetString("grpc_server"), grpc.WithInsecure())
@@ -31,7 +31,7 @@ var deleteDocumentCmd = &cobra.Command{
 		defer conn.Close()
 
 		client := proto.NewIndigoClient(conn)
-		resp, err := client.DeleteDocument(context.Background(), &proto.DeleteDocumentRequest{IndexName: indexName, Id: documentID})
+		resp, err := client.DeleteDocument(context.Background(), &proto.DeleteDocumentRequest{IndexName: viper.GetString("index"), Id: docID})
 		if err != nil {
 			return err
 		}
@@ -54,9 +54,10 @@ var deleteDocumentCmd = &cobra.Command{
 }
 
 func init() {
-	deleteDocumentCmd.Flags().StringVarP(&indexName, "index-name", "n", constant.DefaultIndexName, "index name")
+	deleteDocumentCmd.Flags().StringP("index", "i", constant.DefaultIndex, "index name")
+	viper.BindPFlag("index", deleteDocumentCmd.Flags().Lookup("index"))
 
-	deleteDocumentCmd.Flags().StringVarP(&documentID, "id", "i", constant.DefaultDocumentID, "document id")
+	deleteDocumentCmd.Flags().StringVarP(&docID, "doc-id", "d", constant.DefaultDocID, "document id")
 
 	deleteCmd.AddCommand(deleteDocumentCmd)
 }

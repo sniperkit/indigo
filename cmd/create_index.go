@@ -18,34 +18,34 @@ var createIndexCmd = &cobra.Command{
 	Short: "creates the index to the Indigo gRPC Server",
 	Long:  `The create index command creates the index to the Indigo gRPC Server.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		if indexName == "" {
-			return fmt.Errorf("required flag: --%s", cmd.Flag("index-name").Name)
+		if viper.GetString("index") == "" {
+			return fmt.Errorf("required flag: --%s", cmd.Flag("index").Name)
 		}
 
-		var indexMapping []byte = nil
-		var kvConfig []byte = nil
+		var im []byte = nil
+		var kvc []byte = nil
 
-		if indexMappingFile != "" {
-			file, err := os.Open(indexMappingFile)
+		if indexMapping != "" {
+			file, err := os.Open(indexMapping)
 			if err != nil {
 				return err
 			}
 			defer file.Close()
 
-			indexMapping, err = ioutil.ReadAll(file)
+			im, err = ioutil.ReadAll(file)
 			if err != nil {
 				return err
 			}
 		}
 
-		if kvConfigFile != "" {
-			file, err := os.Open(kvConfigFile)
+		if kvConfig != "" {
+			file, err := os.Open(kvConfig)
 			if err != nil {
 				return err
 			}
 			defer file.Close()
 
-			kvConfig, err = ioutil.ReadAll(file)
+			kvc, err = ioutil.ReadAll(file)
 			if err != nil {
 				return err
 			}
@@ -58,7 +58,7 @@ var createIndexCmd = &cobra.Command{
 		defer conn.Close()
 
 		client := proto.NewIndigoClient(conn)
-		resp, err := client.CreateIndex(context.Background(), &proto.CreateIndexRequest{IndexName: indexName, IndexMapping: indexMapping, IndexType: indexType, Kvstore: kvStore, Kvconfig: kvConfig})
+		resp, err := client.CreateIndex(context.Background(), &proto.CreateIndexRequest{IndexName: viper.GetString("index"), IndexMapping: im, IndexType: indexType, Kvstore: kvStore, Kvconfig: kvc})
 		if err != nil {
 			return err
 		}
@@ -81,11 +81,16 @@ var createIndexCmd = &cobra.Command{
 }
 
 func init() {
-	createIndexCmd.Flags().StringVarP(&indexName, "index-name", "n", constant.DefaultIndexName, "index name")
-	createIndexCmd.Flags().StringVarP(&indexMappingFile, "index-mapping", "m", constant.DefaultIndexMappingFile, "index mapping")
+	createIndexCmd.Flags().StringP("index", "i", constant.DefaultIndex, "index name")
+	viper.BindPFlag("index", createIndexCmd.Flags().Lookup("index"))
+
+	createIndexCmd.Flags().StringVarP(&indexMapping, "index-mapping", "m", constant.DefaultIndexMapping, "index mapping")
+
 	createIndexCmd.Flags().StringVarP(&indexType, "index-type", "t", constant.DefaultIndexType, "index type")
-	createIndexCmd.Flags().StringVarP(&kvStore, "kvstore", "s", constant.DefaultKVStore, "kvstore")
-	createIndexCmd.Flags().StringVarP(&kvConfigFile, "kvconfig", "k", constant.DefaultKVConfigFile, "kvconfig")
+
+	createIndexCmd.Flags().StringVarP(&kvStore, "kv-store", "s", constant.DefaultKVStore, "kvstore")
+
+	createIndexCmd.Flags().StringVarP(&kvConfig, "kv-config", "k", constant.DefaultKVConfigFile, "kvconfig")
 
 	createCmd.AddCommand(createIndexCmd)
 }

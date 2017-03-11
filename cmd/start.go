@@ -104,10 +104,10 @@ var startCmd = &cobra.Command{
 }
 
 func init() {
-	//startCmd.PersistentFlags().StringVarP(&logOutputFile, "log-output", "o", constant.DefaultLogOutputFile, "log file")
+	//startCmd.PersistentFlags().StringVarP(&logOutputFile, "log-output", "o", constant.DefaultLogOutput, "log file")
 	//startCmd.PersistentFlags().StringVarP(&logLevel, "log-level", "l", constant.DefaultLogLevel, "log level")
 
-	startCmd.PersistentFlags().StringP("log-output", "o", constant.DefaultLogOutputFile, "log file")
+	startCmd.PersistentFlags().StringP("log-output", "o", constant.DefaultLogOutput, "log output file")
 	viper.BindPFlag("log_output", startCmd.PersistentFlags().Lookup("log-output"))
 
 	startCmd.PersistentFlags().StringP("log-level", "l", constant.DefaultLogLevel, "log level")

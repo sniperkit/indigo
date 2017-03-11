@@ -3,8 +3,8 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/mosuka/indigo/proto"
 	"github.com/mosuka/indigo/constant"
+	"github.com/mosuka/indigo/proto"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"golang.org/x/net/context"
@@ -16,8 +16,8 @@ var closeIndexCmd = &cobra.Command{
 	Short: "closes the index to the Indigo gRPC Server",
 	Long:  `The close index command closes the index to the Indigo gRPC Server.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		if indexName == "" {
-			return fmt.Errorf("required flag: --%s", cmd.Flag("index-name").Name)
+		if viper.GetString("index") == "" {
+			return fmt.Errorf("required flag: --%s", cmd.Flag("index").Name)
 		}
 
 		conn, err := grpc.Dial(viper.GetString("grpc_server"), grpc.WithInsecure())
@@ -27,7 +27,7 @@ var closeIndexCmd = &cobra.Command{
 		defer conn.Close()
 
 		client := proto.NewIndigoClient(conn)
-		resp, err := client.CloseIndex(context.Background(), &proto.CloseIndexRequest{IndexName: indexName})
+		resp, err := client.CloseIndex(context.Background(), &proto.CloseIndexRequest{IndexName: viper.GetString("index")})
 		if err != nil {
 			return err
 		}
@@ -50,7 +50,8 @@ var closeIndexCmd = &cobra.Command{
 }
 
 func init() {
-	closeIndexCmd.Flags().StringVarP(&indexName, "index-name", "n", constant.DefaultIndexName, "index name")
+	closeIndexCmd.Flags().StringP("index", "i", constant.DefaultIndex, "index name")
+	viper.BindPFlag("index", closeIndexCmd.Flags().Lookup("index"))
 
 	closeCmd.AddCommand(closeIndexCmd)
 }

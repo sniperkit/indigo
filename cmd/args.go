@@ -7,9 +7,9 @@ import (
 var (
 	versionFlag bool = constant.DefaultVersionFlag
 
-	//configFile        string = constant.DefaultConfigFile
+	//configFile        string = constant.DefaultConfig
 	//outputFormat      string = constant.DefaultOutputFormat
-	//logOutputFile     string = constant.DefaultLogOutputFile
+	//logOutputFile     string = constant.DefaultLogOutput
 	//logLevel          string = constant.DefaultLogLevel
 	//gRPCPort          int    = constant.DefaultGRPCPort
 	//dataDir           string = constant.DefaultDataDir
@@ -20,14 +20,17 @@ var (
 	//baseURI    string = constant.DefaultBaseURI
 	//gRPCServer string = constant.DefaultGRPCServer
 
-	indexName         string = constant.DefaultIndexName
-	indexMappingFile  string = constant.DefaultIndexMappingFile
-	indexType         string = constant.DefaultIndexType
-	kvStore           string = constant.DefaultKVStore
-	kvConfigFile      string = constant.DefaultKVConfigFile
-	runtimeConfigFile string = constant.DefaultRuntimeConfigFile
-	documentID        string = constant.DefaultDocumentID
-	documentFile      string = constant.DefaultDocumentFile
-	bulkRequestFile   string = constant.DefaultBulkRequestFile
-	searchRequestFile string = constant.DefaultSearchRequestFile
+	//index         string = constant.DefaultIndex
+
+	indexMapping  string = constant.DefaultIndexMapping
+	indexType     string = constant.DefaultIndexType
+	kvStore       string = constant.DefaultKVStore
+	kvConfig      string = constant.DefaultKVConfigFile
+	runtimeConfig string = constant.DefaultRuntimeConfig
+
+	docID     string = constant.DefaultDocID
+	docFields string = constant.DefaultDocFields
+
+	bulkRequest   string = constant.DefaultBulkRequest
+	searchRequest string = constant.DefaultSearchRequestFile
 )

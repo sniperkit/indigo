@@ -16,12 +16,12 @@ var getDocumentCmd = &cobra.Command{
 	Short: "gets the document from the Indigo gRPC Server",
 	Long:  `The get document command gets the document from the Indigo gRPC Server.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		if indexName == "" {
-			return fmt.Errorf("required flag: --%s", cmd.Flag("index-name").Name)
+		if viper.GetString("index") == "" {
+			return fmt.Errorf("required flag: --%s", cmd.Flag("index").Name)
 		}
 
-		if documentID == "" {
-			return fmt.Errorf("required flag: --%s", cmd.Flag("id").Name)
+		if docID == "" {
+			return fmt.Errorf("required flag: --%s", cmd.Flag("doc-id").Name)
 		}
 
 		conn, err := grpc.Dial(viper.GetString("grpc_server"), grpc.WithInsecure())
@@ -31,7 +31,7 @@ var getDocumentCmd = &cobra.Command{
 		defer conn.Close()
 
 		client := proto.NewIndigoClient(conn)
-		resp, err := client.GetDocument(context.Background(), &proto.GetDocumentRequest{IndexName: indexName, Id: documentID})
+		resp, err := client.GetDocument(context.Background(), &proto.GetDocumentRequest{IndexName: viper.GetString("index"), Id: docID})
 		if err != nil {
 			return err
 		}
@@ -43,9 +43,9 @@ var getDocumentCmd = &cobra.Command{
 
 		r := struct {
 			ID     string                 `json:"id"`
-			Fields map[string]interface{} `json:"fields"`
+			Fields map[string]interface{} `json:"docFields"`
 		}{
-			ID:     documentID,
+			ID:     docID,
 			Fields: fields,
 		}
 
@@ -67,9 +67,10 @@ var getDocumentCmd = &cobra.Command{
 }
 
 func init() {
-	getDocumentCmd.Flags().StringVarP(&indexName, "index-name", "n", constant.DefaultIndexName, "index name")
+	getDocumentCmd.Flags().StringP("index", "i", constant.DefaultIndex, "index name")
+	viper.BindPFlag("index", getDocumentCmd.Flags().Lookup("index"))
 
-	getDocumentCmd.Flags().StringVarP(&documentID, "id", "i", constant.DefaultDocumentID, "document id")
+	getDocumentCmd.Flags().StringVarP(&docID, "doc-id", "d", constant.DefaultDocID, "document id")
 
 	getCmd.AddCommand(getDocumentCmd)
 }

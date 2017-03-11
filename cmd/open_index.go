@@ -18,20 +18,20 @@ var openIndexCmd = &cobra.Command{
 	Short: "opens the index to the Indigo gRPC Server",
 	Long:  `The open index command opens the index to the Indigo gRPC Server.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		if indexName == "" {
-			return fmt.Errorf("required flag: --%s", cmd.Flag("index-name").Name)
+		if viper.GetString("index") == "" {
+			return fmt.Errorf("required flag: --%s", cmd.Flag("index").Name)
 		}
 
-		var runtimeConfig []byte = nil
+		var rc []byte = nil
 
-		if runtimeConfigFile != "" {
-			file, err := os.Open(runtimeConfigFile)
+		if runtimeConfig != "" {
+			file, err := os.Open(runtimeConfig)
 			if err != nil {
 				return err
 			}
 			defer file.Close()
 
-			runtimeConfig, err = ioutil.ReadAll(file)
+			rc, err = ioutil.ReadAll(file)
 			if err != nil {
 				return err
 			}
@@ -44,7 +44,7 @@ var openIndexCmd = &cobra.Command{
 		defer conn.Close()
 
 		client := proto.NewIndigoClient(conn)
-		resp, err := client.OpenIndex(context.Background(), &proto.OpenIndexRequest{IndexName: indexName, RuntimeConfig: runtimeConfig})
+		resp, err := client.OpenIndex(context.Background(), &proto.OpenIndexRequest{IndexName: viper.GetString("index"), RuntimeConfig: rc})
 		if err != nil {
 			return err
 		}
@@ -67,9 +67,10 @@ var openIndexCmd = &cobra.Command{
 }
 
 func init() {
-	openIndexCmd.Flags().StringVarP(&indexName, "index-name", "n", constant.DefaultIndexName, "index name")
+	openIndexCmd.Flags().StringP("index", "i", constant.DefaultIndex, "index name")
+	viper.BindPFlag("index", openIndexCmd.Flags().Lookup("index"))
 
-	openIndexCmd.Flags().StringVarP(&runtimeConfigFile, "runtime-config", "r", constant.DefaultRuntimeConfigFile, "runtime config")
+	openIndexCmd.Flags().StringVarP(&runtimeConfig, "runtime-config", "r", constant.DefaultRuntimeConfig, "runtime config")
 
 	openCmd.AddCommand(openIndexCmd)
 }
