@@ -3,8 +3,8 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/mosuka/indigo/proto"
 	"github.com/mosuka/indigo/constant"
+	"github.com/mosuka/indigo/proto"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"golang.org/x/net/context"
@@ -55,6 +55,7 @@ var deleteDocumentCmd = &cobra.Command{
 
 func init() {
 	deleteDocumentCmd.Flags().StringVarP(&indexName, "index-name", "n", constant.DefaultIndexName, "index name")
+
 	deleteDocumentCmd.Flags().StringVarP(&documentID, "id", "i", constant.DefaultDocumentID, "document id")
 
 	deleteCmd.AddCommand(deleteDocumentCmd)

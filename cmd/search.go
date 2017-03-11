@@ -3,8 +3,8 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/mosuka/indigo/proto"
 	"github.com/mosuka/indigo/constant"
+	"github.com/mosuka/indigo/proto"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"golang.org/x/net/context"
@@ -81,10 +81,11 @@ var searchCmd = &cobra.Command{
 
 func init() {
 	searchCmd.Flags().StringP("grpc-server", "g", constant.DefaultGRPCServer, "Indigo gRPC Sever")
-	searchCmd.Flags().StringVarP(&indexName, "index-name", "n", constant.DefaultIndexName, "index name")
-	searchCmd.Flags().StringVarP(&searchRequestFile, "search-request", "s", constant.DefaultSearchRequestFile, "search request file")
-
 	viper.BindPFlag("grpc_server", searchCmd.Flags().Lookup("grpc-server"))
+
+	searchCmd.Flags().StringVarP(&indexName, "index-name", "n", constant.DefaultIndexName, "index name")
+
+	searchCmd.Flags().StringVarP(&searchRequestFile, "search-request", "s", constant.DefaultSearchRequestFile, "search request file")
 
 	RootCmd.AddCommand(searchCmd)
 }

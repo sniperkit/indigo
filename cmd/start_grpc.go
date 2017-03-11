@@ -56,12 +56,17 @@ var startGRPCCmd = &cobra.Command{
 }
 
 func init() {
-	startGRPCCmd.Flags().IntVarP(&gRPCPort, "port", "p", constant.DefaultGRPCPort, "port number")
-	startGRPCCmd.Flags().StringVarP(&dataDir, "data-dir", "d", constant.DefaultDataDir, "data directory")
-	startGRPCCmd.Flags().BoolVarP(&openExistingIndex, "open-existing-index", "e", constant.DefaultOpenExistingIndex, "open existing index")
+	//startGRPCCmd.Flags().IntVarP(&gRPCPort, "port", "p", constant.DefaultGRPCPort, "port number")
+	//startGRPCCmd.Flags().StringVarP(&dataDir, "data-dir", "d", constant.DefaultDataDir, "data directory")
+	//startGRPCCmd.Flags().BoolVarP(&openExistingIndex, "open-existing-index", "e", constant.DefaultOpenExistingIndex, "open existing index")
 
+	startGRPCCmd.Flags().IntP("port", "p", constant.DefaultGRPCPort, "port number")
 	viper.BindPFlag("grpc_port", startGRPCCmd.Flags().Lookup("port"))
+
+	startGRPCCmd.Flags().StringP("data-dir", "d", constant.DefaultDataDir, "data directory")
 	viper.BindPFlag("data_dir", startGRPCCmd.Flags().Lookup("data-dir"))
+
+	startGRPCCmd.Flags().BoolP("open-existing-index", "e", constant.DefaultOpenExistingIndex, "open existing index")
 	viper.BindPFlag("open_existing_index", startGRPCCmd.Flags().Lookup("open-existing-index"))
 
 	startCmd.AddCommand(startGRPCCmd)

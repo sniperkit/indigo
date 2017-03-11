@@ -26,7 +26,6 @@ var closeCmd = &cobra.Command{
 
 func init() {
 	closeCmd.PersistentFlags().StringP("grpc-server", "g", constant.DefaultGRPCServer, "Indigo gRPC Sever")
-
 	viper.BindPFlag("grpc_server", closeCmd.PersistentFlags().Lookup("grpc-server"))
 
 	RootCmd.AddCommand(closeCmd)

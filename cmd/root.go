@@ -57,10 +57,15 @@ func loadConfig() {
 func init() {
 	cobra.OnInitialize(loadConfig)
 
-	RootCmd.PersistentFlags().StringVarP(&configFile, "config", "c", constant.DefaultConfigFile, "config file")
-	RootCmd.PersistentFlags().StringVarP(&outputFormat, "output-format", "f", constant.DefaultOutputFormat, "output format")
-	RootCmd.PersistentFlags().BoolVarP(&versionFlag, "version", "v", constant.DefaultVersionFlag, "show version numner")
+	//RootCmd.PersistentFlags().StringVarP(&configFile, "config", "c", constant.DefaultConfigFile, "config file")
+	//RootCmd.PersistentFlags().StringVarP(&outputFormat, "output-format", "f", constant.DefaultOutputFormat, "output format")
+	//RootCmd.PersistentFlags().BoolVarP(&versionFlag, "version", "v", constant.DefaultVersionFlag, "show version numner")
 
+	RootCmd.PersistentFlags().StringP("config", "c", constant.DefaultConfigFile, "config file")
 	viper.BindPFlag("config", RootCmd.PersistentFlags().Lookup("config"))
+
+	RootCmd.PersistentFlags().StringP("output-format", "f", constant.DefaultOutputFormat, "output format")
 	viper.BindPFlag("output_format", RootCmd.PersistentFlags().Lookup("output-format"))
+
+	RootCmd.PersistentFlags().BoolVarP(&versionFlag, "version", "v", constant.DefaultVersionFlag, "show version numner")
 }

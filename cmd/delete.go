@@ -26,7 +26,6 @@ var deleteCmd = &cobra.Command{
 
 func init() {
 	deleteCmd.PersistentFlags().StringP("grpc-server", "g", constant.DefaultGRPCServer, "Indigo gRPC Sever")
-
 	viper.BindPFlag("grpc_server", deleteCmd.PersistentFlags().Lookup("grpc-server"))
 
 	RootCmd.AddCommand(deleteCmd)

@@ -26,7 +26,6 @@ var putCmd = &cobra.Command{
 
 func init() {
 	putCmd.PersistentFlags().StringP("grpc-server", "g", constant.DefaultGRPCServer, "Indigo gRPC Sever")
-
 	viper.BindPFlag("grpc_server", putCmd.PersistentFlags().Lookup("grpc-server"))
 
 	RootCmd.AddCommand(putCmd)

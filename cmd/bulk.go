@@ -45,7 +45,7 @@ var bulkCmd = &cobra.Command{
 		defer conn.Close()
 
 		client := proto.NewIndigoClient(conn)
-		resp, err := client.Bulk(context.Background(), &proto.BulkRequest{IndexName: indexName, BulkRequest: bulkRequest, BatchSize: batchSize})
+		resp, err := client.Bulk(context.Background(), &proto.BulkRequest{IndexName: indexName, BulkRequest: bulkRequest, BatchSize: int32(viper.GetInt("batch_size"))})
 		if err != nil {
 			return err
 		}
@@ -69,11 +69,14 @@ var bulkCmd = &cobra.Command{
 
 func init() {
 	bulkCmd.Flags().StringP("grpc-server", "g", constant.DefaultGRPCServer, "Indigo gRPC Sever")
-	bulkCmd.Flags().StringVarP(&indexName, "index-name", "n", constant.DefaultIndexName, "index name")
-	bulkCmd.Flags().StringVarP(&bulkRequestFile, "bulk-request", "b", constant.DefaultBulkRequestFile, "bulk request")
-	bulkCmd.Flags().Int32VarP(&batchSize, "batch-size", "s", constant.DefaultBatchSize, "batch size")
-
 	viper.BindPFlag("grpc_server", bulkCmd.Flags().Lookup("grpc-server"))
+
+	bulkCmd.Flags().Int32P("batch-size", "s", constant.DefaultBatchSize, "batch size")
+	viper.BindPFlag("batch_size", bulkCmd.Flags().Lookup("batch-size"))
+
+	bulkCmd.Flags().StringVarP(&indexName, "index-name", "n", constant.DefaultIndexName, "index name")
+
+	bulkCmd.Flags().StringVarP(&bulkRequestFile, "bulk-request", "b", constant.DefaultBulkRequestFile, "bulk request")
 
 	RootCmd.AddCommand(bulkCmd)
 }

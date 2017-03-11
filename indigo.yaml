@@ -6,6 +6,7 @@ log_level: "info"
 grpc_port: 1289
 data_dir: "./data"
 open_existing_index: true
+batch_size: 1000
 
 rest_port: 2289
 grpc_server: "localhost:1289"

@@ -56,12 +56,17 @@ var startRESTCmd = &cobra.Command{
 }
 
 func init() {
-	startRESTCmd.Flags().IntVarP(&restPort, "port", "p", constant.DefaultRESTPort, "port number")
-	startRESTCmd.Flags().StringVarP(&gRPCServer, "grpc-server", "g", constant.DefaultGRPCServer, "Indigo gRPC Sever")
-	startRESTCmd.Flags().StringVarP(&baseURI, "base-uri", "b", constant.DefaultBaseURI, "base URI to run Indigo REST Server on")
+	//startRESTCmd.Flags().IntVarP(&restPort, "port", "p", constant.DefaultRESTPort, "port number")
+	//startRESTCmd.Flags().StringVarP(&gRPCServer, "grpc-server", "g", constant.DefaultGRPCServer, "Indigo gRPC Sever")
+	//startRESTCmd.Flags().StringVarP(&baseURI, "base-uri", "b", constant.DefaultBaseURI, "base URI to run Indigo REST Server on")
 
+	startRESTCmd.Flags().IntP("port", "p", constant.DefaultRESTPort, "port number")
 	viper.BindPFlag("rest_port", startRESTCmd.Flags().Lookup("port"))
+
+	startRESTCmd.Flags().StringP("grpc-server", "g", constant.DefaultGRPCServer, "Indigo gRPC Sever")
 	viper.BindPFlag("grpc_server", startRESTCmd.Flags().Lookup("grpc-server"))
+
+	startRESTCmd.Flags().StringP("base-uri", "b", constant.DefaultBaseURI, "base URI to run Indigo REST Server on")
 	viper.BindPFlag("base_uri", startRESTCmd.Flags().Lookup("base-uri"))
 
 	startCmd.AddCommand(startRESTCmd)
