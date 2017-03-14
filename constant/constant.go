@@ -3,7 +3,7 @@ package constant
 const (
 	DefaultVersionFlag       bool   = false
 	DefaultConfig            string = ""
-	DefaultOutputFormat      string = "color"
+	DefaultOutputFormat      string = "text"
 	DefaultLogOutput         string = ""
 	DefaultLogLevel          string = "info"
 	DefaultGRPCPort          int    = 1289

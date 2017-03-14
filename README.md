@@ -23,7 +23,7 @@ Indigo provides some commands for controlling Indigo Server.
 The `start grpc` command starts Indigo gRPC Server. You can display a help message by specifying `-h` or `--help` option.
 
 ```sh
-$ ./indigo start grpc -l trace -f color
+$ ./indigo start grpc
 ```
 
 
@@ -148,7 +148,7 @@ You can specify the index mapping describes how to your data model should be ind
 See [Introduction to Index Mappings](http://www.blevesearch.com/docs/Index-Mapping/) and [type IndexMappingImpl](https://godoc.org/github.com/blevesearch/bleve/mapping#IndexMappingImpl) for more details.  
 
 ```sh
-$ ./indigo create index -n example -m example/index_mapping.json -s boltdb -t upside_down -f json
+$ ./indigoctl create index -n example -m example/index_mapping.json -s boltdb -t upside_down -f json
 ```
 
 The result of the above `create index` command is:
@@ -166,7 +166,7 @@ The result of the above `create index` command is:
 The `open index` command opens an existing closed index. You can display a help message by specifying the `- h` or` --help` option.
 
 ```sh
-$ ./indigo open index -n example -f json
+$ ./indigoctl open index -n example -f json
 ```
 
 The result of the above `open index` command is:

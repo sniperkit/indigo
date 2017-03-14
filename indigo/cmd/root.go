@@ -31,8 +31,6 @@ var RootCmd = &cobra.Command{
 }
 
 func LoadConfig() {
-	fmt.Println("LoadConfig()")
-
 	viper.SetDefault("output_format", constant.DefaultOutputFormat)
 	viper.SetDefault("log_output", constant.DefaultLogOutput)
 	viper.SetDefault("log_level", constant.DefaultLogLevel)
@@ -51,17 +49,14 @@ func LoadConfig() {
 	} else {
 		viper.SetConfigName("indigo")
 		viper.SetConfigType("yaml")
-		viper.AddConfigPath("/etc/")
-		viper.AddConfigPath("${HOME}/")
-		viper.AddConfigPath(".")
+		viper.AddConfigPath("/etc/indigo")
+		viper.AddConfigPath("${HOME}/indigo")
+		viper.AddConfigPath("./indigo")
 	}
 	viper.SetEnvPrefix("indigo")
 	viper.AutomaticEnv()
 
-	err := viper.ReadInConfig()
-	if err != nil {
-		fmt.Printf("%s\n", err.Error())
-	}
+	viper.ReadInConfig()
 }
 
 func init() {
