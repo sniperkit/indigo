@@ -3,12 +3,11 @@ package cmd
 import (
 	"github.com/mosuka/indigo/constant"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
 
-var closeCmd = &cobra.Command{
-	Use:   "close",
-	Short: "closes the object to the Indigo gRPC Server",
+var OpenCmd = &cobra.Command{
+	Use:   "open",
+	Short: "opens the object to the Indigo gRPC Server",
 	Long:  `The open command creates the object to the Indigo gRPC Server.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if len(args) < 1 {
@@ -25,8 +24,7 @@ var closeCmd = &cobra.Command{
 }
 
 func init() {
-	closeCmd.PersistentFlags().StringP("grpc-server", "g", constant.DefaultGRPCServer, "Indigo gRPC Sever")
-	viper.BindPFlag("grpc_server", closeCmd.PersistentFlags().Lookup("grpc-server"))
+	OpenCmd.PersistentFlags().StringVarP(&gRPCServer, "grpc-server", "g", constant.DefaultGRPCServer, "Indigo gRPC Sever")
 
-	RootCmd.AddCommand(closeCmd)
+	RootCmd.AddCommand(OpenCmd)
 }

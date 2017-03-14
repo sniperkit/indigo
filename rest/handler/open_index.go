@@ -5,9 +5,9 @@ import (
 	"encoding/json"
 	"github.com/gorilla/mux"
 	"github.com/mosuka/indigo/proto"
+	log "github.com/sirupsen/logrus"
 	"golang.org/x/net/context"
 	"io/ioutil"
-	"log"
 	"net/http"
 )
 
@@ -22,7 +22,9 @@ func NewOpenIndexHandler(client proto.IndigoClient) *OpenIndexHandler {
 }
 
 func (h *OpenIndexHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
-	log.Printf("info: host=\"%s\" request_uri=\"%s\" method=\"%s\" remote_addr=\"%s\" user_agent=\"%s\"\n", req.Host, req.RequestURI, req.Method, req.RemoteAddr, req.UserAgent())
+	log.WithFields(log.Fields{
+		"req": req,
+	}).Info("")
 
 	vars := mux.Vars(req)
 
@@ -30,26 +32,33 @@ func (h *OpenIndexHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 
 	runtimeConfig, err := ioutil.ReadAll(req.Body)
 	if err != nil {
-		log.Printf("error: %s\n", err.Error())
+		log.WithFields(log.Fields{
+			"err": err,
+		}).Error("faild to create runtime config")
+
 		Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
 	resp, err := h.client.OpenIndex(context.Background(), &proto.OpenIndexRequest{IndexName: indexName, RuntimeConfig: runtimeConfig})
 	if err != nil {
-		log.Printf("error: %s\n", err.Error())
+		log.WithFields(log.Fields{
+			"err": err,
+		}).Error("faild to open index")
+
 		Error(w, err.Error(), http.StatusServiceUnavailable)
 		return
 	}
-	log.Print("debug: succeeded in requesting to the Indigo gRPC Server\n")
 
 	output, err := json.MarshalIndent(resp, "", "  ")
 	if err != nil {
-		log.Printf("error: %s\n", err.Error())
+		log.WithFields(log.Fields{
+			"err": err,
+		}).Error("faild to create response")
+
 		Error(w, err.Error(), http.StatusServiceUnavailable)
 		return
 	}
-	log.Print("debug: succeeded in creating response JSON\n")
 
 	buf := new(bytes.Buffer)
 	buf.ReadFrom(bytes.NewReader(output))

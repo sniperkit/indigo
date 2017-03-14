@@ -6,19 +6,18 @@ import (
 	"github.com/mosuka/indigo/constant"
 	"github.com/mosuka/indigo/proto"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"io/ioutil"
 	"os"
 )
 
-var searchCmd = &cobra.Command{
+var SearchCmd = &cobra.Command{
 	Use:   "search",
 	Short: "searches the documents from the Indigo gRPC Server",
 	Long:  `The search command searches the documents from the Indigo gRPC Server.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		if viper.GetString("index") == "" {
+		if index == "" {
 			return fmt.Errorf("required flag: --%s", cmd.Flag("index").Name)
 		}
 
@@ -38,7 +37,7 @@ var searchCmd = &cobra.Command{
 			return err
 		}
 
-		conn, err := grpc.Dial(viper.GetString("grpc_server"), grpc.WithInsecure())
+		conn, err := grpc.Dial(gRPCServer, grpc.WithInsecure())
 		if err != nil {
 			return err
 		}
@@ -46,7 +45,7 @@ var searchCmd = &cobra.Command{
 
 		client := proto.NewIndigoClient(conn)
 
-		resp, err := client.Search(context.Background(), &proto.SearchRequest{IndexName: viper.GetString("index"), SearchRequest: sr})
+		resp, err := client.Search(context.Background(), &proto.SearchRequest{IndexName: index, SearchRequest: sr})
 		if err != nil {
 			return err
 		}
@@ -62,7 +61,7 @@ var searchCmd = &cobra.Command{
 			SearchResult: searchResult,
 		}
 
-		switch viper.GetString("output_format") {
+		switch outputFormat {
 		case "text":
 			fmt.Printf("%s\n", resp.String())
 		case "json":
@@ -80,13 +79,9 @@ var searchCmd = &cobra.Command{
 }
 
 func init() {
-	searchCmd.Flags().StringP("grpc-server", "g", constant.DefaultGRPCServer, "Indigo gRPC Sever")
-	viper.BindPFlag("grpc_server", searchCmd.Flags().Lookup("grpc-server"))
+	SearchCmd.Flags().StringVarP(&gRPCServer, "grpc-server", "g", constant.DefaultGRPCServer, "Indigo gRPC Sever")
+	SearchCmd.Flags().StringVarP(&index, "index", "i", constant.DefaultIndex, "index name")
+	SearchCmd.Flags().StringVarP(&searchRequest, "search-request", "s", constant.DefaultSearchRequestFile, "search request file")
 
-	searchCmd.Flags().StringP("index", "i", constant.DefaultIndex, "index name")
-	viper.BindPFlag("index", searchCmd.Flags().Lookup("index"))
-
-	searchCmd.Flags().StringVarP(&searchRequest, "search-request", "s", constant.DefaultSearchRequestFile, "search request file")
-
-	RootCmd.AddCommand(searchCmd)
+	RootCmd.AddCommand(SearchCmd)
 }

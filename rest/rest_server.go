@@ -5,8 +5,8 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/mosuka/indigo/proto"
 	"github.com/mosuka/indigo/rest/handler"
+	log "github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
-	"log"
 	"net"
 	"net/http"
 )
@@ -23,9 +23,15 @@ func NewIndigoRESTServer(port int, basePath, gRPCServer string) *indigoRESTServe
 
 	conn, err := grpc.Dial(gRPCServer, grpc.WithInsecure())
 	if err == nil {
-		log.Printf("info: create connection target=\"%s\"\n", gRPCServer)
+		log.WithFields(log.Fields{
+			"grpc_server": gRPCServer,
+		}).Info("succeeded in creating connection")
 	} else {
-		log.Printf("error: %s target=\"%s\"\n", err.Error(), gRPCServer)
+		log.WithFields(log.Fields{
+			"grpc_server": gRPCServer,
+			"err":         err,
+		}).Error("failed to create connection")
+
 		return nil
 	}
 
@@ -48,9 +54,14 @@ func NewIndigoRESTServer(port int, basePath, gRPCServer string) *indigoRESTServe
 
 	listener, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
 	if err == nil {
-		log.Printf("info: create listener port=%d\n", port)
+		log.WithFields(log.Fields{
+			"port": port,
+		}).Info("succeeded in creating listener")
 	} else {
-		log.Printf("error: %s port=%d\n", err.Error(), port)
+		log.WithFields(log.Fields{
+			"port": port,
+			"err":  err,
+		}).Error("failed to create listener")
 		return nil
 	}
 
@@ -67,7 +78,9 @@ func (irs *indigoRESTServer) Start() error {
 		return
 	}()
 
-	log.Printf("info: The Indigo REST Server started addr=\"%s\"\n", irs.listener.Addr().String())
+	log.WithFields(log.Fields{
+		"addr": irs.listener.Addr().String(),
+	}).Info("The Indigo REST Server started")
 
 	return nil
 }
@@ -75,21 +88,29 @@ func (irs *indigoRESTServer) Start() error {
 func (irs *indigoRESTServer) Stop() error {
 	err := irs.conn.Close()
 	if err == nil {
-		log.Print("info: close connection\n")
+		log.Info("succeeded in closing connection")
 	} else {
-		log.Printf("error: %s\n", err.Error())
+		log.WithFields(log.Fields{
+			"err": err,
+		}).Error("failed to close connection")
+
 		return err
 	}
 
 	err = irs.listener.Close()
 	if err == nil {
-		log.Print("info: close listener\n")
+		log.Info("succeeded in closing listener")
 	} else {
-		log.Printf("error: %s\n", err.Error())
+		log.WithFields(log.Fields{
+			"err": err,
+		}).Error("failed to close listener")
+
 		return err
 	}
 
-	log.Printf("info: The Indigo REST Server stopped addr=\"%s\"\n", irs.listener.Addr().String())
+	log.WithFields(log.Fields{
+		"addr": irs.listener.Addr().String(),
+	}).Info("The Indigo REST Server stopped")
 
 	return nil
 }

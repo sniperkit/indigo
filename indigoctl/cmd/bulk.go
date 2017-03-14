@@ -6,19 +6,18 @@ import (
 	"github.com/mosuka/indigo/constant"
 	"github.com/mosuka/indigo/proto"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"io/ioutil"
 	"os"
 )
 
-var bulkCmd = &cobra.Command{
+var BulkCmd = &cobra.Command{
 	Use:   "bulk",
 	Short: "indexes the documents in bulk to the Indigo gRPC Server",
 	Long:  `The bulk command indexes the documents in bulk to the Indigo gRPC Server.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		if viper.GetString("index") == "" {
+		if index == "" {
 			return fmt.Errorf("required flag: --%s", cmd.Flag("index").Name)
 		}
 
@@ -38,19 +37,19 @@ var bulkCmd = &cobra.Command{
 			return err
 		}
 
-		conn, err := grpc.Dial(viper.GetString("grpc_server"), grpc.WithInsecure())
+		conn, err := grpc.Dial(gRPCServer, grpc.WithInsecure())
 		if err != nil {
 			return err
 		}
 		defer conn.Close()
 
 		client := proto.NewIndigoClient(conn)
-		resp, err := client.Bulk(context.Background(), &proto.BulkRequest{IndexName: viper.GetString("index"), BulkRequest: br, BatchSize: int32(viper.GetInt("batch_size"))})
+		resp, err := client.Bulk(context.Background(), &proto.BulkRequest{IndexName: index, BulkRequest: br, BatchSize: batchSize})
 		if err != nil {
 			return err
 		}
 
-		switch viper.GetString("output_format") {
+		switch outputFormat {
 		case "text":
 			fmt.Printf("%s\n", resp.String())
 		case "json":
@@ -68,16 +67,10 @@ var bulkCmd = &cobra.Command{
 }
 
 func init() {
-	bulkCmd.Flags().StringP("grpc-server", "g", constant.DefaultGRPCServer, "Indigo gRPC Sever")
-	viper.BindPFlag("grpc_server", bulkCmd.Flags().Lookup("grpc-server"))
+	BulkCmd.Flags().StringVarP(&gRPCServer, "grpc-server", "g", constant.DefaultGRPCServer, "Indigo gRPC Sever")
+	BulkCmd.Flags().StringVarP(&index, "index", "i", constant.DefaultIndex, "index name")
+	BulkCmd.Flags().StringVarP(&bulkRequest, "bulk-request", "b", constant.DefaultBulkRequest, "bulk request")
+	BulkCmd.Flags().Int32VarP(&batchSize, "batch-size", "s", constant.DefaultBatchSize, "batch size")
 
-	bulkCmd.Flags().Int32P("batch-size", "s", constant.DefaultBatchSize, "batch size")
-	viper.BindPFlag("batch_size", bulkCmd.Flags().Lookup("batch-size"))
-
-	bulkCmd.Flags().StringP("index", "i", constant.DefaultIndex, "index name")
-	viper.BindPFlag("index", bulkCmd.Flags().Lookup("index"))
-
-	bulkCmd.Flags().StringVarP(&bulkRequest, "bulk-request", "b", constant.DefaultBulkRequest, "bulk request")
-
-	RootCmd.AddCommand(bulkCmd)
+	RootCmd.AddCommand(BulkCmd)
 }

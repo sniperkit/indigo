@@ -7,8 +7,8 @@ import (
 	"github.com/blevesearch/bleve/mapping"
 	"github.com/gorilla/mux"
 	"github.com/mosuka/indigo/proto"
+	log "github.com/sirupsen/logrus"
 	"golang.org/x/net/context"
-	"log"
 	"net/http"
 )
 
@@ -23,29 +23,39 @@ func NewGetIndexHandler(client proto.IndigoClient) *GetIndexHandler {
 }
 
 func (h *GetIndexHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
-	log.Printf("info: host=\"%s\" request_uri=\"%s\" method=\"%s\" remote_addr=\"%s\" user_agent=\"%s\"\n", req.Host, req.RequestURI, req.Method, req.RemoteAddr, req.UserAgent())
+	log.WithFields(log.Fields{
+		"req": req,
+	}).Info("")
 
 	vars := mux.Vars(req)
 	indexName := vars["indexName"]
 
 	resp, err := h.client.GetIndex(context.Background(), &proto.GetIndexRequest{IndexName: indexName})
 	if err != nil {
-		log.Printf("error: %s\n", err.Error())
+		log.WithFields(log.Fields{
+			"err": err,
+		}).Error("failed to get index")
+
 		Error(w, err.Error(), http.StatusServiceUnavailable)
 		return
 	}
-	log.Print("debug: succeeded in requesting to the Indigo gRPC Server\n")
 
 	indexStats := make(map[string]interface{})
 	if err := json.Unmarshal(resp.IndexStats, &indexStats); err != nil {
-		log.Printf("error: %s\n", err.Error())
+		log.WithFields(log.Fields{
+			"err": err,
+		}).Error("failed to create index stats")
+
 		Error(w, err.Error(), http.StatusServiceUnavailable)
 		return
 	}
 
 	indexMapping := bleve.NewIndexMapping()
 	if err := json.Unmarshal(resp.IndexMapping, &indexMapping); err != nil {
-		log.Printf("error: %s\n", err.Error())
+		log.WithFields(log.Fields{
+			"err": err,
+		}).Error("failed to create index mapping")
+
 		Error(w, err.Error(), http.StatusServiceUnavailable)
 		return
 	}
@@ -62,11 +72,13 @@ func (h *GetIndexHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 
 	output, err := json.MarshalIndent(r, "", "  ")
 	if err != nil {
-		log.Printf("error: %s\n", err.Error())
+		log.WithFields(log.Fields{
+			"err": err,
+		}).Error("failed to create response")
+
 		Error(w, err.Error(), http.StatusServiceUnavailable)
 		return
 	}
-	log.Print("debug: succeeded in creating response JSON\n")
 
 	buf := new(bytes.Buffer)
 	buf.ReadFrom(bytes.NewReader(output))

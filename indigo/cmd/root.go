@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/mosuka/indigo/constant"
 	"github.com/mosuka/indigo/version"
@@ -31,13 +30,9 @@ var RootCmd = &cobra.Command{
 	},
 }
 
-func Execute() {
-	if err := RootCmd.Execute(); err != nil {
-		os.Exit(1)
-	}
-}
+func LoadConfig() {
+	fmt.Println("LoadConfig()")
 
-func loadConfig() {
 	viper.SetDefault("output_format", constant.DefaultOutputFormat)
 	viper.SetDefault("log_output", constant.DefaultLogOutput)
 	viper.SetDefault("log_level", constant.DefaultLogLevel)
@@ -49,6 +44,7 @@ func loadConfig() {
 	viper.SetDefault("rest_port", constant.DefaultRESTPort)
 	viper.SetDefault("grpc_server", constant.DefaultGRPCServer)
 	viper.SetDefault("base_uri", constant.DefaultBaseURI)
+	viper.SetDefault("index", constant.DefaultIndex)
 
 	if viper.GetString("config") != "" {
 		viper.SetConfigFile(viper.GetString("config"))
@@ -66,27 +62,15 @@ func loadConfig() {
 	if err != nil {
 		fmt.Printf("%s\n", err.Error())
 	}
-
-	configSettings, err := json.MarshalIndent(viper.AllSettings(), "", "  ")
-	if err == nil {
-		fmt.Printf("%s\n", configSettings)
-	} else {
-		fmt.Println(err.Error())
-	}
 }
 
 func init() {
-	cobra.OnInitialize(loadConfig)
-
-	//RootCmd.PersistentFlags().StringVarP(&configFile, "config", "c", constant.DefaultConfig, "config file")
-	//RootCmd.PersistentFlags().StringVarP(&outputFormat, "output-format", "f", constant.DefaultOutputFormat, "output format")
-	//RootCmd.PersistentFlags().BoolVarP(&versionFlag, "version", "v", constant.DefaultVersionFlag, "show version numner")
+	cobra.OnInitialize(LoadConfig)
 
 	RootCmd.PersistentFlags().StringP("config", "c", constant.DefaultConfig, "config file")
-	viper.BindPFlag("config", RootCmd.PersistentFlags().Lookup("config"))
-
 	RootCmd.PersistentFlags().StringP("output-format", "f", constant.DefaultOutputFormat, "output format")
-	viper.BindPFlag("output_format", RootCmd.PersistentFlags().Lookup("output-format"))
-
 	RootCmd.PersistentFlags().BoolVarP(&versionFlag, "version", "v", constant.DefaultVersionFlag, "show version numner")
+
+	viper.BindPFlag("config", RootCmd.PersistentFlags().Lookup("config"))
+	viper.BindPFlag("output_format", RootCmd.PersistentFlags().Lookup("output-format"))
 }

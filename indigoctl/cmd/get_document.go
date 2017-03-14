@@ -6,17 +6,16 @@ import (
 	"github.com/mosuka/indigo/constant"
 	"github.com/mosuka/indigo/proto"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 )
 
-var getDocumentCmd = &cobra.Command{
+var GetDocumentCmd = &cobra.Command{
 	Use:   "document",
 	Short: "gets the document from the Indigo gRPC Server",
 	Long:  `The get document command gets the document from the Indigo gRPC Server.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		if viper.GetString("index") == "" {
+		if index == "" {
 			return fmt.Errorf("required flag: --%s", cmd.Flag("index").Name)
 		}
 
@@ -24,14 +23,14 @@ var getDocumentCmd = &cobra.Command{
 			return fmt.Errorf("required flag: --%s", cmd.Flag("doc-id").Name)
 		}
 
-		conn, err := grpc.Dial(viper.GetString("grpc_server"), grpc.WithInsecure())
+		conn, err := grpc.Dial(gRPCServer, grpc.WithInsecure())
 		if err != nil {
 			return err
 		}
 		defer conn.Close()
 
 		client := proto.NewIndigoClient(conn)
-		resp, err := client.GetDocument(context.Background(), &proto.GetDocumentRequest{IndexName: viper.GetString("index"), Id: docID})
+		resp, err := client.GetDocument(context.Background(), &proto.GetDocumentRequest{IndexName: index, Id: docID})
 		if err != nil {
 			return err
 		}
@@ -49,7 +48,7 @@ var getDocumentCmd = &cobra.Command{
 			Fields: fields,
 		}
 
-		switch viper.GetString("output_format") {
+		switch outputFormat {
 		case "text":
 			fmt.Printf("%s\n", r)
 		case "json":
@@ -67,10 +66,8 @@ var getDocumentCmd = &cobra.Command{
 }
 
 func init() {
-	getDocumentCmd.Flags().StringP("index", "i", constant.DefaultIndex, "index name")
-	viper.BindPFlag("index", getDocumentCmd.Flags().Lookup("index"))
+	GetDocumentCmd.Flags().StringVarP(&index, "index", "i", constant.DefaultIndex, "index name")
+	GetDocumentCmd.Flags().StringVarP(&docID, "doc-id", "d", constant.DefaultDocID, "document id")
 
-	getDocumentCmd.Flags().StringVarP(&docID, "doc-id", "d", constant.DefaultDocID, "document id")
-
-	getCmd.AddCommand(getDocumentCmd)
+	GetCmd.AddCommand(GetDocumentCmd)
 }

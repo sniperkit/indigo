@@ -4,8 +4,8 @@ import (
 	"bytes"
 	"encoding/json"
 	"github.com/mosuka/indigo/proto"
+	log "github.com/sirupsen/logrus"
 	"golang.org/x/net/context"
-	"log"
 	"net/http"
 )
 
@@ -20,23 +20,29 @@ func NewListIndicesHandler(client proto.IndigoClient) *ListIndexHandler {
 }
 
 func (h *ListIndexHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
-	log.Printf("info: host=\"%s\" request_uri=\"%s\" method=\"%s\" remote_addr=\"%s\" user_agent=\"%s\"\n", req.Host, req.RequestURI, req.Method, req.RemoteAddr, req.UserAgent())
+	log.WithFields(log.Fields{
+		"req": req,
+	}).Info("")
 
 	resp, err := h.client.ListIndex(context.Background(), &proto.ListIndexRequest{})
 	if err != nil {
-		log.Printf("error: %s\n", err.Error())
+		log.WithFields(log.Fields{
+			"err": err,
+		}).Error("failed to list index")
+
 		Error(w, err.Error(), http.StatusServiceUnavailable)
 		return
 	}
-	log.Print("debug: succeeded in requesting to the Indigo gRPC Server\n")
 
 	output, err := json.MarshalIndent(resp, "", "  ")
 	if err != nil {
-		log.Printf("error: %s\n", err.Error())
+		log.WithFields(log.Fields{
+			"err": err,
+		}).Error("failed to create response")
+
 		Error(w, err.Error(), http.StatusServiceUnavailable)
 		return
 	}
-	log.Print("debug: succeeded in creating response JSON\n")
 
 	buf := new(bytes.Buffer)
 	buf.ReadFrom(bytes.NewReader(output))

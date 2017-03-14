@@ -3,8 +3,8 @@ package grpc
 import (
 	"fmt"
 	"github.com/mosuka/indigo/proto"
+	log "github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
-	"log"
 	"net"
 )
 
@@ -22,9 +22,14 @@ func NewIndigoGRPCServer(port int, dataDir string) *indigoGRPCServer {
 
 	listener, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
 	if err == nil {
-		log.Printf("info: create listener port=%d \n", port)
+		log.WithFields(log.Fields{
+			"port": port,
+		}).Info("create listener")
 	} else {
-		log.Printf("error: %s port=%d \n", err.Error(), port)
+		log.WithFields(log.Fields{
+			"port":  port,
+			"error": err.Error(),
+		}).Error("failed to create listener")
 		return nil
 	}
 
@@ -44,7 +49,9 @@ func (igs *indigoGRPCServer) Start(openExistsIndex bool) error {
 		return
 	}()
 
-	log.Printf("info: The Indigo gRPC Server started addr=\"%s\"\n", igs.listener.Addr().String())
+	log.WithFields(log.Fields{
+		"addr": igs.listener.Addr().String(),
+	}).Info("The Indigo gRPC Server started")
 
 	return nil
 }
@@ -53,7 +60,9 @@ func (igs *indigoGRPCServer) Stop() error {
 	igs.service.CloseIndices()
 	igs.server.GracefulStop()
 
-	log.Printf("info: The Indigo gRPC Server stopped addr=\"%s\"\n", igs.listener.Addr().String())
+	log.WithFields(log.Fields{
+		"addr": igs.listener.Addr().String(),
+	}).Info("The Indigo gRPC Server stopped")
 
 	return nil
 }

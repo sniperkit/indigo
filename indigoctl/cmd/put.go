@@ -3,10 +3,9 @@ package cmd
 import (
 	"github.com/mosuka/indigo/constant"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
 
-var putCmd = &cobra.Command{
+var PutCmd = &cobra.Command{
 	Use:   "put",
 	Short: "puts the object from the Indigo gRPC Server",
 	Long:  `The put command puts the object from the Indigo gRPC Server.`,
@@ -25,8 +24,7 @@ var putCmd = &cobra.Command{
 }
 
 func init() {
-	putCmd.PersistentFlags().StringP("grpc-server", "g", constant.DefaultGRPCServer, "Indigo gRPC Sever")
-	viper.BindPFlag("grpc_server", putCmd.PersistentFlags().Lookup("grpc-server"))
+	PutCmd.PersistentFlags().StringVarP(&gRPCServer, "grpc-server", "g", constant.DefaultGRPCServer, "Indigo gRPC Sever")
 
-	RootCmd.AddCommand(putCmd)
+	RootCmd.AddCommand(PutCmd)
 }

@@ -6,19 +6,18 @@ import (
 	"github.com/mosuka/indigo/constant"
 	"github.com/mosuka/indigo/proto"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"io/ioutil"
 	"os"
 )
 
-var putDocumentCmd = &cobra.Command{
+var PutDocumentCmd = &cobra.Command{
 	Use:   "document",
 	Short: "puts the document to the Indigo gRPC Server",
 	Long:  `The index document command puts the document to the Indigo gRPC Server.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		if viper.GetString("index") == "" {
+		if index == "" {
 			return fmt.Errorf("required flag: --%s", cmd.Flag("index").Name)
 		}
 
@@ -42,19 +41,19 @@ var putDocumentCmd = &cobra.Command{
 			return err
 		}
 
-		conn, err := grpc.Dial(viper.GetString("grpc_server"), grpc.WithInsecure())
+		conn, err := grpc.Dial(gRPCServer, grpc.WithInsecure())
 		if err != nil {
 			return err
 		}
 		defer conn.Close()
 
 		client := proto.NewIndigoClient(conn)
-		resp, err := client.PutDocument(context.Background(), &proto.PutDocumentRequest{IndexName: viper.GetString("index"), Id: docID, Fields: document})
+		resp, err := client.PutDocument(context.Background(), &proto.PutDocumentRequest{IndexName: index, Id: docID, Fields: document})
 		if err != nil {
 			return err
 		}
 
-		switch viper.GetString("output_format") {
+		switch outputFormat {
 		case "text":
 			fmt.Printf("%s\n", resp.String())
 		case "json":
@@ -72,12 +71,9 @@ var putDocumentCmd = &cobra.Command{
 }
 
 func init() {
-	putDocumentCmd.Flags().StringP("index", "i", constant.DefaultIndex, "index name")
-	viper.BindPFlag("index", putDocumentCmd.Flags().Lookup("index"))
+	PutDocumentCmd.Flags().StringVarP(&index, "index", "i", constant.DefaultIndex, "index name")
+	PutDocumentCmd.Flags().StringVarP(&docID, "doc-id", "d", constant.DefaultDocID, "document id")
+	PutDocumentCmd.Flags().StringVarP(&docFields, "doc-fields", "F", constant.DefaultDocFields, "document fields")
 
-	putDocumentCmd.Flags().StringVarP(&docID, "doc-id", "d", constant.DefaultDocID, "document id")
-
-	putDocumentCmd.Flags().StringVarP(&docFields, "doc-fields", "F", constant.DefaultDocFields, "document fields")
-
-	putCmd.AddCommand(putDocumentCmd)
+	PutCmd.AddCommand(PutDocumentCmd)
 }

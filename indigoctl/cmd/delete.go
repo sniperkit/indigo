@@ -3,10 +3,9 @@ package cmd
 import (
 	"github.com/mosuka/indigo/constant"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
 
-var deleteCmd = &cobra.Command{
+var DeleteCmd = &cobra.Command{
 	Use:   "delete",
 	Short: "deletes the object to the Indigo gRPC Server",
 	Long:  `The delete command deletes the object to the Indigo gRPC Server.`,
@@ -25,8 +24,7 @@ var deleteCmd = &cobra.Command{
 }
 
 func init() {
-	deleteCmd.PersistentFlags().StringP("grpc-server", "g", constant.DefaultGRPCServer, "Indigo gRPC Sever")
-	viper.BindPFlag("grpc_server", deleteCmd.PersistentFlags().Lookup("grpc-server"))
+	DeleteCmd.PersistentFlags().StringVarP(&gRPCServer, "grpc-server", "g", constant.DefaultGRPCServer, "Indigo gRPC Sever")
 
-	RootCmd.AddCommand(deleteCmd)
+	RootCmd.AddCommand(DeleteCmd)
 }

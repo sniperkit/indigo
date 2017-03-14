@@ -4,11 +4,11 @@ import (
 	"bytes"
 	"encoding/json"
 	"github.com/gorilla/mux"
-	"github.com/mosuka/indigo/proto"
 	"github.com/mosuka/indigo/constant"
+	"github.com/mosuka/indigo/proto"
+	log "github.com/sirupsen/logrus"
 	"golang.org/x/net/context"
 	"io/ioutil"
-	"log"
 	"net/http"
 )
 
@@ -23,7 +23,9 @@ func NewCreateIndexHandler(client proto.IndigoClient) *CreateIndexHandler {
 }
 
 func (h *CreateIndexHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
-	log.Printf("info: host=\"%s\" request_uri=\"%s\" method=\"%s\" remote_addr=\"%s\" user_agent=\"%s\"\n", req.Host, req.RequestURI, req.Method, req.RemoteAddr, req.UserAgent())
+	log.WithFields(log.Fields{
+		"req": req,
+	}).Info("")
 
 	vars := mux.Vars(req)
 
@@ -31,6 +33,10 @@ func (h *CreateIndexHandler) ServeHTTP(w http.ResponseWriter, req *http.Request)
 
 	indexMapping, err := ioutil.ReadAll(req.Body)
 	if err != nil {
+		log.WithFields(log.Fields{
+			"err": err,
+		}).Error("faild to create index mapping")
+
 		Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -47,19 +53,23 @@ func (h *CreateIndexHandler) ServeHTTP(w http.ResponseWriter, req *http.Request)
 
 	resp, err := h.client.CreateIndex(context.Background(), &proto.CreateIndexRequest{IndexName: indexName, IndexMapping: indexMapping, IndexType: indexType, Kvstore: indexStore, Kvconfig: nil})
 	if err != nil {
-		log.Printf("error: %s\n", err.Error())
+		log.WithFields(log.Fields{
+			"req": req,
+		}).Error("failed to create index")
+
 		Error(w, err.Error(), http.StatusServiceUnavailable)
 		return
 	}
-	log.Print("debug: succeeded in requesting to the Indigo gRPC Server\n")
 
 	output, err := json.MarshalIndent(resp, "", "  ")
 	if err != nil {
-		log.Printf("error: %s\n", err.Error())
+		log.WithFields(log.Fields{
+			"err": err,
+		}).Error("failed to create response")
+
 		Error(w, err.Error(), http.StatusServiceUnavailable)
 		return
 	}
-	log.Print("debug: succeeded in creating response JSON\n")
 
 	buf := new(bytes.Buffer)
 	buf.ReadFrom(bytes.NewReader(output))

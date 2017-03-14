@@ -6,19 +6,18 @@ import (
 	"github.com/mosuka/indigo/constant"
 	"github.com/mosuka/indigo/proto"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"io/ioutil"
 	"os"
 )
 
-var openIndexCmd = &cobra.Command{
+var OpenIndexCmd = &cobra.Command{
 	Use:   "index",
 	Short: "opens the index to the Indigo gRPC Server",
 	Long:  `The open index command opens the index to the Indigo gRPC Server.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		if viper.GetString("index") == "" {
+		if index == "" {
 			return fmt.Errorf("required flag: --%s", cmd.Flag("index").Name)
 		}
 
@@ -37,19 +36,19 @@ var openIndexCmd = &cobra.Command{
 			}
 		}
 
-		conn, err := grpc.Dial(viper.GetString("grpc_server"), grpc.WithInsecure())
+		conn, err := grpc.Dial(gRPCServer, grpc.WithInsecure())
 		if err != nil {
 			return err
 		}
 		defer conn.Close()
 
 		client := proto.NewIndigoClient(conn)
-		resp, err := client.OpenIndex(context.Background(), &proto.OpenIndexRequest{IndexName: viper.GetString("index"), RuntimeConfig: rc})
+		resp, err := client.OpenIndex(context.Background(), &proto.OpenIndexRequest{IndexName: index, RuntimeConfig: rc})
 		if err != nil {
 			return err
 		}
 
-		switch viper.GetString("output_format") {
+		switch outputFormat {
 		case "text":
 			fmt.Printf("%s\n", resp.String())
 		case "json":
@@ -67,10 +66,8 @@ var openIndexCmd = &cobra.Command{
 }
 
 func init() {
-	openIndexCmd.Flags().StringP("index", "i", constant.DefaultIndex, "index name")
-	viper.BindPFlag("index", openIndexCmd.Flags().Lookup("index"))
+	OpenIndexCmd.Flags().StringVarP(&index, "index", "i", constant.DefaultIndex, "index name")
+	OpenIndexCmd.Flags().StringVarP(&runtimeConfig, "runtime-config", "r", constant.DefaultRuntimeConfig, "runtime config")
 
-	openIndexCmd.Flags().StringVarP(&runtimeConfig, "runtime-config", "r", constant.DefaultRuntimeConfig, "runtime config")
-
-	openCmd.AddCommand(openIndexCmd)
+	OpenCmd.AddCommand(OpenIndexCmd)
 }

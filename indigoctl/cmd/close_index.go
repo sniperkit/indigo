@@ -6,33 +6,32 @@ import (
 	"github.com/mosuka/indigo/constant"
 	"github.com/mosuka/indigo/proto"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 )
 
-var deleteIndexCmd = &cobra.Command{
+var CloseIndexCmd = &cobra.Command{
 	Use:   "index",
-	Short: "deletes the index from the Indigo gRPC Server",
-	Long:  `The delete index command deletes the index from the Indigo gRPC Server.`,
+	Short: "closes the index to the Indigo gRPC Server",
+	Long:  `The close index command closes the index to the Indigo gRPC Server.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		if viper.GetString("index") == "" {
+		if index == "" {
 			return fmt.Errorf("required flag: --%s", cmd.Flag("index").Name)
 		}
 
-		conn, err := grpc.Dial(viper.GetString("grpc_server"), grpc.WithInsecure())
+		conn, err := grpc.Dial(gRPCServer, grpc.WithInsecure())
 		if err != nil {
 			return err
 		}
 		defer conn.Close()
 
 		client := proto.NewIndigoClient(conn)
-		resp, err := client.DeleteIndex(context.Background(), &proto.DeleteIndexRequest{IndexName: viper.GetString("index")})
+		resp, err := client.CloseIndex(context.Background(), &proto.CloseIndexRequest{IndexName: index})
 		if err != nil {
 			return err
 		}
 
-		switch viper.GetString("output_format") {
+		switch outputFormat {
 		case "text":
 			fmt.Printf("%s\n", resp.String())
 		case "json":
@@ -50,8 +49,7 @@ var deleteIndexCmd = &cobra.Command{
 }
 
 func init() {
-	deleteIndexCmd.Flags().StringP("index", "i", constant.DefaultIndex, "index name")
-	viper.BindPFlag("index", deleteIndexCmd.Flags().Lookup("index"))
+	CloseIndexCmd.Flags().StringVarP(&index, "index", "i", constant.DefaultIndex, "index name")
 
-	deleteCmd.AddCommand(deleteIndexCmd)
+	CloseCmd.AddCommand(CloseIndexCmd)
 }

@@ -8,28 +8,27 @@ import (
 	"github.com/mosuka/indigo/constant"
 	"github.com/mosuka/indigo/proto"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 )
 
-var getIndexCmd = &cobra.Command{
+var GetIndexCmd = &cobra.Command{
 	Use:   "index",
 	Short: "gets the index information from the Indigo gRPC Server",
 	Long:  `The get index command gets the index information from the Indigo gRPC Server.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		if viper.GetString("index") == "" {
+		if index == "" {
 			return fmt.Errorf("required flag: --%s", cmd.Flag("index").Name)
 		}
 
-		conn, err := grpc.Dial(viper.GetString("grpc_server"), grpc.WithInsecure())
+		conn, err := grpc.Dial(gRPCServer, grpc.WithInsecure())
 		if err != nil {
 			return err
 		}
 		defer conn.Close()
 
 		client := proto.NewIndigoClient(conn)
-		resp, err := client.GetIndex(context.Background(), &proto.GetIndexRequest{IndexName: viper.GetString("index")})
+		resp, err := client.GetIndex(context.Background(), &proto.GetIndexRequest{IndexName: index})
 		if err != nil {
 			return err
 		}
@@ -54,7 +53,7 @@ var getIndexCmd = &cobra.Command{
 			IndexMapping:  indexMapping,
 		}
 
-		switch viper.GetString("output_format") {
+		switch outputFormat {
 		case "text":
 			fmt.Printf("%s\n", r)
 		case "json":
@@ -72,8 +71,7 @@ var getIndexCmd = &cobra.Command{
 }
 
 func init() {
-	getIndexCmd.Flags().StringP("index", "i", constant.DefaultIndex, "index name")
-	viper.BindPFlag("index", getIndexCmd.Flags().Lookup("index"))
+	GetIndexCmd.Flags().StringVarP(&index, "index", "i", constant.DefaultIndex, "index name")
 
-	getCmd.AddCommand(getIndexCmd)
+	GetCmd.AddCommand(GetIndexCmd)
 }

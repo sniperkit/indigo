@@ -5,22 +5,25 @@ import (
 )
 
 var (
-	versionFlag bool = constant.DefaultVersionFlag
+	versionFlag  bool   = constant.DefaultVersionFlag
+	outputFormat string = constant.DefaultOutputFormat
+
+	gRPCServer string = constant.DefaultGRPCServer
 
 	//configFile        string = constant.DefaultConfig
-	//outputFormat      string = constant.DefaultOutputFormat
 	//logOutputFile     string = constant.DefaultLogOutput
 	//logLevel          string = constant.DefaultLogLevel
 	//gRPCPort          int    = constant.DefaultGRPCPort
 	//dataDir           string = constant.DefaultDataDir
 	//openExistingIndex bool   = constant.DefaultOpenExistingIndex
-	//batchSize int32 = constant.DefaultBatchSize
+
+	index string = constant.DefaultIndex
+
+	bulkRequest string = constant.DefaultBulkRequest
+	batchSize   int32  = constant.DefaultBatchSize
 
 	//restPort   int    = constant.DefaultRESTPort
 	//baseURI    string = constant.DefaultBaseURI
-	//gRPCServer string = constant.DefaultGRPCServer
-
-	//index         string = constant.DefaultIndex
 
 	indexMapping  string = constant.DefaultIndexMapping
 	indexType     string = constant.DefaultIndexType
@@ -31,6 +34,5 @@ var (
 	docID     string = constant.DefaultDocID
 	docFields string = constant.DefaultDocFields
 
-	bulkRequest   string = constant.DefaultBulkRequest
 	searchRequest string = constant.DefaultSearchRequestFile
 )
