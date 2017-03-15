@@ -8,11 +8,6 @@ Indigo REST Server provides JSON API ([HTTP/1.1](https://en.wikipedia.org/wiki/H
 ![](./img/Indigo%20Architecture.png "Indigo")
 
 
-## Features
-
-- TODO
-
-
 ## The Indigo Command Line Interface
 
 Indigo provides some commands for controlling Indigo Server.
