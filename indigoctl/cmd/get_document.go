@@ -42,7 +42,7 @@ var GetDocumentCmd = &cobra.Command{
 
 		r := struct {
 			ID     string                 `json:"id"`
-			Fields map[string]interface{} `json:"docFields"`
+			Fields map[string]interface{} `json:"fields"`
 		}{
 			ID:     docID,
 			Fields: fields,

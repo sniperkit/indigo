@@ -23,7 +23,7 @@ Indigo provides some commands for controlling Indigo Server.
 The `start grpc` command starts Indigo gRPC Server. You can display a help message by specifying `-h` or `--help` option.
 
 ```sh
-$ ./indigo start grpc
+$ indigo start grpc
 ```
 
 
@@ -148,7 +148,7 @@ You can specify the index mapping describes how to your data model should be ind
 See [Introduction to Index Mappings](http://www.blevesearch.com/docs/Index-Mapping/) and [type IndexMappingImpl](https://godoc.org/github.com/blevesearch/bleve/mapping#IndexMappingImpl) for more details.  
 
 ```sh
-$ ./indigoctl create index -n example -m example/index_mapping.json -s boltdb -t upside_down -f json
+$ indigoctl create index -i example example/index_mapping.json -f json
 ```
 
 The result of the above `create index` command is:
@@ -166,7 +166,7 @@ The result of the above `create index` command is:
 The `open index` command opens an existing closed index. You can display a help message by specifying the `- h` or` --help` option.
 
 ```sh
-$ ./indigoctl open index -n example -f json
+$ indigoctl open index -i example -f json
 ```
 
 The result of the above `open index` command is:
@@ -184,7 +184,7 @@ The result of the above `open index` command is:
 The `get index` command retrieves an index information about existing opened index. You can display a help message by specifying the `- h` or` --help` option.
 
 ```sh
-$ ./indigo get index -n example -f json
+$ indigoctl get index -i example -f json
 ```
 
 The result of the above `get index` command is:
@@ -326,7 +326,7 @@ The result of the above `get index` command is:
 The `close index` command closes an existing opened index. You can display a help message by specifying the `- h` or` --help` option.
 
 ```sh
-$ ./indigo close index -n example -f json
+$ indigoctl close index -i example -f json
 ```
 
 The result of the above `close index` command is:
@@ -343,7 +343,7 @@ The result of the above `close index` command is:
 The `delete index` command deletes an existing closed index. You can display a help message by specifying the `- h` or` --help` option.
 
 ```sh
-$ ./indigo delete index -n example -f json
+$ indigoctl delete index -i example -f json
 ```
 
 The result of the above `delete index` command is:
@@ -360,7 +360,7 @@ The result of the above `delete index` command is:
 The `list index` command lists opened indices. You can display a help message by specifying the `- h` or` --help` option.
 
 ```sh
-$ ./indigo list index -f json
+$ indigoctl list index -f json
 ```
 
 The result of the above `list index` command is:
@@ -391,7 +391,7 @@ The document example is following:
 ```
 
 ```sh
-$ ./indigo put document -n example -i 1 -F example/document_1.json -f json
+$ indigoctl put document -i example -d 1 -F example/document_1.json -f json
 ```
 
 The result of the above `put document` command is:
@@ -500,7 +500,7 @@ The bulk example is following:
 ```
 
 ```sh
-$ ./indigo bulk -n example -b example/bulk_put.json -f json
+$ indigoctl bulk -i example -b example/bulk_put.json -f json
 ```
 
 The result of the above `bulk` command is:
@@ -508,8 +508,6 @@ The result of the above `bulk` command is:
 ```json
 {
   "put_count": 7,
-  "put_error_count": 0,
-  "delete_count": 0
 }
 ```
 
@@ -541,7 +539,7 @@ See [Queries](http://www.blevesearch.com/docs/Query/), [Query String Query](http
 You can display a help message by specifying the `- h` or` --help` option.
 
 ```sh
-$ ./indigo search -n example -s example/simple_query.json -f json
+$ indigoctl search -i example -s example/simple_query.json -f json
 ```
 
 The result of the above `search` command is:
@@ -721,7 +719,7 @@ $ indigo start rest
 The create index API creates the Index to the Indigo gRPC Server. Indigo provides support for multiple indices, including executing operations across several indices.
 
 ```sh
-$ curl -s -X PUT -H "Content-Type: application/json" --data-binary @example/index_mapping.json "http://localhost:2289/api/example?indexType=upside_down&indexStore=boltdb"
+$ curl -s -X PUT -H "Content-Type: application/json" --data-binary @example/index_mapping.json "http://localhost:2289/api/example"
 ```
 
 The result of the above command is:
@@ -739,7 +737,7 @@ The result of the above command is:
 The open index API opens an existing closed index.
 
 ```sh
-$ curl -s -H "Content-Type: application/json" --data-binary @example/runtime_config.json -X POST "http://localhost:2289/api/example/_open"
+$ curl -s -X POST -H "Content-Type: application/json" --data-binary @example/runtime_config.json "http://localhost:2289/api/example/_open"
 ```
 
 The result of the above command is:
