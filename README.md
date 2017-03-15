@@ -5,10 +5,10 @@ Indigo includes a full text search and indexing server, it also includes a web s
 Indigo gRPC Server communicates with the client using [gRPC](http://www.grpc.io) ([HTTP/2](https://en.wikipedia.org/wiki/HTTP/2) + [Protocol Buffers](https://developers.google.com/protocol-buffers/)). You can access to Indigo gRPC Server using gRPC directly.  
 Indigo REST Server provides JSON API ([HTTP/1.1](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol) + [JSON](http://www.json.org)) that communicate with Indigo gRPC Server. If you want to access to Indigo gRPC Server using traditional JSON API, you can access via Indigo REST Server.
 
+![](./img/Indigo%20Architecture.png "Indigo")
+
 
 ## Features
-
-![](./img/Indigo%20Architecture.png "Indigo")
 
 - TODO
 
