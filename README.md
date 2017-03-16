@@ -1,19 +1,25 @@
 # Indigo
 
-Indigo is a full text search and indexing server written in [Go](https://golang.org) based on [Bleve](http://www.blevesearch.com).  
-Indigo includes a full text search and indexing server, it also includes a web server that provides a [RESTful](https://en.wikipedia.org/wiki/Representational_state_transfer) interface for Indigo gRPC server.  
-Indigo gRPC Server communicates with the client using [gRPC](http://www.grpc.io) ([HTTP/2](https://en.wikipedia.org/wiki/HTTP/2) + [Protocol Buffers](https://developers.google.com/protocol-buffers/)). You can access to Indigo gRPC Server using gRPC directly.  
-Indigo REST Server provides JSON API ([HTTP/1.1](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol) + [JSON](http://www.json.org)) that communicate with Indigo gRPC Server. If you want to access to Indigo gRPC Server using traditional JSON API, you can access via Indigo REST Server.
+Indigo is a full text search and indexing server written in [Go](https://golang.org) based on [Bleve](http://www.blevesearch.com), it also includes a web server that provides a [RESTful](https://en.wikipedia.org/wiki/Representational_state_transfer) interface and control command. Indigo makes it easy for programmers to develop search applications with advanced features.  
+
+The Indigo gRPC Server provides full text search and indexing functions through [gRPC](http://www.grpc.io) ([HTTP/2](https://en.wikipedia.org/wiki/HTTP/2) + [Protocol Buffers](https://developers.google.com/protocol-buffers/)).  
+The Indigo REST Server is a gateway, it provides a traditional JSON API ([HTTP/1.1](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol) + [JSON](http://www.json.org)) that communicating with the Indigo gRPC Server.  
 
 ![](./img/Indigo%20Architecture.png "Indigo")
 
 
-## The Indigo Command Line Interface
+## Features
 
-Indigo provides some commands for controlling Indigo Server.
+- Full-text search and indexing
+- Faceting
+- Result highlighting
+- Text analysis
+- Multiple indices
+
+For more detailed information, refer to the [Bleve document](http://www.blevesearch.com/docs/Home/).
 
 
-### Start Indigo gRPC Server
+## Start Indigo gRPC Server
 
 The `start grpc` command starts Indigo gRPC Server. You can display a help message by specifying `-h` or `--help` option.
 
@@ -22,7 +28,7 @@ $ indigo start grpc
 ```
 
 
-### Create the index to the Indigo gRPC Server
+## Create the index to the Indigo gRPC Server
 
 The `create index` command creates the Index to the Indigo gRPC Server. Indigo provides support for multiple indices, including executing operations across several indices. You can display a help message by specifying `-h` or `--help` option.  
 You can specify the index mapping describes how to your data model should be indexed. it contains all of the details about which fields your documents can contain, and how those fields should be dealt with when adding documents to the index, or when querying those fields. The example is following:
@@ -156,7 +162,7 @@ The result of the above `create index` command is:
 ```
 
 
-### Open the index to the Indigo gRPC Server
+## Open the index to the Indigo gRPC Server
 
 The `open index` command opens an existing closed index. You can display a help message by specifying the `- h` or` --help` option.
 
@@ -174,7 +180,7 @@ The result of the above `open index` command is:
 ```
 
 
-### Get the index information from the Indigo gRPC Server
+## Get the index information from the Indigo gRPC Server
 
 The `get index` command retrieves an index information about existing opened index. You can display a help message by specifying the `- h` or` --help` option.
 
@@ -316,7 +322,7 @@ The result of the above `get index` command is:
 ```
 
 
-### Close the index from the Indigo gRPC Server
+## Close the index from the Indigo gRPC Server
 
 The `close index` command closes an existing opened index. You can display a help message by specifying the `- h` or` --help` option.
 
@@ -333,7 +339,7 @@ The result of the above `close index` command is:
 ```
 
 
-### Delete the index from the Indigo gRPC Server
+## Delete the index from the Indigo gRPC Server
 
 The `delete index` command deletes an existing closed index. You can display a help message by specifying the `- h` or` --help` option.
 
@@ -350,7 +356,7 @@ The result of the above `delete index` command is:
 ```
 
 
-### List the indices from the Indigo gRPC Server
+## List the indices from the Indigo gRPC Server
 
 The `list index` command lists opened indices. You can display a help message by specifying the `- h` or` --help` option.
 
@@ -369,7 +375,7 @@ The result of the above `list index` command is:
 ```
 
 
-### Put the document to the Indigo gRPC Server
+## Put the document to the Indigo gRPC Server
 
 The `put document` command adds or updates a JSON formatted document in a specified index. You can display a help message by specifying the `- h` or` --help` option.  
 The document example is following:
@@ -398,7 +404,7 @@ The result of the above `put document` command is:
 ```
 
 
-### Get the document from the Indigo gRPC Server
+## Get the document from the Indigo gRPC Server
 
 The `get document` command retrieves a JSON formatted document on its id from a specified index. You can display a help message by specifying the `- h` or` --help` option.
 
@@ -423,7 +429,7 @@ The result of the above `get document` command is:
 ```
 
 
-### Delete the document from the Indigo gRPC Server
+## Delete the document from the Indigo gRPC Server
 
 The `delete document` command deletes a document on its id from a specified index. You can display a help message by specifying the `- h` or` --help` option.
 
@@ -440,7 +446,7 @@ The result of the above `delete document` command is:
 ```
 
 
-### Index the documents in bulk to the Indigo gRPC Server
+## Index the documents in bulk to the Indigo gRPC Server
 
 The `bulk` command makes it possible to perform many put/delete operations in a single command execution. This can greatly increase the indexing speed. You can display a help message by specifying the `- h` or` --help` option.
 The bulk example is following:
@@ -507,7 +513,7 @@ The result of the above `bulk` command is:
 ```
 
 
-### Search the documents frmo the Indigo gRPC Server
+## Search the documents frmo the Indigo gRPC Server
 
 The `search` command can be executed with a search request, which includes the Query, within its file. Here is an example:
 
@@ -700,7 +706,7 @@ See [type SearchResult](https://godoc.org/github.com/blevesearch/bleve#SearchRes
 
 
 
-### Start Indigo REST Server
+## Start Indigo REST Server
 
 The `start rest` command starts Indigo REST Server. You can display a help message by specifying `-h` or `--help` option.
 
@@ -709,7 +715,7 @@ $ indigo start rest
 ```
 
 
-### Create the index to the Indigo gRPC Server via the Indigo REST Server
+## Create the index to the Indigo gRPC Server via the Indigo REST Server
 
 The create index API creates the Index to the Indigo gRPC Server. Indigo provides support for multiple indices, including executing operations across several indices.
 
@@ -727,7 +733,7 @@ The result of the above command is:
 ```
 
 
-### Open the index to the Indigo gRPC Server via the Indigo REST Server
+## Open the index to the Indigo gRPC Server via the Indigo REST Server
 
 The open index API opens an existing closed index.
 
@@ -745,7 +751,7 @@ The result of the above command is:
 ```
 
 
-### Get the index information from the Indigo gRPC Server via the Indigo REST Server
+## Get the index information from the Indigo gRPC Server via the Indigo REST Server
 
 The get index API retrieves an index information about existing opened index.
 
@@ -887,7 +893,7 @@ The result of the above command is:
 ```
 
 
-### Close the index to the Indigo gRPC Server via the Indigo REST Server
+## Close the index to the Indigo gRPC Server via the Indigo REST Server
 
 The close index API closes an existing opened index.
 
@@ -904,7 +910,7 @@ The result of the above command is:
 ```
 
 
-### Delete the index to the Indigo gRPC Server via the Indigo REST Server
+## Delete the index to the Indigo gRPC Server via the Indigo REST Server
 
 The delete index API deletes an existing closed index.
 
@@ -921,7 +927,7 @@ The result of the above command is:
 ```
 
 
-### List the index to the Indigo gRPC Server via the Indigo REST Server
+## List the index to the Indigo gRPC Server via the Indigo REST Server
 
 The list index API lists opened indices.
 
@@ -940,7 +946,7 @@ The result of the above command is:
 ```
 
 
-### Put the document to the Indigo gRPC Server via the Indigo REST Server
+## Put the document to the Indigo gRPC Server via the Indigo REST Server
 
 The put document API adds or updates a JSON formatted document in a specified index.
 
@@ -957,7 +963,7 @@ The result of the above command is:
 ```
 
 
-### Get the document to the Indigo gRPC Server via the Indigo REST Server
+## Get the document to the Indigo gRPC Server via the Indigo REST Server
 
 The get document API retrieves a JSON formatted document on its id from a specified index.
 
@@ -982,7 +988,7 @@ The result of the above command is:
 ```
 
 
-### Delete the document from the Indigo gRPC Server via the Indigo REST Server
+## Delete the document from the Indigo gRPC Server via the Indigo REST Server
 
 The delete document API deletes a document on its id from a specified index.
 
@@ -999,7 +1005,7 @@ The result of the above command is:
 ```
 
 
-### Index the documents in bulk to the Indigo gRPC Server via the Indigo REST Server
+## Index the documents in bulk to the Indigo gRPC Server via the Indigo REST Server
 
 The bulk API makes it possible to perform many put/delete operations in a single command execution. This can greatly increase the indexing speed.
 
@@ -1016,7 +1022,7 @@ The result of the above command is:
 ```
 
 
-### Search the documents from the Indigo gRPC Server via the Indigo REST Server
+## Search the documents from the Indigo gRPC Server via the Indigo REST Server
 
 The search API can be executed with a search request, which includes the Query, within its file.
 
