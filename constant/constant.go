@@ -7,7 +7,7 @@ const (
 	DefaultLogOutput         string = ""
 	DefaultLogLevel          string = "info"
 	DefaultGRPCPort          int    = 1289
-	DefaultDataDir           string = "./data"
+	DefaultDataDir           string = "/var/indigo/data"
 	DefaultOpenExistingIndex bool   = false
 	DefaultRESTPort          int    = 2289
 	DefaultGRPCServer        string = "localhost:1289"

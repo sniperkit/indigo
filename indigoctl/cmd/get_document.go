@@ -14,55 +14,57 @@ var GetDocumentCmd = &cobra.Command{
 	Use:   "document",
 	Short: "gets the document from the Indigo gRPC Server",
 	Long:  `The get document command gets the document from the Indigo gRPC Server.`,
-	RunE: func(cmd *cobra.Command, args []string) error {
-		if index == "" {
-			return fmt.Errorf("required flag: --%s", cmd.Flag("index").Name)
-		}
+	RunE:  runEGetDocumentCmd,
+}
 
-		if docID == "" {
-			return fmt.Errorf("required flag: --%s", cmd.Flag("doc-id").Name)
-		}
+func runEGetDocumentCmd(cmd *cobra.Command, args []string) error {
+	if index == "" {
+		return fmt.Errorf("required flag: --%s", cmd.Flag("index").Name)
+	}
 
-		conn, err := grpc.Dial(gRPCServer, grpc.WithInsecure())
+	if docID == "" {
+		return fmt.Errorf("required flag: --%s", cmd.Flag("doc-id").Name)
+	}
+
+	conn, err := grpc.Dial(gRPCServer, grpc.WithInsecure())
+	if err != nil {
+		return err
+	}
+	defer conn.Close()
+
+	client := proto.NewIndigoClient(conn)
+	resp, err := client.GetDocument(context.Background(), &proto.GetDocumentRequest{Index: index, Id: docID})
+	if err != nil {
+		return err
+	}
+
+	fields := make(map[string]interface{})
+	if err := json.Unmarshal(resp.Fields, &fields); err != nil {
+		return err
+	}
+
+	r := struct {
+		ID     string                 `json:"id"`
+		Fields map[string]interface{} `json:"fields"`
+	}{
+		ID:     docID,
+		Fields: fields,
+	}
+
+	switch outputFormat {
+	case "text":
+		fmt.Printf("%s\n", r)
+	case "json":
+		output, err := json.MarshalIndent(r, "", "  ")
 		if err != nil {
 			return err
 		}
-		defer conn.Close()
+		fmt.Printf("%s\n", output)
+	default:
+		fmt.Printf("%s\n", r)
+	}
 
-		client := proto.NewIndigoClient(conn)
-		resp, err := client.GetDocument(context.Background(), &proto.GetDocumentRequest{IndexName: index, Id: docID})
-		if err != nil {
-			return err
-		}
-
-		fields := make(map[string]interface{})
-		if err := json.Unmarshal(resp.Fields, &fields); err != nil {
-			return err
-		}
-
-		r := struct {
-			ID     string                 `json:"id"`
-			Fields map[string]interface{} `json:"fields"`
-		}{
-			ID:     docID,
-			Fields: fields,
-		}
-
-		switch outputFormat {
-		case "text":
-			fmt.Printf("%s\n", r)
-		case "json":
-			output, err := json.MarshalIndent(r, "", "  ")
-			if err != nil {
-				return err
-			}
-			fmt.Printf("%s\n", output)
-		default:
-			fmt.Printf("%s\n", r)
-		}
-
-		return nil
-	},
+	return nil
 }
 
 func init() {

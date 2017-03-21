@@ -28,9 +28,9 @@ func (h *GetIndexHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	}).Info("")
 
 	vars := mux.Vars(req)
-	indexName := vars["indexName"]
+	index := vars["index"]
 
-	resp, err := h.client.GetIndex(context.Background(), &proto.GetIndexRequest{IndexName: indexName})
+	resp, err := h.client.GetIndex(context.Background(), &proto.GetIndexRequest{Index: index})
 	if err != nil {
 		log.WithFields(log.Fields{
 			"err": err,

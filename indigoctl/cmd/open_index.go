@@ -16,53 +16,55 @@ var OpenIndexCmd = &cobra.Command{
 	Use:   "index",
 	Short: "opens the index to the Indigo gRPC Server",
 	Long:  `The open index command opens the index to the Indigo gRPC Server.`,
-	RunE: func(cmd *cobra.Command, args []string) error {
-		if index == "" {
-			return fmt.Errorf("required flag: --%s", cmd.Flag("index").Name)
-		}
+	RunE:  runEOpenIndexCmd,
+}
 
-		var rc []byte = nil
+func runEOpenIndexCmd(cmd *cobra.Command, args []string) error {
+	if index == "" {
+		return fmt.Errorf("required flag: --%s", cmd.Flag("index").Name)
+	}
 
-		if runtimeConfig != "" {
-			file, err := os.Open(runtimeConfig)
-			if err != nil {
-				return err
-			}
-			defer file.Close()
+	var rc []byte = nil
 
-			rc, err = ioutil.ReadAll(file)
-			if err != nil {
-				return err
-			}
-		}
-
-		conn, err := grpc.Dial(gRPCServer, grpc.WithInsecure())
+	if runtimeConfig != "" {
+		file, err := os.Open(runtimeConfig)
 		if err != nil {
 			return err
 		}
-		defer conn.Close()
+		defer file.Close()
 
-		client := proto.NewIndigoClient(conn)
-		resp, err := client.OpenIndex(context.Background(), &proto.OpenIndexRequest{IndexName: index, RuntimeConfig: rc})
+		rc, err = ioutil.ReadAll(file)
 		if err != nil {
 			return err
 		}
+	}
 
-		switch outputFormat {
-		case "text":
-			fmt.Printf("%s\n", resp.String())
-		case "json":
-			output, err := json.MarshalIndent(resp, "", "  ")
-			if err != nil {
-				return err
-			}
-			fmt.Printf("%s\n", output)
-		default:
-			fmt.Printf("%s\n", resp.String())
+	conn, err := grpc.Dial(gRPCServer, grpc.WithInsecure())
+	if err != nil {
+		return err
+	}
+	defer conn.Close()
+
+	client := proto.NewIndigoClient(conn)
+	resp, err := client.OpenIndex(context.Background(), &proto.OpenIndexRequest{Index: index, RuntimeConfig: rc})
+	if err != nil {
+		return err
+	}
+
+	switch outputFormat {
+	case "text":
+		fmt.Printf("%s\n", resp.String())
+	case "json":
+		output, err := json.MarshalIndent(resp, "", "  ")
+		if err != nil {
+			return err
 		}
+		fmt.Printf("%s\n", output)
+	default:
+		fmt.Printf("%s\n", resp.String())
+	}
 
-		return nil
-	},
+	return nil
 }
 
 func init() {

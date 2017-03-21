@@ -3,6 +3,7 @@ package grpc
 import (
 	"fmt"
 	"github.com/mosuka/indigo/proto"
+	"github.com/mosuka/indigo/service"
 	log "github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 	"net"
@@ -11,12 +12,12 @@ import (
 type indigoGRPCServer struct {
 	server   *grpc.Server
 	listener net.Listener
-	service  *indigoGRPCService
+	service  *service.IndigoGRPCService
 }
 
 func NewIndigoGRPCServer(port int, dataDir string) *indigoGRPCServer {
 	server := grpc.NewServer()
-	service := NewIndigoGRPCService(dataDir)
+	service := service.NewIndigoGRPCService(dataDir)
 
 	proto.RegisterIndigoServer(server, service)
 

@@ -14,42 +14,44 @@ var DeleteDocumentCmd = &cobra.Command{
 	Use:   "document",
 	Short: "deletes the document from the Indigo gRPC Server",
 	Long:  `The delete document command deletes the document from the Indigo gRPC Server.`,
-	RunE: func(cmd *cobra.Command, args []string) error {
-		if index == "" {
-			return fmt.Errorf("required flag: --%s", cmd.Flag("index").Name)
-		}
+	RunE:  runEDeleteDocumentCmd,
+}
 
-		if docID == "" {
-			return fmt.Errorf("required flag: --%s", cmd.Flag("doc-id").Name)
-		}
+func runEDeleteDocumentCmd(cmd *cobra.Command, args []string) error {
+	if index == "" {
+		return fmt.Errorf("required flag: --%s", cmd.Flag("index").Name)
+	}
 
-		conn, err := grpc.Dial(gRPCServer, grpc.WithInsecure())
+	if docID == "" {
+		return fmt.Errorf("required flag: --%s", cmd.Flag("doc-id").Name)
+	}
+
+	conn, err := grpc.Dial(gRPCServer, grpc.WithInsecure())
+	if err != nil {
+		return err
+	}
+	defer conn.Close()
+
+	client := proto.NewIndigoClient(conn)
+	resp, err := client.DeleteDocument(context.Background(), &proto.DeleteDocumentRequest{Index: index, Id: docID})
+	if err != nil {
+		return err
+	}
+
+	switch outputFormat {
+	case "text":
+		fmt.Printf("%s\n", resp.String())
+	case "json":
+		output, err := json.MarshalIndent(resp, "", "  ")
 		if err != nil {
 			return err
 		}
-		defer conn.Close()
+		fmt.Printf("%s\n", output)
+	default:
+		fmt.Printf("%s\n", resp.String())
+	}
 
-		client := proto.NewIndigoClient(conn)
-		resp, err := client.DeleteDocument(context.Background(), &proto.DeleteDocumentRequest{IndexName: index, Id: docID})
-		if err != nil {
-			return err
-		}
-
-		switch outputFormat {
-		case "text":
-			fmt.Printf("%s\n", resp.String())
-		case "json":
-			output, err := json.MarshalIndent(resp, "", "  ")
-			if err != nil {
-				return err
-			}
-			fmt.Printf("%s\n", output)
-		default:
-			fmt.Printf("%s\n", resp.String())
-		}
-
-		return nil
-	},
+	return nil
 }
 
 func init() {

@@ -9,18 +9,20 @@ var OpenCmd = &cobra.Command{
 	Use:   "open",
 	Short: "opens the object to the Indigo gRPC Server",
 	Long:  `The open command creates the object to the Indigo gRPC Server.`,
-	RunE: func(cmd *cobra.Command, args []string) error {
-		if len(args) < 1 {
-			return cmd.Help()
-		}
+	RunE:  runEOpenCmd,
+}
 
-		_, _, err := cmd.Find(args)
-		if err != nil {
-			return err
-		}
+func runEOpenCmd(cmd *cobra.Command, args []string) error {
+	if len(args) < 1 {
+		return cmd.Help()
+	}
 
-		return nil
-	},
+	_, _, err := cmd.Find(args)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func init() {

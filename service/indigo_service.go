@@ -1,4 +1,4 @@
-package grpc
+package service
 
 import (
 	"encoding/json"
@@ -16,13 +16,13 @@ import (
 	"time"
 )
 
-type indigoGRPCService struct {
+type IndigoGRPCService struct {
 	dataDir string
 	indices map[string]bleve.Index
 	mutexes map[string]*sync.RWMutex
 }
 
-func NewIndigoGRPCService(dataDir string) *indigoGRPCService {
+func NewIndigoGRPCService(dataDir string) *IndigoGRPCService {
 	indices := make(map[string]bleve.Index)
 	mutexes := make(map[string]*sync.RWMutex)
 
@@ -45,14 +45,14 @@ func NewIndigoGRPCService(dataDir string) *indigoGRPCService {
 		}).Warn("data directory already exists")
 	}
 
-	return &indigoGRPCService{
+	return &IndigoGRPCService{
 		dataDir: dataDir,
 		indices: indices,
 		mutexes: mutexes,
 	}
 }
 
-func (igs *indigoGRPCService) lockIndex(index string) {
+func (igs *IndigoGRPCService) lockIndex(index string) {
 	if _, existed := igs.mutexes[index]; !existed {
 		igs.mutexes[index] = new(sync.RWMutex)
 	}
@@ -64,7 +64,7 @@ func (igs *indigoGRPCService) lockIndex(index string) {
 	}).Debug("index was locked")
 }
 
-func (igs *indigoGRPCService) unlockIndex(index string) {
+func (igs *IndigoGRPCService) unlockIndex(index string) {
 	if _, existed := igs.mutexes[index]; !existed {
 		igs.mutexes[index] = new(sync.RWMutex)
 	}
@@ -76,7 +76,7 @@ func (igs *indigoGRPCService) unlockIndex(index string) {
 	}).Debug("index was unlocked")
 }
 
-func (igs *indigoGRPCService) OpenIndices() {
+func (igs *IndigoGRPCService) OpenIndices() {
 	if fiList, err := ioutil.ReadDir(igs.dataDir); err == nil {
 		for _, fi := range fiList {
 			if fi.IsDir() {
@@ -109,7 +109,7 @@ func (igs *indigoGRPCService) OpenIndices() {
 	return
 }
 
-func (igs *indigoGRPCService) CloseIndices() {
+func (igs *IndigoGRPCService) CloseIndices() {
 	for index, idx := range igs.indices {
 		if err := idx.Close(); err == nil {
 			log.WithFields(log.Fields{
@@ -126,32 +126,32 @@ func (igs *indigoGRPCService) CloseIndices() {
 	return
 }
 
-func (igs *indigoGRPCService) CreateIndex(ctx context.Context, req *proto.CreateIndexRequest) (*proto.CreateIndexResponse, error) {
-	igs.lockIndex(req.IndexName)
-	defer igs.unlockIndex(req.IndexName)
+func (igs *IndigoGRPCService) CreateIndex(ctx context.Context, req *proto.CreateIndexRequest) (*proto.CreateIndexResponse, error) {
+	igs.lockIndex(req.Index)
+	defer igs.unlockIndex(req.Index)
 
-	if _, open := igs.indices[req.IndexName]; open {
+	if _, open := igs.indices[req.Index]; open {
 		err := errors.New("index already opened")
 
 		log.WithFields(log.Fields{
-			"index": req.IndexName,
+			"index": req.Index,
 			"err":   err,
 		}).Error("failed to create index")
 
 		return &proto.CreateIndexResponse{}, err
 	}
 
-	indexDir := path.Join(igs.dataDir, req.IndexName)
+	indexDir := path.Join(igs.dataDir, req.Index)
 
 	indexMapping := bleve.NewIndexMapping()
 	if req.IndexMapping != nil {
 		if err := json.Unmarshal(req.IndexMapping, &indexMapping); err == nil {
 			log.WithFields(log.Fields{
-				"index": req.IndexName,
+				"index": req.Index,
 			}).Debug("succeeded in creating index mapping")
 		} else {
 			log.WithFields(log.Fields{
-				"index": req.IndexName,
+				"index": req.Index,
 				"err":   err,
 			}).Error("failed to creat index mapping")
 
@@ -163,11 +163,11 @@ func (igs *indigoGRPCService) CreateIndex(ctx context.Context, req *proto.Create
 	if req.Kvconfig != nil {
 		if err := json.Unmarshal(req.Kvconfig, &kvConfig); err == nil {
 			log.WithFields(log.Fields{
-				"index": req.IndexName,
+				"index": req.Index,
 			}).Debug("succeeded in creating kv config")
 		} else {
 			log.WithFields(log.Fields{
-				"index": req.IndexName,
+				"index": req.Index,
 				"err":   err,
 			}).Error("failed to create kv config")
 
@@ -181,16 +181,16 @@ func (igs *indigoGRPCService) CreateIndex(ctx context.Context, req *proto.Create
 		index, err = bleve.NewUsing(indexDir, indexMapping, req.IndexType, req.Kvstore, kvConfig)
 		if err == nil {
 			log.WithFields(log.Fields{
-				"index":     req.IndexName,
+				"index":     req.Index,
 				"indexDir":  indexDir,
 				"indexType": req.IndexType,
 				"kvStore":   req.Kvstore,
 			}).Info("succeeded in creating index")
 
-			igs.indices[req.IndexName] = index
+			igs.indices[req.Index] = index
 		} else {
 			log.WithFields(log.Fields{
-				"index":     req.IndexName,
+				"index":     req.Index,
 				"indexDir":  indexDir,
 				"indexType": req.IndexType,
 				"kvStore":   req.Kvstore,
@@ -199,7 +199,7 @@ func (igs *indigoGRPCService) CreateIndex(ctx context.Context, req *proto.Create
 		}
 	} else {
 		log.WithFields(log.Fields{
-			"index":     req.IndexName,
+			"index":     req.Index,
 			"indexDir":  indexDir,
 			"indexType": req.IndexType,
 			"kvStore":   req.Kvstore,
@@ -208,38 +208,83 @@ func (igs *indigoGRPCService) CreateIndex(ctx context.Context, req *proto.Create
 	}
 
 	return &proto.CreateIndexResponse{
-		IndexName: req.IndexName,
-		IndexDir:  indexDir,
+		Index:    req.Index,
+		IndexDir: indexDir,
 	}, err
 }
 
-func (igs *indigoGRPCService) OpenIndex(ctx context.Context, req *proto.OpenIndexRequest) (*proto.OpenIndexResponse, error) {
-	igs.lockIndex(req.IndexName)
-	defer igs.unlockIndex(req.IndexName)
+func (igs *IndigoGRPCService) DeleteIndex(ctx context.Context, req *proto.DeleteIndexRequest) (*proto.DeleteIndexResponse, error) {
+	igs.lockIndex(req.Index)
+	defer igs.unlockIndex(req.Index)
 
-	if _, open := igs.indices[req.IndexName]; open {
+	if _, open := igs.indices[req.Index]; open {
 		err := errors.New("index already opened")
 
 		log.WithFields(log.Fields{
-			"index": req.IndexName,
+			"index": req.Index,
+			"err":   err,
+		}).Error("failed to delete index")
+
+		return &proto.DeleteIndexResponse{}, err
+	}
+
+	indexDir := path.Join(igs.dataDir, req.Index)
+
+	_, err := os.Stat(indexDir)
+	if err == nil {
+		err = os.RemoveAll(indexDir)
+		if err == nil {
+			log.WithFields(log.Fields{
+				"index":    req.Index,
+				"indexDir": indexDir,
+			}).Info("succeeded in deleting index")
+		} else {
+			log.WithFields(log.Fields{
+				"index":    req.Index,
+				"indexDir": indexDir,
+				"err":      err,
+			}).Error("failed to delete index")
+		}
+	} else {
+		log.WithFields(log.Fields{
+			"index":    req.Index,
+			"indexDir": indexDir,
+			"err":      err,
+		}).Error("failed to delete index")
+	}
+
+	return &proto.DeleteIndexResponse{
+		Index: req.Index,
+	}, err
+}
+
+func (igs *IndigoGRPCService) OpenIndex(ctx context.Context, req *proto.OpenIndexRequest) (*proto.OpenIndexResponse, error) {
+	igs.lockIndex(req.Index)
+	defer igs.unlockIndex(req.Index)
+
+	if _, open := igs.indices[req.Index]; open {
+		err := errors.New("index already opened")
+
+		log.WithFields(log.Fields{
+			"index": req.Index,
 			"err":   err,
 		}).Error("failed to open index")
 
 		return &proto.OpenIndexResponse{}, err
 	}
 
-	indexDir := path.Join(igs.dataDir, req.IndexName)
+	indexDir := path.Join(igs.dataDir, req.Index)
 
 	runtimeConfig := make(map[string]interface{})
 	if req.RuntimeConfig != nil {
 		err := json.Unmarshal(req.RuntimeConfig, &runtimeConfig)
 		if err == nil {
 			log.WithFields(log.Fields{
-				"index": req.IndexName,
+				"index": req.Index,
 			}).Debug("succeeded in creating runtime config")
 		} else {
 			log.WithFields(log.Fields{
-				"index": req.IndexName,
+				"index": req.Index,
 				"err":   err,
 			}).Error("failed to create runtime config")
 
@@ -253,36 +298,83 @@ func (igs *indigoGRPCService) OpenIndex(ctx context.Context, req *proto.OpenInde
 		index, err = bleve.OpenUsing(indexDir, runtimeConfig)
 		if err == nil {
 			log.WithFields(log.Fields{
-				"index": req.IndexName,
+				"index": req.Index,
 			}).Info("succeeded in opening index")
 
-			igs.indices[req.IndexName] = index
+			igs.indices[req.Index] = index
 		} else {
 			log.WithFields(log.Fields{
-				"index": req.IndexName,
+				"index": req.Index,
 				"err":   err,
 			}).Error("failed to open index")
 		}
 	} else {
 		log.WithFields(log.Fields{
-			"index": req.IndexName,
+			"index": req.Index,
 			"err":   err,
 		}).Error("failed to open index")
 	}
 
 	return &proto.OpenIndexResponse{
-		IndexName: req.IndexName,
-		IndexDir:  indexDir,
+		Index:    req.Index,
+		IndexDir: indexDir,
 	}, err
 }
 
-func (igs *indigoGRPCService) GetIndex(ctx context.Context, req *proto.GetIndexRequest) (*proto.GetIndexResponse, error) {
-	index, open := igs.indices[req.IndexName]
+func (igs *IndigoGRPCService) CloseIndex(ctx context.Context, req *proto.CloseIndexRequest) (*proto.CloseIndexResponse, error) {
+	igs.lockIndex(req.Index)
+	defer igs.unlockIndex(req.Index)
+
+	index, open := igs.indices[req.Index]
 	if !open {
 		err := errors.New("index is not open")
 
 		log.WithFields(log.Fields{
-			"index": req.IndexName,
+			"index": req.Index,
+			"err":   err,
+		}).Error("failed to close index")
+
+		return &proto.CloseIndexResponse{}, err
+	}
+
+	err := index.Close()
+	if err == nil {
+		log.WithFields(log.Fields{
+			"index": req.Index,
+		}).Info("succeeded in closing index")
+
+		delete(igs.indices, req.Index)
+	} else {
+		log.WithFields(log.Fields{
+			"index": req.Index,
+			"err":   err,
+		}).Error("failed to close index")
+	}
+
+	return &proto.CloseIndexResponse{
+		Index: req.Index,
+	}, err
+}
+
+func (igs *IndigoGRPCService) ListIndex(ctx context.Context, req *proto.ListIndexRequest) (*proto.ListIndexResponse, error) {
+	indices := make([]string, 0)
+
+	for index := range igs.indices {
+		indices = append(indices, index)
+	}
+
+	return &proto.ListIndexResponse{
+		Indices: indices,
+	}, nil
+}
+
+func (igs *IndigoGRPCService) GetIndex(ctx context.Context, req *proto.GetIndexRequest) (*proto.GetIndexResponse, error) {
+	index, open := igs.indices[req.Index]
+	if !open {
+		err := errors.New("index is not open")
+
+		log.WithFields(log.Fields{
+			"index": req.Index,
 			"err":   err,
 		}).Error("failed to get index")
 
@@ -294,11 +386,11 @@ func (igs *indigoGRPCService) GetIndex(ctx context.Context, req *proto.GetIndexR
 	indexStats, err := index.Stats().MarshalJSON()
 	if err == nil {
 		log.WithFields(log.Fields{
-			"index": req.IndexName,
+			"index": req.Index,
 		}).Info("succeeded in creating index stats")
 	} else {
 		log.WithFields(log.Fields{
-			"index": req.IndexName,
+			"index": req.Index,
 			"err":   err,
 		}).Error("failed to create index stats")
 	}
@@ -306,11 +398,11 @@ func (igs *indigoGRPCService) GetIndex(ctx context.Context, req *proto.GetIndexR
 	indexMapping, err := json.Marshal(index.Mapping())
 	if err == nil {
 		log.WithFields(log.Fields{
-			"index": req.IndexName,
+			"index": req.Index,
 		}).Info("succeeded in creating index mapping")
 	} else {
 		log.WithFields(log.Fields{
-			"index": req.IndexName,
+			"index": req.Index,
 			"err":   err,
 		}).Error("failed to create index mapping")
 	}
@@ -322,105 +414,21 @@ func (igs *indigoGRPCService) GetIndex(ctx context.Context, req *proto.GetIndexR
 	}, err
 }
 
-func (igs *indigoGRPCService) CloseIndex(ctx context.Context, req *proto.CloseIndexRequest) (*proto.CloseIndexResponse, error) {
-	igs.lockIndex(req.IndexName)
-	defer igs.unlockIndex(req.IndexName)
+//func (igs *IndigoGRPCService) CreateAlias(ctx context.Context, req *proto.CreateAliasRequest) (*proto.CreateAliasResponse, error) {
+//
+//	return &proto.CreateAliasResponse{
+//		Alias:   req.Alias,
+//		Indices: req.Indices,
+//	}, nil
+//}
 
-	index, open := igs.indices[req.IndexName]
+func (igs *IndigoGRPCService) PutDocument(ctx context.Context, req *proto.PutDocumentRequest) (*proto.PutDocumentResponse, error) {
+	index, open := igs.indices[req.Index]
 	if !open {
 		err := errors.New("index is not open")
 
 		log.WithFields(log.Fields{
-			"index": req.IndexName,
-			"err":   err,
-		}).Error("failed to close index")
-
-		return &proto.CloseIndexResponse{}, err
-	}
-
-	err := index.Close()
-	if err == nil {
-		log.WithFields(log.Fields{
-			"index": req.IndexName,
-		}).Info("succeeded in closing index")
-
-		delete(igs.indices, req.IndexName)
-	} else {
-		log.WithFields(log.Fields{
-			"index": req.IndexName,
-			"err":   err,
-		}).Error("failed to close index")
-	}
-
-	return &proto.CloseIndexResponse{
-		IndexName: req.IndexName,
-	}, err
-}
-
-func (igs *indigoGRPCService) DeleteIndex(ctx context.Context, req *proto.DeleteIndexRequest) (*proto.DeleteIndexResponse, error) {
-	igs.lockIndex(req.IndexName)
-	defer igs.unlockIndex(req.IndexName)
-
-	if _, open := igs.indices[req.IndexName]; open {
-		err := errors.New("index already opened")
-
-		log.WithFields(log.Fields{
-			"index": req.IndexName,
-			"err":   err,
-		}).Error("failed to delete index")
-
-		return &proto.DeleteIndexResponse{}, err
-	}
-
-	indexDir := path.Join(igs.dataDir, req.IndexName)
-
-	_, err := os.Stat(indexDir)
-	if err == nil {
-		err = os.RemoveAll(indexDir)
-		if err == nil {
-			log.WithFields(log.Fields{
-				"index":    req.IndexName,
-				"indexDir": indexDir,
-			}).Info("succeeded in deleting index")
-		} else {
-			log.WithFields(log.Fields{
-				"index":    req.IndexName,
-				"indexDir": indexDir,
-				"err":      err,
-			}).Error("failed to delete index")
-		}
-	} else {
-		log.WithFields(log.Fields{
-			"index":    req.IndexName,
-			"indexDir": indexDir,
-			"err":      err,
-		}).Error("failed to delete index")
-	}
-
-	return &proto.DeleteIndexResponse{
-		IndexName: req.IndexName,
-	}, err
-}
-
-func (igs *indigoGRPCService) ListIndex(ctx context.Context, req *proto.ListIndexRequest) (*proto.ListIndexResponse, error) {
-	indices := make([]string, 0)
-
-	for indexName := range igs.indices {
-		indices = append(indices, indexName)
-	}
-
-	return &proto.ListIndexResponse{
-		Indices: indices,
-	}, nil
-}
-
-func (igs *indigoGRPCService) PutDocument(ctx context.Context, req *proto.PutDocumentRequest) (*proto.PutDocumentResponse, error) {
-	index, open := igs.indices[req.IndexName]
-	if !open {
-		err := errors.New("index is not open")
-
-		log.WithFields(log.Fields{
-			"index": req.IndexName,
+			"index": req.Index,
 			"err":   err,
 		}).Error("failed to put document")
 
@@ -432,7 +440,7 @@ func (igs *indigoGRPCService) PutDocument(ctx context.Context, req *proto.PutDoc
 	err := json.Unmarshal(req.Fields, &fields)
 	if err == nil {
 		log.WithFields(log.Fields{
-			"index": req.IndexName,
+			"index": req.Index,
 			"id":    req.Id,
 		}).Debug("succeeded in creating document")
 
@@ -441,19 +449,19 @@ func (igs *indigoGRPCService) PutDocument(ctx context.Context, req *proto.PutDoc
 			success = true
 
 			log.WithFields(log.Fields{
-				"index": req.IndexName,
+				"index": req.Index,
 				"id":    req.Id,
 			}).Info("succeeded in putting document")
 		} else {
 			log.WithFields(log.Fields{
-				"index": req.IndexName,
+				"index": req.Index,
 				"id":    req.Id,
 				"err":   err,
 			}).Error("failed to put document")
 		}
 	} else {
 		log.WithFields(log.Fields{
-			"index": req.IndexName,
+			"index": req.Index,
 			"id":    req.Id,
 			"err":   err,
 		}).Error("failed to put document")
@@ -464,13 +472,13 @@ func (igs *indigoGRPCService) PutDocument(ctx context.Context, req *proto.PutDoc
 	}, err
 }
 
-func (igs *indigoGRPCService) GetDocument(ctx context.Context, req *proto.GetDocumentRequest) (*proto.GetDocumentResponse, error) {
-	index, open := igs.indices[req.IndexName]
+func (igs *IndigoGRPCService) GetDocument(ctx context.Context, req *proto.GetDocumentRequest) (*proto.GetDocumentResponse, error) {
+	index, open := igs.indices[req.Index]
 	if !open {
 		err := errors.New("index is not open")
 
 		log.WithFields(log.Fields{
-			"index": req.IndexName,
+			"index": req.Index,
 			"err":   err,
 		}).Error("failed to get document")
 
@@ -481,7 +489,7 @@ func (igs *indigoGRPCService) GetDocument(ctx context.Context, req *proto.GetDoc
 	if doc, err := index.Document(req.Id); err == nil {
 		if doc != nil {
 			log.WithFields(log.Fields{
-				"index": req.IndexName,
+				"index": req.Index,
 				"id":    req.Id,
 			}).Info("succeeded in getting document")
 
@@ -521,13 +529,13 @@ func (igs *indigoGRPCService) GetDocument(ctx context.Context, req *proto.GetDoc
 			}
 		} else {
 			log.WithFields(log.Fields{
-				"index": req.IndexName,
+				"index": req.Index,
 				"id":    req.Id,
 			}).Info("document does not exist")
 		}
 	} else {
 		log.WithFields(log.Fields{
-			"index": req.IndexName,
+			"index": req.Index,
 			"id":    req.Id,
 			"err":   err,
 		}).Error("failed to get document")
@@ -538,12 +546,12 @@ func (igs *indigoGRPCService) GetDocument(ctx context.Context, req *proto.GetDoc
 	bytesFields, err := json.Marshal(fields)
 	if err == nil {
 		log.WithFields(log.Fields{
-			"index": req.IndexName,
+			"index": req.Index,
 			"id":    req.Id,
 		}).Debug("succeeded in creating document")
 	} else {
 		log.WithFields(log.Fields{
-			"index": req.IndexName,
+			"index": req.Index,
 			"id":    req.Id,
 			"err":   err,
 		}).Error("failed to get document")
@@ -555,13 +563,13 @@ func (igs *indigoGRPCService) GetDocument(ctx context.Context, req *proto.GetDoc
 	}, err
 }
 
-func (igs *indigoGRPCService) DeleteDocument(ctx context.Context, req *proto.DeleteDocumentRequest) (*proto.DeleteDocumentResponse, error) {
-	index, open := igs.indices[req.IndexName]
+func (igs *IndigoGRPCService) DeleteDocument(ctx context.Context, req *proto.DeleteDocumentRequest) (*proto.DeleteDocumentResponse, error) {
+	index, open := igs.indices[req.Index]
 	if !open {
 		err := errors.New("index is not open")
 
 		log.WithFields(log.Fields{
-			"index": req.IndexName,
+			"index": req.Index,
 			"err":   err,
 		}).Error("failed to delete document")
 
@@ -573,12 +581,12 @@ func (igs *indigoGRPCService) DeleteDocument(ctx context.Context, req *proto.Del
 	if err == nil {
 		success = true
 		log.WithFields(log.Fields{
-			"index": req.IndexName,
+			"index": req.Index,
 			"id":    req.Id,
 		}).Info("succeeded in deleting document")
 	} else {
 		log.WithFields(log.Fields{
-			"index": req.IndexName,
+			"index": req.Index,
 			"id":    req.Id,
 			"err":   err,
 		}).Error("failed to delete document")
@@ -589,16 +597,16 @@ func (igs *indigoGRPCService) DeleteDocument(ctx context.Context, req *proto.Del
 	}, err
 }
 
-func (igs *indigoGRPCService) Bulk(ctx context.Context, req *proto.BulkRequest) (*proto.BulkResponse, error) {
-	igs.lockIndex(req.IndexName)
-	defer igs.unlockIndex(req.IndexName)
+func (igs *IndigoGRPCService) Bulk(ctx context.Context, req *proto.BulkRequest) (*proto.BulkResponse, error) {
+	igs.lockIndex(req.Index)
+	defer igs.unlockIndex(req.Index)
 
-	index, open := igs.indices[req.IndexName]
+	index, open := igs.indices[req.Index]
 	if !open {
 		err := errors.New("index is not open")
 
 		log.WithFields(log.Fields{
-			"index": req.IndexName,
+			"index": req.Index,
 			"err":   err,
 		}).Error("failed to index documents in bulk")
 
@@ -610,7 +618,7 @@ func (igs *indigoGRPCService) Bulk(ctx context.Context, req *proto.BulkRequest) 
 		err := json.Unmarshal(req.BulkRequest, &bulkRequest)
 		if err != nil {
 			log.WithFields(log.Fields{
-				"index": req.IndexName,
+				"index": req.Index,
 				"err":   err,
 			}).Error("failed to index documents in bulk")
 
@@ -623,7 +631,7 @@ func (igs *indigoGRPCService) Bulk(ctx context.Context, req *proto.BulkRequest) 
 		err := errors.New("unexpected bulk request format")
 
 		log.WithFields(log.Fields{
-			"index": req.IndexName,
+			"index": req.Index,
 			"err":   err,
 		}).Error("failed to index documents in bulk")
 
@@ -643,7 +651,7 @@ func (igs *indigoGRPCService) Bulk(ctx context.Context, req *proto.BulkRequest) 
 		request, ok := request.(map[string]interface{})
 		if !ok {
 			log.WithFields(log.Fields{
-				"index":   req.IndexName,
+				"index":   req.Index,
 				"num":     num,
 				"request": request,
 			}).Warn("unexpected request format")
@@ -654,7 +662,7 @@ func (igs *indigoGRPCService) Bulk(ctx context.Context, req *proto.BulkRequest) 
 		var method string
 		if _, ok := request["method"]; !ok {
 			log.WithFields(log.Fields{
-				"index":   req.IndexName,
+				"index":   req.Index,
 				"num":     num,
 				"request": request,
 			}).Warn("method does not exist in request")
@@ -666,7 +674,7 @@ func (igs *indigoGRPCService) Bulk(ctx context.Context, req *proto.BulkRequest) 
 		var id string
 		if _, ok := request["id"]; !ok {
 			log.WithFields(log.Fields{
-				"index":   req.IndexName,
+				"index":   req.Index,
 				"num":     num,
 				"request": request,
 			}).Warn("id does not exist in request")
@@ -680,7 +688,7 @@ func (igs *indigoGRPCService) Bulk(ctx context.Context, req *proto.BulkRequest) 
 			var fields interface{}
 			if _, ok := request["fields"]; !ok {
 				log.WithFields(log.Fields{
-					"index":   req.IndexName,
+					"index":   req.Index,
 					"num":     num,
 					"request": request,
 				}).Warn("fields does not exist in request")
@@ -692,7 +700,7 @@ func (igs *indigoGRPCService) Bulk(ctx context.Context, req *proto.BulkRequest) 
 			err := batch.Index(id, fields)
 			if err == nil {
 				log.WithFields(log.Fields{
-					"index":   req.IndexName,
+					"index":   req.Index,
 					"num":     num,
 					"request": request,
 				}).Info("succeeded in putting document")
@@ -701,7 +709,7 @@ func (igs *indigoGRPCService) Bulk(ctx context.Context, req *proto.BulkRequest) 
 				batchCount++
 			} else {
 				log.WithFields(log.Fields{
-					"index":   req.IndexName,
+					"index":   req.Index,
 					"num":     num,
 					"request": request,
 					"err":     err,
@@ -713,7 +721,7 @@ func (igs *indigoGRPCService) Bulk(ctx context.Context, req *proto.BulkRequest) 
 			batch.Delete(id)
 
 			log.WithFields(log.Fields{
-				"index":   req.IndexName,
+				"index":   req.Index,
 				"num":     num,
 				"request": request,
 			}).Info("succeeded in deleting document")
@@ -722,7 +730,7 @@ func (igs *indigoGRPCService) Bulk(ctx context.Context, req *proto.BulkRequest) 
 			batchCount++
 		default:
 			log.WithFields(log.Fields{
-				"index":   req.IndexName,
+				"index":   req.Index,
 				"num":     num,
 				"request": request,
 			}).Warn("unexpected method")
@@ -734,12 +742,12 @@ func (igs *indigoGRPCService) Bulk(ctx context.Context, req *proto.BulkRequest) 
 			err := index.Batch(batch)
 			if err == nil {
 				log.WithFields(log.Fields{
-					"index": req.IndexName,
+					"index": req.Index,
 					"count": batch.Size(),
 				}).Info("succeeded in indexing documents in bulk")
 			} else {
 				log.WithFields(log.Fields{
-					"index": req.IndexName,
+					"index": req.Index,
 					"count": batch.Size(),
 				}).Warn("failed to index  documents in bulk")
 			}
@@ -752,12 +760,12 @@ func (igs *indigoGRPCService) Bulk(ctx context.Context, req *proto.BulkRequest) 
 		err := index.Batch(batch)
 		if err == nil {
 			log.WithFields(log.Fields{
-				"index": req.IndexName,
+				"index": req.Index,
 				"count": batch.Size(),
 			}).Info("succeeded in indexing documents in bulk")
 		} else {
 			log.WithFields(log.Fields{
-				"index": req.IndexName,
+				"index": req.Index,
 				"count": batch.Size(),
 			}).Warn("failed to index  documents in bulk")
 		}
@@ -770,13 +778,13 @@ func (igs *indigoGRPCService) Bulk(ctx context.Context, req *proto.BulkRequest) 
 	}, nil
 }
 
-func (igs *indigoGRPCService) Search(ctx context.Context, req *proto.SearchRequest) (*proto.SearchResponse, error) {
-	index, open := igs.indices[req.IndexName]
+func (igs *IndigoGRPCService) Search(ctx context.Context, req *proto.SearchRequest) (*proto.SearchResponse, error) {
+	index, open := igs.indices[req.Index]
 	if !open {
 		err := errors.New("index is not open")
 
 		log.WithFields(log.Fields{
-			"index": req.IndexName,
+			"index": req.Index,
 			"err":   err,
 		}).Error("failed to search documents")
 
@@ -788,7 +796,7 @@ func (igs *indigoGRPCService) Search(ctx context.Context, req *proto.SearchReque
 		err := json.Unmarshal(req.SearchRequest, searchRequest)
 		if err != nil {
 			log.WithFields(log.Fields{
-				"index": req.IndexName,
+				"index": req.Index,
 				"err":   err,
 			}).Error("failed to search documents")
 
@@ -799,11 +807,11 @@ func (igs *indigoGRPCService) Search(ctx context.Context, req *proto.SearchReque
 	searchResult, err := index.Search(searchRequest)
 	if err == nil {
 		log.WithFields(log.Fields{
-			"index": req.IndexName,
+			"index": req.Index,
 		}).Info("succeeded in searching documents")
 	} else {
 		log.WithFields(log.Fields{
-			"index": req.IndexName,
+			"index": req.Index,
 			"err":   err,
 		}).Error("failed to search documents")
 
@@ -813,11 +821,11 @@ func (igs *indigoGRPCService) Search(ctx context.Context, req *proto.SearchReque
 	bytesSearchResult, err := json.Marshal(&searchResult)
 	if err == nil {
 		log.WithFields(log.Fields{
-			"index": req.IndexName,
+			"index": req.Index,
 		}).Debug("succeeded in creating search result")
 	} else {
 		log.WithFields(log.Fields{
-			"index": req.IndexName,
+			"index": req.Index,
 			"err":   err,
 		}).Error("failed to create search result")
 	}

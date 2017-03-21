@@ -4,11 +4,12 @@ package proto;
 
 service Indigo {
     rpc CreateIndex(CreateIndexRequest) returns (CreateIndexResponse) {}
-    rpc OpenIndex(OpenIndexRequest) returns (OpenIndexResponse) {}
-    rpc GetIndex(GetIndexRequest) returns (GetIndexResponse) {}
-    rpc CloseIndex(CloseIndexRequest) returns (CloseIndexResponse) {}
     rpc DeleteIndex(DeleteIndexRequest) returns (DeleteIndexResponse) {}
+    rpc OpenIndex(OpenIndexRequest) returns (OpenIndexResponse) {}
+    rpc CloseIndex(CloseIndexRequest) returns (CloseIndexResponse) {}
     rpc ListIndex(ListIndexRequest) returns (ListIndexResponse) {}
+    rpc GetIndex(GetIndexRequest) returns (GetIndexResponse) {}
+//    rpc CreateAlias(CreateAliasRequest) returns (CreateAliasResponse) {}
     rpc PutDocument(PutDocumentRequest) returns (PutDocumentResponse) {}
     rpc GetDocument(GetDocumentRequest) returns (GetDocumentResponse) {}
     rpc DeleteDocument(DeleteDocumentRequest) returns (DeleteDocumentResponse) {}
@@ -17,7 +18,7 @@ service Indigo {
 }
 
 message CreateIndexRequest {
-    string index_name = 1;
+    string index = 1;
     bytes index_mapping = 2;
     string index_type = 3;
     string kvstore = 4;
@@ -25,44 +26,34 @@ message CreateIndexRequest {
 }
 
 message CreateIndexResponse {
-    string index_name = 1;
+    string index = 1;
     string index_dir = 2;
 }
 
+message DeleteIndexRequest {
+    string index = 1;
+}
+
+message DeleteIndexResponse {
+    string index = 1;
+}
+
 message OpenIndexRequest {
-    string index_name = 1;
+    string index = 1;
     bytes runtime_config = 2;
 }
 
 message OpenIndexResponse {
-    string index_name = 1;
+    string index = 1;
     string index_dir = 2;
 }
 
-message GetIndexRequest {
-    string index_name = 1;
-}
-
-message GetIndexResponse {
-    uint64 document_count = 1;
-    bytes index_stats = 2;
-    bytes index_mapping = 3;
-}
-
 message CloseIndexRequest {
-    string index_name = 1;
+    string index = 1;
 }
 
 message CloseIndexResponse {
-    string index_name = 1;
-}
-
-message DeleteIndexRequest {
-    string index_name = 1;
-}
-
-message DeleteIndexResponse {
-    string index_name = 1;
+    string index = 1;
 }
 
 message ListIndexRequest {
@@ -72,8 +63,28 @@ message ListIndexResponse {
     repeated string indices = 1;
 }
 
+message GetIndexRequest {
+    string index = 1;
+}
+
+message GetIndexResponse {
+    uint64 document_count = 1;
+    bytes index_stats = 2;
+    bytes index_mapping = 3;
+}
+
+//message CreateAliasRequest {
+//    string alias = 1;
+//    repeated string indices = 2;
+//}
+//
+//message CreateAliasResponse {
+//    string alias = 1;
+//    repeated string indices = 2;
+//}
+
 message PutDocumentRequest {
-    string index_name = 1;
+    string index = 1;
     string id = 2;
     bytes fields = 3;
 }
@@ -83,7 +94,7 @@ message PutDocumentResponse {
 }
 
 message GetDocumentRequest {
-    string index_name = 1;
+    string index = 1;
     string id = 2;
 }
 
@@ -93,7 +104,7 @@ message GetDocumentResponse {
 }
 
 message DeleteDocumentRequest {
-    string index_name = 1;
+    string index = 1;
     string id = 2;
 }
 
@@ -102,7 +113,7 @@ message DeleteDocumentResponse {
 }
 
 message BulkRequest {
-    string index_name = 1;
+    string index = 1;
     bytes bulk_request = 2;
     int32 batch_size = 3;
 }
@@ -114,7 +125,7 @@ message BulkResponse {
 }
 
 message SearchRequest {
-    string index_name = 1;
+    string index = 1;
     bytes search_request = 2;
 }
 

@@ -16,67 +16,69 @@ var CreateIndexCmd = &cobra.Command{
 	Use:   "index",
 	Short: "creates the index to the Indigo gRPC Server",
 	Long:  `The create index command creates the index to the Indigo gRPC Server.`,
-	RunE: func(cmd *cobra.Command, args []string) error {
-		if index == "" {
-			return fmt.Errorf("required flag: --%s", cmd.Flag("index").Name)
-		}
+	RunE:  runECreateIndexCmd,
+}
 
-		var im []byte = nil
-		var kvc []byte = nil
+func runECreateIndexCmd(cmd *cobra.Command, args []string) error {
+	if index == "" {
+		return fmt.Errorf("required flag: --%s", cmd.Flag("index").Name)
+	}
 
-		if indexMapping != "" {
-			file, err := os.Open(indexMapping)
-			if err != nil {
-				return err
-			}
-			defer file.Close()
+	var im []byte = nil
+	var kvc []byte = nil
 
-			im, err = ioutil.ReadAll(file)
-			if err != nil {
-				return err
-			}
-		}
-
-		if kvConfig != "" {
-			file, err := os.Open(kvConfig)
-			if err != nil {
-				return err
-			}
-			defer file.Close()
-
-			kvc, err = ioutil.ReadAll(file)
-			if err != nil {
-				return err
-			}
-		}
-
-		conn, err := grpc.Dial(gRPCServer, grpc.WithInsecure())
+	if indexMapping != "" {
+		file, err := os.Open(indexMapping)
 		if err != nil {
 			return err
 		}
-		defer conn.Close()
+		defer file.Close()
 
-		client := proto.NewIndigoClient(conn)
-		resp, err := client.CreateIndex(context.Background(), &proto.CreateIndexRequest{IndexName: index, IndexMapping: im, IndexType: indexType, Kvstore: kvStore, Kvconfig: kvc})
+		im, err = ioutil.ReadAll(file)
 		if err != nil {
 			return err
 		}
+	}
 
-		switch outputFormat {
-		case "text":
-			fmt.Printf("%s\n", resp.String())
-		case "json":
-			output, err := json.MarshalIndent(resp, "", "  ")
-			if err != nil {
-				return err
-			}
-			fmt.Printf("%s\n", output)
-		default:
-			fmt.Printf("%s\n", resp.String())
+	if kvConfig != "" {
+		file, err := os.Open(kvConfig)
+		if err != nil {
+			return err
 		}
+		defer file.Close()
 
-		return nil
-	},
+		kvc, err = ioutil.ReadAll(file)
+		if err != nil {
+			return err
+		}
+	}
+
+	conn, err := grpc.Dial(gRPCServer, grpc.WithInsecure())
+	if err != nil {
+		return err
+	}
+	defer conn.Close()
+
+	client := proto.NewIndigoClient(conn)
+	resp, err := client.CreateIndex(context.Background(), &proto.CreateIndexRequest{Index: index, IndexMapping: im, IndexType: indexType, Kvstore: kvStore, Kvconfig: kvc})
+	if err != nil {
+		return err
+	}
+
+	switch outputFormat {
+	case "text":
+		fmt.Printf("%s\n", resp.String())
+	case "json":
+		output, err := json.MarshalIndent(resp, "", "  ")
+		if err != nil {
+			return err
+		}
+		fmt.Printf("%s\n", output)
+	default:
+		fmt.Printf("%s\n", resp.String())
+	}
+
+	return nil
 }
 
 func init() {

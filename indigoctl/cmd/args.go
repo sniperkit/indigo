@@ -10,20 +10,10 @@ var (
 
 	gRPCServer string = constant.DefaultGRPCServer
 
-	//configFile        string = constant.DefaultConfig
-	//logOutputFile     string = constant.DefaultLogOutput
-	//logLevel          string = constant.DefaultLogLevel
-	//gRPCPort          int    = constant.DefaultGRPCPort
-	//dataDir           string = constant.DefaultDataDir
-	//openExistingIndex bool   = constant.DefaultOpenExistingIndex
-
 	index string = constant.DefaultIndex
 
 	bulkRequest string = constant.DefaultBulkRequest
 	batchSize   int32  = constant.DefaultBatchSize
-
-	//restPort   int    = constant.DefaultRESTPort
-	//baseURI    string = constant.DefaultBaseURI
 
 	indexMapping  string = constant.DefaultIndexMapping
 	indexType     string = constant.DefaultIndexType

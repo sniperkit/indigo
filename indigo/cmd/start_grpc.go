@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"github.com/mosuka/indigo/constant"
-	"github.com/mosuka/indigo/grpc"
+	"github.com/mosuka/indigo/indigo/grpc"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -15,30 +15,32 @@ var StartGRPCCmd = &cobra.Command{
 	Use:   "grpc",
 	Short: "start Indigo gRPC Server",
 	Long:  `The start grpc command starts the Indigo gRPC Server.`,
-	RunE: func(cmd *cobra.Command, args []string) error {
-		server := grpc.NewIndigoGRPCServer(viper.GetInt("grpc_port"), viper.GetString("data_dir"))
-		server.Start(viper.GetBool("open_existing_index"))
+	RunE:  runEStartGRPCCmd,
+}
 
-		signalChan := make(chan os.Signal, 1)
-		signal.Notify(signalChan,
-			syscall.SIGHUP,
-			syscall.SIGINT,
-			syscall.SIGTERM,
-			syscall.SIGQUIT)
-		for {
-			sig := <-signalChan
+func runEStartGRPCCmd(cmd *cobra.Command, args []string) error {
+	server := grpc.NewIndigoGRPCServer(viper.GetInt("grpc_port"), viper.GetString("data_dir"))
+	server.Start(viper.GetBool("open_existing_index"))
 
-			log.WithFields(log.Fields{
-				"signal": sig,
-			}).Info("trap signal")
+	signalChan := make(chan os.Signal, 1)
+	signal.Notify(signalChan,
+		syscall.SIGHUP,
+		syscall.SIGINT,
+		syscall.SIGTERM,
+		syscall.SIGQUIT)
+	for {
+		sig := <-signalChan
 
-			server.Stop()
+		log.WithFields(log.Fields{
+			"signal": sig,
+		}).Info("trap signal")
 
-			return nil
-		}
+		server.Stop()
 
 		return nil
-	},
+	}
+
+	return nil
 }
 
 func init() {

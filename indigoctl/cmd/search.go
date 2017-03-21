@@ -16,66 +16,68 @@ var SearchCmd = &cobra.Command{
 	Use:   "search",
 	Short: "searches the documents from the Indigo gRPC Server",
 	Long:  `The search command searches the documents from the Indigo gRPC Server.`,
-	RunE: func(cmd *cobra.Command, args []string) error {
-		if index == "" {
-			return fmt.Errorf("required flag: --%s", cmd.Flag("index").Name)
-		}
+	RunE:  runESearchCmd,
+}
 
-		if searchRequest == "" {
-			return fmt.Errorf("required flag: --%s", cmd.Flag("search-request").Name)
-		}
+func runESearchCmd(cmd *cobra.Command, args []string) error {
+	if index == "" {
+		return fmt.Errorf("required flag: --%s", cmd.Flag("index").Name)
+	}
 
-		sr := make([]byte, 0)
-		file, err := os.Open(searchRequest)
+	if searchRequest == "" {
+		return fmt.Errorf("required flag: --%s", cmd.Flag("search-request").Name)
+	}
+
+	sr := make([]byte, 0)
+	file, err := os.Open(searchRequest)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	sr, err = ioutil.ReadAll(file)
+	if err != nil {
+		return err
+	}
+
+	conn, err := grpc.Dial(gRPCServer, grpc.WithInsecure())
+	if err != nil {
+		return err
+	}
+	defer conn.Close()
+
+	client := proto.NewIndigoClient(conn)
+
+	resp, err := client.Search(context.Background(), &proto.SearchRequest{Index: index, SearchRequest: sr})
+	if err != nil {
+		return err
+	}
+
+	searchResult := make(map[string]interface{})
+	if err := json.Unmarshal(resp.SearchResult, &searchResult); err != nil {
+		return err
+	}
+
+	r := struct {
+		SearchResult map[string]interface{} `json:"search_result"`
+	}{
+		SearchResult: searchResult,
+	}
+
+	switch outputFormat {
+	case "text":
+		fmt.Printf("%s\n", resp.String())
+	case "json":
+		output, err := json.MarshalIndent(r, "", "  ")
 		if err != nil {
 			return err
 		}
-		defer file.Close()
+		fmt.Printf("%s\n", output)
+	default:
+		fmt.Printf("%s\n", resp.String())
+	}
 
-		sr, err = ioutil.ReadAll(file)
-		if err != nil {
-			return err
-		}
-
-		conn, err := grpc.Dial(gRPCServer, grpc.WithInsecure())
-		if err != nil {
-			return err
-		}
-		defer conn.Close()
-
-		client := proto.NewIndigoClient(conn)
-
-		resp, err := client.Search(context.Background(), &proto.SearchRequest{IndexName: index, SearchRequest: sr})
-		if err != nil {
-			return err
-		}
-
-		searchResult := make(map[string]interface{})
-		if err := json.Unmarshal(resp.SearchResult, &searchResult); err != nil {
-			return err
-		}
-
-		r := struct {
-			SearchResult map[string]interface{} `json:"search_result"`
-		}{
-			SearchResult: searchResult,
-		}
-
-		switch outputFormat {
-		case "text":
-			fmt.Printf("%s\n", resp.String())
-		case "json":
-			output, err := json.MarshalIndent(r, "", "  ")
-			if err != nil {
-				return err
-			}
-			fmt.Printf("%s\n", output)
-		default:
-			fmt.Printf("%s\n", resp.String())
-		}
-
-		return nil
-	},
+	return nil
 }
 
 func init() {

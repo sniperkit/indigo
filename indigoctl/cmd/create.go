@@ -9,18 +9,20 @@ var CreateCmd = &cobra.Command{
 	Use:   "create",
 	Short: "creates the object to the Indigo gRPC Server",
 	Long:  `The create command creates the object to the Indigo gRPC Server.`,
-	RunE: func(cmd *cobra.Command, args []string) error {
-		if len(args) < 1 {
-			return cmd.Help()
-		}
+	RunE:  runECreateCmd,
+}
 
-		_, _, err := cmd.Find(args)
-		if err != nil {
-			return err
-		}
+func runECreateCmd(cmd *cobra.Command, args []string) error {
+	if len(args) < 1 {
+		return cmd.Help()
+	}
 
-		return nil
-	},
+	_, _, err := cmd.Find(args)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func init() {

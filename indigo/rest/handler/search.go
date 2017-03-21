@@ -28,7 +28,7 @@ func (h *SearchHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 
 	vars := mux.Vars(req)
 
-	indexName := vars["indexName"]
+	index := vars["index"]
 
 	searchRequest, err := ioutil.ReadAll(req.Body)
 	if err != nil {
@@ -40,7 +40,7 @@ func (h *SearchHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	resp, err := h.client.Search(context.Background(), &proto.SearchRequest{IndexName: indexName, SearchRequest: searchRequest})
+	resp, err := h.client.Search(context.Background(), &proto.SearchRequest{Index: index, SearchRequest: searchRequest})
 	if err != nil {
 		log.WithFields(log.Fields{
 			"req": req,

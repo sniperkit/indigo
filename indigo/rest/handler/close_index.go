@@ -10,30 +10,30 @@ import (
 	"net/http"
 )
 
-type DeleteIndexHandler struct {
+type CloseIndexHandler struct {
 	client proto.IndigoClient
 }
 
-func NewDeleteIndexHandler(client proto.IndigoClient) *DeleteIndexHandler {
-	return &DeleteIndexHandler{
+func NewCloseIndexHandler(client proto.IndigoClient) *CloseIndexHandler {
+	return &CloseIndexHandler{
 		client: client,
 	}
 }
 
-func (h *DeleteIndexHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
+func (h *CloseIndexHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	log.WithFields(log.Fields{
 		"req": req,
 	}).Info("")
 
 	vars := mux.Vars(req)
 
-	indexName := vars["indexName"]
+	index := vars["index"]
 
-	resp, err := h.client.DeleteIndex(context.Background(), &proto.DeleteIndexRequest{IndexName: indexName})
+	resp, err := h.client.CloseIndex(context.Background(), &proto.CloseIndexRequest{Index: index})
 	if err != nil {
 		log.WithFields(log.Fields{
 			"req": req,
-		}).Error("failed to delete index")
+		}).Error("failed to close index")
 
 		Error(w, err.Error(), http.StatusServiceUnavailable)
 		return

@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"github.com/mosuka/indigo/constant"
-	"github.com/mosuka/indigo/rest"
+	"github.com/mosuka/indigo/indigo/rest"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -15,30 +15,32 @@ var StartRESTCmd = &cobra.Command{
 	Use:   "rest",
 	Short: "start Indigo REST Server",
 	Long:  `The start rest command starts the Indigo REST Server.`,
-	RunE: func(cmd *cobra.Command, args []string) error {
-		server := rest.NewIndigoRESTServer(viper.GetInt("rest_port"), viper.GetString("base_uri"), viper.GetString("grpc_server"))
-		server.Start()
+	RunE:  runEStartRESTCmd,
+}
 
-		signalChan := make(chan os.Signal, 1)
-		signal.Notify(signalChan,
-			syscall.SIGHUP,
-			syscall.SIGINT,
-			syscall.SIGTERM,
-			syscall.SIGQUIT)
-		for {
-			sig := <-signalChan
+func runEStartRESTCmd(cmd *cobra.Command, args []string) error {
+	server := rest.NewIndigoRESTServer(viper.GetInt("rest_port"), viper.GetString("base_uri"), viper.GetString("grpc_server"))
+	server.Start()
 
-			log.WithFields(log.Fields{
-				"signal": sig,
-			}).Info("trap signal")
+	signalChan := make(chan os.Signal, 1)
+	signal.Notify(signalChan,
+		syscall.SIGHUP,
+		syscall.SIGINT,
+		syscall.SIGTERM,
+		syscall.SIGQUIT)
+	for {
+		sig := <-signalChan
 
-			server.Stop()
+		log.WithFields(log.Fields{
+			"signal": sig,
+		}).Info("trap signal")
 
-			return nil
-		}
+		server.Stop()
 
 		return nil
-	},
+	}
+
+	return nil
 }
 
 func init() {

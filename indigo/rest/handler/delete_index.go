@@ -7,45 +7,33 @@ import (
 	"github.com/mosuka/indigo/proto"
 	log "github.com/sirupsen/logrus"
 	"golang.org/x/net/context"
-	"io/ioutil"
 	"net/http"
 )
 
-type PutDocumentHandler struct {
+type DeleteIndexHandler struct {
 	client proto.IndigoClient
 }
 
-func NewPutDocumentHandler(client proto.IndigoClient) *PutDocumentHandler {
-	return &PutDocumentHandler{
+func NewDeleteIndexHandler(client proto.IndigoClient) *DeleteIndexHandler {
+	return &DeleteIndexHandler{
 		client: client,
 	}
 }
 
-func (h *PutDocumentHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
+func (h *DeleteIndexHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	log.WithFields(log.Fields{
 		"req": req,
 	}).Info("")
 
 	vars := mux.Vars(req)
 
-	indexName := vars["indexName"]
-	id := vars["id"]
+	index := vars["index"]
 
-	fields, err := ioutil.ReadAll(req.Body)
+	resp, err := h.client.DeleteIndex(context.Background(), &proto.DeleteIndexRequest{Index: index})
 	if err != nil {
 		log.WithFields(log.Fields{
 			"req": req,
-		}).Error("failed to create document fields")
-
-		Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-
-	resp, err := h.client.PutDocument(context.Background(), &proto.PutDocumentRequest{IndexName: indexName, Id: id, Fields: fields})
-	if err != nil {
-		log.WithFields(log.Fields{
-			"req": req,
-		}).Error("failed to put document")
+		}).Error("failed to delete index")
 
 		Error(w, err.Error(), http.StatusServiceUnavailable)
 		return
@@ -54,7 +42,7 @@ func (h *PutDocumentHandler) ServeHTTP(w http.ResponseWriter, req *http.Request)
 	output, err := json.MarshalIndent(resp, "", "  ")
 	if err != nil {
 		log.WithFields(log.Fields{
-			"req": req,
+			"err": err,
 		}).Error("failed to create response")
 
 		Error(w, err.Error(), http.StatusServiceUnavailable)

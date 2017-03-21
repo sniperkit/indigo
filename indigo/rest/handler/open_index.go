@@ -28,7 +28,7 @@ func (h *OpenIndexHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 
 	vars := mux.Vars(req)
 
-	indexName := vars["indexName"]
+	index := vars["index"]
 
 	runtimeConfig, err := ioutil.ReadAll(req.Body)
 	if err != nil {
@@ -40,7 +40,7 @@ func (h *OpenIndexHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	resp, err := h.client.OpenIndex(context.Background(), &proto.OpenIndexRequest{IndexName: indexName, RuntimeConfig: runtimeConfig})
+	resp, err := h.client.OpenIndex(context.Background(), &proto.OpenIndexRequest{Index: index, RuntimeConfig: runtimeConfig})
 	if err != nil {
 		log.WithFields(log.Fields{
 			"err": err,

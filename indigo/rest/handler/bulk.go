@@ -10,52 +10,61 @@ import (
 	"golang.org/x/net/context"
 	"io/ioutil"
 	"net/http"
+	"strconv"
 )
 
-type CreateIndexHandler struct {
+type BulkHandler struct {
 	client proto.IndigoClient
 }
 
-func NewCreateIndexHandler(client proto.IndigoClient) *CreateIndexHandler {
-	return &CreateIndexHandler{
+func NewBulkHandler(client proto.IndigoClient) *BulkHandler {
+	return &BulkHandler{
 		client: client,
 	}
 }
 
-func (h *CreateIndexHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
+func (h *BulkHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	log.WithFields(log.Fields{
 		"req": req,
 	}).Info("")
 
 	vars := mux.Vars(req)
 
-	indexName := vars["indexName"]
+	index := vars["index"]
 
-	indexMapping, err := ioutil.ReadAll(req.Body)
+	bulkRequest, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		log.WithFields(log.Fields{
 			"err": err,
-		}).Error("faild to create index mapping")
+		}).Error("faild to create bulk request")
 
 		Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	indexType := req.URL.Query().Get("indexType")
-	if indexType == "" {
-		indexType = constant.DefaultIndexType
+	batchSize := constant.DefaultBatchSize
+	bs, err := strconv.Atoi(req.URL.Query().Get("batchSize"))
+	if err == nil {
+		if bs > 0 {
+			batchSize = int32(bs)
+		} else {
+			log.WithFields(log.Fields{
+				"batchSize": bs,
+				"err":       err,
+			}).Warn("unexpected batch size")
+		}
+	} else {
+		log.WithFields(log.Fields{
+			"batchSize": bs,
+			"err":       err,
+		}).Warn("unexpected batch size")
 	}
 
-	indexStore := req.URL.Query().Get("indexStore")
-	if indexStore == "" {
-		indexStore = constant.DefaultKVStore
-	}
-
-	resp, err := h.client.CreateIndex(context.Background(), &proto.CreateIndexRequest{IndexName: indexName, IndexMapping: indexMapping, IndexType: indexType, Kvstore: indexStore, Kvconfig: nil})
+	resp, err := h.client.Bulk(context.Background(), &proto.BulkRequest{Index: index, BulkRequest: bulkRequest, BatchSize: batchSize})
 	if err != nil {
 		log.WithFields(log.Fields{
-			"req": req,
-		}).Error("failed to create index")
+			"err": err,
+		}).Error("failed to index documents in bulk")
 
 		Error(w, err.Error(), http.StatusServiceUnavailable)
 		return
