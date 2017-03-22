@@ -3,11 +3,11 @@ package handler
 import (
 	"bytes"
 	"encoding/json"
+	log "github.com/Sirupsen/logrus"
 	"github.com/blevesearch/bleve"
 	"github.com/blevesearch/bleve/mapping"
 	"github.com/gorilla/mux"
 	"github.com/mosuka/indigo/proto"
-	log "github.com/sirupsen/logrus"
 	"golang.org/x/net/context"
 	"net/http"
 )

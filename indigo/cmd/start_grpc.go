@@ -3,7 +3,7 @@ package cmd
 import (
 	"github.com/mosuka/indigo/constant"
 	"github.com/mosuka/indigo/indigo/grpc"
-	log "github.com/sirupsen/logrus"
+	log "github.com/Sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"os"

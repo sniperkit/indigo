@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/mosuka/indigo/proto"
 	"github.com/mosuka/indigo/service"
-	log "github.com/sirupsen/logrus"
+	log "github.com/Sirupsen/logrus"
 	"google.golang.org/grpc"
 	"net"
 )

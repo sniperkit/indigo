@@ -3,9 +3,9 @@ package handler
 import (
 	"bytes"
 	"encoding/json"
+	log "github.com/Sirupsen/logrus"
 	"github.com/gorilla/mux"
 	"github.com/mosuka/indigo/proto"
-	log "github.com/sirupsen/logrus"
 	"golang.org/x/net/context"
 	"io/ioutil"
 	"net/http"
