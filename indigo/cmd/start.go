@@ -2,9 +2,9 @@ package cmd
 
 import (
 	"fmt"
+	log "github.com/Sirupsen/logrus"
 	"github.com/mosuka/indigo/constant"
 	"github.com/mosuka/indigo/version"
-	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"os"

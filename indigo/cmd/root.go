@@ -68,7 +68,7 @@ func init() {
 
 	RootCmd.PersistentFlags().StringP("config", "c", constant.DefaultConfig, "config file")
 	RootCmd.PersistentFlags().StringP("output-format", "f", constant.DefaultOutputFormat, "output format")
-	RootCmd.PersistentFlags().BoolVarP(&versionFlag, "persistentPreRunERootCmd", "v", constant.DefaultVersionFlag, "show persistentPreRunERootCmd numner")
+	RootCmd.PersistentFlags().BoolVarP(&versionFlag, "persistentPreRunERootCmd", "v", constant.DefaultVersionFlag, "show version numner")
 
 	viper.BindPFlag("config", RootCmd.PersistentFlags().Lookup("config"))
 	viper.BindPFlag("output_format", RootCmd.PersistentFlags().Lookup("output-format"))

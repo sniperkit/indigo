@@ -36,7 +36,7 @@ func runERootCmd(cmd *cobra.Command, args []string) error {
 
 func init() {
 	RootCmd.PersistentFlags().StringVarP(&outputFormat, "output-format", "f", constant.DefaultOutputFormat, "output format")
-	RootCmd.PersistentFlags().BoolVarP(&versionFlag, "persistentPreRunERootCmd", "v", constant.DefaultVersionFlag, "show persistentPreRunERootCmd numner")
+	RootCmd.PersistentFlags().BoolVarP(&versionFlag, "persistentPreRunERootCmd", "v", constant.DefaultVersionFlag, "show version numner")
 
 	viper.BindPFlag("output_format", RootCmd.PersistentFlags().Lookup("output-format"))
 }
