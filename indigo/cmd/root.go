@@ -11,8 +11,8 @@ import (
 
 var RootCmd = &cobra.Command{
 	Use:               "indigo",
-	Short:             "Indigo Command Line Interface",
-	Long:              `The Indigo Command Line Interface controlls the Indigo Server.`,
+	Short:             "CLI for Indigo Server",
+	Long:              `The Command Line Interface for the Indigo gRPC or REST Server.`,
 	PersistentPreRunE: persistentPreRunERootCmd,
 	RunE:              runERootCmd,
 }
@@ -35,18 +35,17 @@ func runERootCmd(cmd *cobra.Command, args []string) error {
 }
 
 func LoadConfig() {
-	viper.SetDefault("output_format", constant.DefaultOutputFormat)
+	viper.SetDefault("log_output_format", constant.DefaultLogOutputFormat)
 	viper.SetDefault("log_output", constant.DefaultLogOutput)
 	viper.SetDefault("log_level", constant.DefaultLogLevel)
-	viper.SetDefault("grpc_port", constant.DefaultGRPCPort)
-	viper.SetDefault("data_dir", constant.DefaultDataDir)
-	viper.SetDefault("open_existing_index", constant.DefaultOpenExistingIndex)
-	viper.SetDefault("batch_size", constant.DefaultBatchSize)
-	viper.SetDefault("index", constant.DefaultIndex)
-	viper.SetDefault("rest_port", constant.DefaultRESTPort)
-	viper.SetDefault("grpc_server", constant.DefaultGRPCServer)
-	viper.SetDefault("base_uri", constant.DefaultBaseURI)
-	viper.SetDefault("index", constant.DefaultIndex)
+
+	viper.SetDefault("grpc.port", constant.DefaultGRPCPort)
+	viper.SetDefault("grpc.data_dir", constant.DefaultDataDir)
+	viper.SetDefault("grpc.open_existing_index", constant.DefaultOpenExistingIndex)
+
+	viper.SetDefault("rest.port", constant.DefaultRESTPort)
+	viper.SetDefault("rest.base_uri", constant.DefaultBaseURI)
+	viper.SetDefault("rest.grpc_server", constant.DefaultGRPCServer)
 
 	if viper.GetString("config") != "" {
 		viper.SetConfigFile(viper.GetString("config"))
@@ -66,10 +65,8 @@ func LoadConfig() {
 func init() {
 	cobra.OnInitialize(LoadConfig)
 
-	RootCmd.PersistentFlags().StringP("config", "c", constant.DefaultConfig, "config file")
-	RootCmd.PersistentFlags().StringP("output-format", "f", constant.DefaultOutputFormat, "output format")
-	RootCmd.PersistentFlags().BoolVarP(&versionFlag, "persistentPreRunERootCmd", "v", constant.DefaultVersionFlag, "show version numner")
+	RootCmd.PersistentFlags().StringP("config", "c", constant.DefaultConfig, "configuration file of Indigo Server")
+	RootCmd.PersistentFlags().BoolVarP(&versionFlag, "version", "v", constant.DefaultVersionFlag, "show version numner")
 
 	viper.BindPFlag("config", RootCmd.PersistentFlags().Lookup("config"))
-	viper.BindPFlag("output_format", RootCmd.PersistentFlags().Lookup("output-format"))
 }

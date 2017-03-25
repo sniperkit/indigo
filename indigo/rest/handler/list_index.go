@@ -3,8 +3,8 @@ package handler
 import (
 	"bytes"
 	"encoding/json"
-	log "github.com/Sirupsen/logrus"
 	"github.com/mosuka/indigo/proto"
+	log "github.com/sirupsen/logrus"
 	"golang.org/x/net/context"
 	"net/http"
 )

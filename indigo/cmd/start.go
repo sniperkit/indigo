@@ -2,9 +2,9 @@ package cmd
 
 import (
 	"fmt"
-	log "github.com/Sirupsen/logrus"
 	"github.com/mosuka/indigo/constant"
 	"github.com/mosuka/indigo/version"
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"os"
@@ -28,7 +28,7 @@ func persistentPreRunEStartCmd(cmd *cobra.Command, args []string) error {
 		os.Exit(0)
 	}
 
-	switch viper.GetString("output_format") {
+	switch viper.GetString("log_output_format") {
 	case "text":
 		log.SetFormatter(&log.TextFormatter{
 			ForceColors:      false,
@@ -128,9 +128,11 @@ func persistentPostRunEStartCmd(cmd *cobra.Command, args []string) error {
 }
 
 func init() {
-	StartCmd.PersistentFlags().StringP("log-output", "o", constant.DefaultLogOutput, "log output file")
-	StartCmd.PersistentFlags().StringP("log-level", "l", constant.DefaultLogLevel, "log level")
+	StartCmd.PersistentFlags().StringP("log-output-format", "f", constant.DefaultLogOutputFormat, "log output format of Indigo Server")
+	StartCmd.PersistentFlags().StringP("log-output", "o", constant.DefaultLogOutput, "log output destination of Indigo Server")
+	StartCmd.PersistentFlags().StringP("log-level", "l", constant.DefaultLogLevel, "log level of log output by Indigo Server")
 
+	viper.BindPFlag("log_output_format", StartCmd.PersistentFlags().Lookup("log-output-format"))
 	viper.BindPFlag("log_output", StartCmd.PersistentFlags().Lookup("log-output"))
 	viper.BindPFlag("log_level", StartCmd.PersistentFlags().Lookup("log-level"))
 

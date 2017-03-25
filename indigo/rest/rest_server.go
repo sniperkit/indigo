@@ -5,7 +5,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/mosuka/indigo/indigo/rest/handler"
 	"github.com/mosuka/indigo/proto"
-	log "github.com/Sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 	"net"
 	"net/http"

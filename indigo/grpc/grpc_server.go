@@ -2,9 +2,9 @@ package grpc
 
 import (
 	"fmt"
+	log "github.com/sirupsen/logrus"
 	"github.com/mosuka/indigo/proto"
 	"github.com/mosuka/indigo/service"
-	log "github.com/Sirupsen/logrus"
 	"google.golang.org/grpc"
 	"net"
 )
