@@ -81,7 +81,7 @@ func runESearchCmd(cmd *cobra.Command, args []string) error {
 }
 
 func init() {
-	SearchCmd.Flags().StringVarP(&gRPCServer, "grpc-server", "g", constant.DefaultGRPCServer, "Indigo gRPC Sever")
+	SearchCmd.Flags().StringVarP(&gRPCServer, "grpc-server", "g", constant.DefaultGRPCServer, "Indigo gRPC Server to connect to")
 	SearchCmd.Flags().StringVarP(&index, "index", "i", constant.DefaultIndex, "index name")
 	SearchCmd.Flags().StringVarP(&searchRequest, "search-request", "s", constant.DefaultSearchRequestFile, "search request file")
 

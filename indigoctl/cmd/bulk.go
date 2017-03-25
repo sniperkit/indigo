@@ -14,8 +14,8 @@ import (
 
 var BulkCmd = &cobra.Command{
 	Use:   "bulk",
-	Short: "indexes the documents in runEBulkCmd to the Indigo gRPC Server",
-	Long:  `The runEBulkCmd command indexes the documents in runEBulkCmd to the Indigo gRPC Server.`,
+	Short: "indexes the documents in bulk to the Indigo gRPC Server",
+	Long:  `The bulk command indexes the documents in bulk to the Indigo gRPC Server.`,
 	RunE:  runEBulkCmd,
 }
 
@@ -25,7 +25,7 @@ func runEBulkCmd(cmd *cobra.Command, args []string) error {
 	}
 
 	if bulkRequest == "" {
-		return fmt.Errorf("required flag: --%s", cmd.Flag("runEBulkCmd-request").Name)
+		return fmt.Errorf("required flag: --%s", cmd.Flag("bulk-request").Name)
 	}
 
 	br := make([]byte, 0)
@@ -69,10 +69,10 @@ func runEBulkCmd(cmd *cobra.Command, args []string) error {
 }
 
 func init() {
-	BulkCmd.Flags().StringVarP(&gRPCServer, "grpc-server", "g", constant.DefaultGRPCServer, "Indigo gRPC Sever")
+	BulkCmd.Flags().StringVarP(&gRPCServer, "grpc-server", "g", constant.DefaultGRPCServer, "Indigo gRPC Server to connect to")
 	BulkCmd.Flags().StringVarP(&index, "index", "i", constant.DefaultIndex, "index name")
-	BulkCmd.Flags().StringVarP(&bulkRequest, "runEBulkCmd-request", "b", constant.DefaultBulkRequest, "bulk request")
-	BulkCmd.Flags().Int32VarP(&batchSize, "batch-size", "s", constant.DefaultBatchSize, "batch size")
+	BulkCmd.Flags().StringVarP(&bulkRequest, "bulk-request", "b", constant.DefaultBulkRequest, "bulk request")
+	BulkCmd.Flags().Int32VarP(&batchSize, "batch-size", "s", constant.DefaultBatchSize, "batch size of bulk request")
 
 	RootCmd.AddCommand(BulkCmd)
 }

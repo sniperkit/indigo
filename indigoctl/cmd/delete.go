@@ -26,7 +26,7 @@ func runEDeleteCmd(cmd *cobra.Command, args []string) error {
 }
 
 func init() {
-	DeleteCmd.PersistentFlags().StringVarP(&gRPCServer, "grpc-server", "g", constant.DefaultGRPCServer, "Indigo gRPC Sever")
+	DeleteCmd.PersistentFlags().StringVarP(&gRPCServer, "grpc-server", "g", constant.DefaultGRPCServer, "Indigo gRPC Server to connect to")
 
 	RootCmd.AddCommand(DeleteCmd)
 }

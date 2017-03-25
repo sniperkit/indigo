@@ -18,6 +18,55 @@ The Indigo REST Server is a gateway, it provides a traditional JSON API ([HTTP/1
 
 For more detailed information, refer to the [Bleve document](http://www.blevesearch.com/docs/Home/).
 
+## Configuration file
+
+Indigo has a YAML format configuration file.
+
+```yaml
+log_output_format: text
+log_output: ""
+log_level: "info"
+
+grpc:
+  port: 1289
+  data_dir: "/var/indigo/data"
+  open_existing_index: true
+
+rest:
+  port: 2289
+  base_uri: "/api"
+  grpc_server: "localhost:1289"
+```
+
+| Name                     | Description                                                                                       |
+| ------------------------ | ------------------------------------------------------------------------------------------------- |
+| log_output_format        | The log output format of the Indigo gRPC or REST Server. Default is `text`                        |
+| log_output               | The log output destination of the Indigo gRPC or REST Server. Default is `stdout`                 |
+| log_level                | The log level of log output by Indigo gRPC or REST Server. Default is `info`                      |
+| grpc.port                | Port number to be used when the Indigo gRPC Server starts up. default is `1289`                   |
+| grpc.data_dir            | The path of the directory where Indigo gRPC Server stores the data. Default is `/var/indigo/data` |
+| grpc.open_existing_index | Flag to open indices when started to Indigo gRPC Server. Default is `false`                       |
+| rest.port                | Port number to be used when the Indigo REST Server starts up. default is `2289`                   |
+| rest.base_uri            | The base URI of API endpoint on the Indigo REST Server. Default is `/api`                         |
+| rest.grpc_server         | Indigo gRPC server to which Indigo REST Server connects. Default is `localhost:1289`              |
+
+
+## Environment variables
+
+The Indigo supports following environment variables.
+
+| Name                            | Description                                                                                       |
+| ------------------------------- | ------------------------------------------------------------------------------------------------- |
+| INDIGO_LOG_OUTPUT_FORMAT        | The log output format of the Indigo gRPC or REST Server. Default is `text`                        |
+| INDIGO_LOG_OUTPUT               | The log output destination of the Indigo gRPC or REST Server. Default is `stdout`                 |
+| INDIGO_LOG_LEVEL                | The log level of log output by Indigo gRPC or REST Server. Default is `info`                      |
+| INDIGO_GRPC_PORT                | Port number to be used when the Indigo gRPC Server starts up. default is `1289`                   |
+| INDIGO_GRPC_DATA_DIR            | The path of the directory where Indigo gRPC Server stores the data. Default is `/var/indigo/data` |
+| INDIGO_GRPC_OPEN_EXISTING_INDEX | Flag to open indices when started to Indigo gRPC Server. Default is `false`                       |
+| INDIGO_REST_PORT                | Port number to be used when the Indigo REST Server starts up. default is `2289`                   |
+| INDIGO_REST_BASE_URI            | The base URI of API endpoint on the Indigo REST Server. Default is `/api`                         |
+| INDIGO_REST_GRPC_SERVER         | Indigo gRPC server to which Indigo REST Server connects. Default is `localhost:1289`              |
+
 
 ## Start Indigo gRPC Server
 
@@ -409,7 +458,7 @@ The result of the above `put document` command is:
 The `get document` command retrieves a JSON formatted document on its id from a specified index. You can display a help message by specifying the `- h` or` --help` option.
 
 ```sh
-$ ./indigo get document -n example -i 1 -f json
+$ indigoctl get document -i example -d 1 -f json
 ```
 
 The result of the above `get document` command is:
@@ -434,7 +483,7 @@ The result of the above `get document` command is:
 The `delete document` command deletes a document on its id from a specified index. You can display a help message by specifying the `- h` or` --help` option.
 
 ```sh
-$ ./indigo delete document -n example -i 1 -f json
+$ indigoctl delete document -i example -d 1 -f json
 ```
 
 The result of the above `delete document` command is:
@@ -513,7 +562,7 @@ The result of the above `bulk` command is:
 ```
 
 
-## Search the documents frmo the Indigo gRPC Server
+## Search the documents from the Indigo gRPC Server
 
 The `search` command can be executed with a search request, which includes the Query, within its file. Here is an example:
 

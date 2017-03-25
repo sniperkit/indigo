@@ -3,7 +3,7 @@ package constant
 const (
 	DefaultVersionFlag       bool   = false
 	DefaultConfig            string = ""
-	DefaultOutputFormat      string = "text"
+	DefaultLogOutputFormat   string = "text"
 	DefaultLogOutput         string = ""
 	DefaultLogLevel          string = "info"
 	DefaultGRPCPort          int    = 1289
@@ -12,6 +12,8 @@ const (
 	DefaultRESTPort          int    = 2289
 	DefaultGRPCServer        string = "localhost:1289"
 	DefaultBaseURI           string = "/api"
+
+	DefaultOutputFormat      string = "json"
 	DefaultIndex             string = ""
 	DefaultIndexMapping      string = ""
 	DefaultIndexType         string = "upside_down"

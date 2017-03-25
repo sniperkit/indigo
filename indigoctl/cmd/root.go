@@ -5,14 +5,13 @@ import (
 	"github.com/mosuka/indigo/constant"
 	ver "github.com/mosuka/indigo/version"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 	"os"
 )
 
 var RootCmd = &cobra.Command{
 	Use:               "indigo",
-	Short:             "Indigo Command Line Interface",
-	Long:              `The Indigo Command Line Interface controlls the Indigo Server.`,
+	Short:             "CLI for controling Indigo Server",
+	Long:              `The Command Line Interface for controling the Indigo Server.`,
 	PersistentPreRunE: persistentPreRunERootCmd,
 	RunE:              runERootCmd,
 }
@@ -35,8 +34,6 @@ func runERootCmd(cmd *cobra.Command, args []string) error {
 }
 
 func init() {
-	RootCmd.PersistentFlags().StringVarP(&outputFormat, "output-format", "f", constant.DefaultOutputFormat, "output format")
-	RootCmd.PersistentFlags().BoolVarP(&versionFlag, "persistentPreRunERootCmd", "v", constant.DefaultVersionFlag, "show version numner")
-
-	viper.BindPFlag("output_format", RootCmd.PersistentFlags().Lookup("output-format"))
+	RootCmd.PersistentFlags().StringVarP(&outputFormat, "output-format", "f", constant.DefaultOutputFormat, "output format of the command execution result")
+	RootCmd.PersistentFlags().BoolVarP(&versionFlag, "verson", "v", constant.DefaultVersionFlag, "show version numner")
 }

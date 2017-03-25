@@ -2,12 +2,12 @@ package service
 
 import (
 	"encoding/json"
-	log "github.com/Sirupsen/logrus"
 	"github.com/blevesearch/bleve"
 	"github.com/blevesearch/bleve/document"
 	_ "github.com/mosuka/indigo/dependency"
 	"github.com/mosuka/indigo/proto"
 	"github.com/pkg/errors"
+	log "github.com/sirupsen/logrus"
 	"golang.org/x/net/context"
 	"io/ioutil"
 	"os"
