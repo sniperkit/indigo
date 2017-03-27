@@ -8,7 +8,7 @@ import (
 var PutCmd = &cobra.Command{
 	Use:   "put",
 	Short: "puts the object from the Indigo gRPC Server",
-	Long:  `The put command puts the object from the Indigo gRPC Server.`,
+	Long:  `The put command puts the object from tlhe Indigo gRPC Server.`,
 	RunE:  runEPutCmd,
 }
 
