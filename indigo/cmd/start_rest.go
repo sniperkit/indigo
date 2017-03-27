@@ -1,9 +1,9 @@
 package cmd
 
 import (
-	log "github.com/sirupsen/logrus"
 	"github.com/mosuka/indigo/constant"
 	"github.com/mosuka/indigo/indigo/rest"
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"os"
