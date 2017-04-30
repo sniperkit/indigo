@@ -73,9 +73,9 @@ func runEPutDocumentCmd(cmd *cobra.Command, args []string) error {
 }
 
 func init() {
-	PutDocumentCmd.Flags().StringVarP(&index, "index", "i", constant.DefaultIndex, "index name")
-	PutDocumentCmd.Flags().StringVarP(&docID, "doc-id", "d", constant.DefaultDocID, "document id")
-	PutDocumentCmd.Flags().StringVarP(&docFields, "doc-fields", "F", constant.DefaultDocFields, "document fields")
+	PutDocumentCmd.Flags().StringVar(&index, "index", constant.DefaultIndex, "index name")
+	PutDocumentCmd.Flags().StringVar(&docID, "doc-id", constant.DefaultDocID, "document id")
+	PutDocumentCmd.Flags().StringVar(&docFields, "doc-fields", constant.DefaultDocFields, "document fields")
 
 	PutCmd.AddCommand(PutDocumentCmd)
 }

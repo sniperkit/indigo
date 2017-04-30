@@ -55,8 +55,8 @@ func runEDeleteDocumentCmd(cmd *cobra.Command, args []string) error {
 }
 
 func init() {
-	DeleteDocumentCmd.Flags().StringVarP(&index, "index", "i", constant.DefaultIndex, "index name")
-	DeleteDocumentCmd.Flags().StringVarP(&docID, "doc-id", "d", constant.DefaultDocID, "document id")
+	DeleteDocumentCmd.Flags().StringVar(&index, "index", constant.DefaultIndex, "index name")
+	DeleteDocumentCmd.Flags().StringVar(&docID, "doc-id", constant.DefaultDocID, "document id")
 
 	DeleteCmd.AddCommand(DeleteDocumentCmd)
 }

@@ -82,11 +82,11 @@ func runECreateIndexCmd(cmd *cobra.Command, args []string) error {
 }
 
 func init() {
-	CreateIndexCmd.Flags().StringVarP(&index, "index", "i", constant.DefaultIndex, "index name")
-	CreateIndexCmd.Flags().StringVarP(&indexMapping, "index-mapping", "m", constant.DefaultIndexMapping, "index mapping")
-	CreateIndexCmd.Flags().StringVarP(&indexType, "index-type", "t", constant.DefaultIndexType, "index type")
-	CreateIndexCmd.Flags().StringVarP(&kvStore, "kvstore", "s", constant.DefaultKVStore, "kvstore")
-	CreateIndexCmd.Flags().StringVarP(&kvConfig, "kvconfig", "k", constant.DefaultKVConfigFile, "kvconfig")
+	CreateIndexCmd.Flags().StringVar(&index, "index", constant.DefaultIndex, "index name")
+	CreateIndexCmd.Flags().StringVar(&indexMapping, "index-mapping", constant.DefaultIndexMapping, "index mapping")
+	CreateIndexCmd.Flags().StringVar(&indexType, "index-type", constant.DefaultIndexType, "index type")
+	CreateIndexCmd.Flags().StringVar(&kvStore, "kvstore", constant.DefaultKVStore, "kvstore")
+	CreateIndexCmd.Flags().StringVar(&kvConfig, "kvconfig", constant.DefaultKVConfigFile, "kvconfig")
 
 	CreateCmd.AddCommand(CreateIndexCmd)
 }

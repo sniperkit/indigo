@@ -73,7 +73,7 @@ func runEGetIndexCmd(cmd *cobra.Command, args []string) error {
 }
 
 func init() {
-	GetIndexCmd.Flags().StringVarP(&index, "index", "i", constant.DefaultIndex, "index name")
+	GetIndexCmd.Flags().StringVar(&index, "index", constant.DefaultIndex, "index name")
 
 	GetCmd.AddCommand(GetIndexCmd)
 }

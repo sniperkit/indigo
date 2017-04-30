@@ -792,16 +792,14 @@ func (igs *IndigoGRPCService) Search(ctx context.Context, req *proto.SearchReque
 	}
 
 	searchRequest := bleve.NewSearchRequest(nil)
-	if req.SearchRequest != nil {
-		err := json.Unmarshal(req.SearchRequest, searchRequest)
-		if err != nil {
-			log.WithFields(log.Fields{
-				"index": req.Index,
-				"err":   err,
-			}).Error("failed to search documents")
+	err := searchRequest.UnmarshalJSON(req.SearchRequest)
+	if err != nil {
+		log.WithFields(log.Fields{
+			"index": req.Index,
+			"err":   err,
+		}).Error("failed to search documents")
 
-			return &proto.SearchResponse{}, err
-		}
+		return &proto.SearchResponse{}, err
 	}
 
 	searchResult, err := index.Search(searchRequest)

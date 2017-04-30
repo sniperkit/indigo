@@ -18,12 +18,12 @@ The Indigo REST Server is a gateway, it provides a traditional JSON API ([HTTP/1
 
 For more detailed information, refer to the [Bleve document](http://www.blevesearch.com/docs/Home/).
 
-## Configuration file
+## Parameters and  Environment variables
 
-Indigo has a YAML format configuration file.
+Indigo parameters are described in indigo.yaml.
 
 ```yaml
-log_output_format: text
+log_format: text
 log_output: ""
 log_level: "info"
 
@@ -38,34 +38,18 @@ rest:
   grpc_server: "localhost:1289"
 ```
 
-| Name                     | Description                                                                                       |
-| ------------------------ | ------------------------------------------------------------------------------------------------- |
-| log_output_format        | The log output format of the Indigo gRPC or REST Server. Default is `text`                        |
-| log_output               | The log output destination of the Indigo gRPC or REST Server. Default is `stdout`                 |
-| log_level                | The log level of log output by Indigo gRPC or REST Server. Default is `info`                      |
-| grpc.port                | Port number to be used when the Indigo gRPC Server starts up. default is `1289`                   |
-| grpc.data_dir            | The path of the directory where Indigo gRPC Server stores the data. Default is `/var/indigo/data` |
-| grpc.open_existing_index | Flag to open indices when started to Indigo gRPC Server. Default is `false`                       |
-| rest.port                | Port number to be used when the Indigo REST Server starts up. default is `2289`                   |
-| rest.base_uri            | The base URI of API endpoint on the Indigo REST Server. Default is `/api`                         |
-| rest.grpc_server         | Indigo gRPC server to which Indigo REST Server connects. Default is `localhost:1289`              |
+| Parameter Name           | Environment variables           | Description                                                                                                                                        |
+| ------------------------ | ------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| log_format               | INDIGO_LOG_FORMAT               | The log output format of the Indigo gRPC or REST Server. You can choose `text`, `color` and `json`. Default is `text`                              |
+| log_output               | INDIGO_LOG_OUTPUT               | The log output destination of the Indigo gRPC or REST Server. Default is `stdout`                                                                  |
+| log_level                | INDIGO_LOG_LEVEL                | The log level of log output by Indigo gRPC or REST Server. You can choose `debug`, `info`, `warn`, `error`, `fatal` and `panic`. Default is `info` |
+| grpc.port                | INDIGO_GRPC_PORT                | Port number to be used when the Indigo gRPC Server starts up. default is `1289`                                                                    |
+| grpc.data_dir            | INDIGO_GRPC_DATA_DIR            | The path of the directory where Indigo gRPC Server stores the data. Default is `/var/indigo/data`                                                  |
+| grpc.open_existing_index | INDIGO_GRPC_OPEN_EXISTING_INDEX | Flag to open indices when started to Indigo gRPC Server. Default is `false`                                                                        |
+| rest.port                | INDIGO_REST_PORT                | Port number to be used when the Indigo REST Server starts up. default is `2289`                                                                    |
+| rest.base_uri            | INDIGO_REST_BASE_URI            | The base URI of API endpoint on the Indigo REST Server. Default is `/api`                                                                          |
+| rest.grpc_server         | INDIGO_REST_GRPC_SERVER         | Indigo gRPC server to which Indigo REST Server connects. Default is `localhost:1289`                                                               |
 
-
-## Environment variables
-
-The Indigo supports following environment variables.
-
-| Name                            | Description                                                                                       |
-| ------------------------------- | ------------------------------------------------------------------------------------------------- |
-| INDIGO_LOG_OUTPUT_FORMAT        | The log output format of the Indigo gRPC or REST Server. Default is `text`                        |
-| INDIGO_LOG_OUTPUT               | The log output destination of the Indigo gRPC or REST Server. Default is `stdout`                 |
-| INDIGO_LOG_LEVEL                | The log level of log output by Indigo gRPC or REST Server. Default is `info`                      |
-| INDIGO_GRPC_PORT                | Port number to be used when the Indigo gRPC Server starts up. default is `1289`                   |
-| INDIGO_GRPC_DATA_DIR            | The path of the directory where Indigo gRPC Server stores the data. Default is `/var/indigo/data` |
-| INDIGO_GRPC_OPEN_EXISTING_INDEX | Flag to open indices when started to Indigo gRPC Server. Default is `false`                       |
-| INDIGO_REST_PORT                | Port number to be used when the Indigo REST Server starts up. default is `2289`                   |
-| INDIGO_REST_BASE_URI            | The base URI of API endpoint on the Indigo REST Server. Default is `/api`                         |
-| INDIGO_REST_GRPC_SERVER         | Indigo gRPC server to which Indigo REST Server connects. Default is `localhost:1289`              |
 
 
 ## Start Indigo gRPC Server

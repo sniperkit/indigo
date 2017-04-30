@@ -69,10 +69,10 @@ func runEBulkCmd(cmd *cobra.Command, args []string) error {
 }
 
 func init() {
-	BulkCmd.Flags().StringVarP(&gRPCServer, "grpc-server", "g", constant.DefaultGRPCServer, "Indigo gRPC Server to connect to")
-	BulkCmd.Flags().StringVarP(&index, "index", "i", constant.DefaultIndex, "index name")
-	BulkCmd.Flags().StringVarP(&bulkRequest, "bulk-request", "b", constant.DefaultBulkRequest, "bulk request")
-	BulkCmd.Flags().Int32VarP(&batchSize, "batch-size", "s", constant.DefaultBatchSize, "batch size of bulk request")
+	BulkCmd.Flags().StringVar(&gRPCServer, "grpc-server", constant.DefaultGRPCServer, "Indigo gRPC Server to connect to")
+	BulkCmd.Flags().StringVar(&index, "index", constant.DefaultIndex, "index name")
+	BulkCmd.Flags().StringVar(&bulkRequest, "bulk-request", constant.DefaultBulkRequest, "bulk request")
+	BulkCmd.Flags().Int32Var(&batchSize, "batch-size", constant.DefaultBatchSize, "batch size of bulk request")
 
 	RootCmd.AddCommand(BulkCmd)
 }

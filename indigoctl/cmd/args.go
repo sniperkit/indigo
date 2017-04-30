@@ -24,5 +24,10 @@ var (
 	docID     string = constant.DefaultDocID
 	docFields string = constant.DefaultDocFields
 
-	searchRequest string = constant.DefaultSearchRequestFile
+	searchRequest string   = constant.DefaultSearchRequestFile
+	query         string   = constant.DefaultQuery
+	size          int      = constant.DefaultSize
+	from          int      = constant.DefaultFrom
+	explain       bool     = constant.DefaultExplain
+	fields        []string = constant.DefaultFields
 )

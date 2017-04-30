@@ -68,8 +68,8 @@ func runEOpenIndexCmd(cmd *cobra.Command, args []string) error {
 }
 
 func init() {
-	OpenIndexCmd.Flags().StringVarP(&index, "index", "i", constant.DefaultIndex, "index name")
-	OpenIndexCmd.Flags().StringVarP(&runtimeConfig, "runtime-config", "r", constant.DefaultRuntimeConfig, "runtime config")
+	OpenIndexCmd.Flags().StringVar(&index, "index", constant.DefaultIndex, "index name")
+	OpenIndexCmd.Flags().StringVar(&runtimeConfig, "runtime-config", constant.DefaultRuntimeConfig, "runtime config")
 
 	OpenCmd.AddCommand(OpenIndexCmd)
 }

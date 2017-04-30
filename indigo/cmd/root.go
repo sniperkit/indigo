@@ -35,7 +35,7 @@ func runERootCmd(cmd *cobra.Command, args []string) error {
 }
 
 func LoadConfig() {
-	viper.SetDefault("log_output_format", constant.DefaultLogOutputFormat)
+	viper.SetDefault("log_format", constant.DefaultLogFormat)
 	viper.SetDefault("log_output", constant.DefaultLogOutput)
 	viper.SetDefault("log_level", constant.DefaultLogLevel)
 
@@ -65,8 +65,8 @@ func LoadConfig() {
 func init() {
 	cobra.OnInitialize(LoadConfig)
 
-	RootCmd.PersistentFlags().StringP("config", "c", constant.DefaultConfig, "configuration file of Indigo Server")
-	RootCmd.PersistentFlags().BoolVarP(&versionFlag, "version", "v", constant.DefaultVersionFlag, "show version numner")
+	RootCmd.PersistentFlags().String("config", constant.DefaultConfig, "configuration file of Indigo Server")
+	RootCmd.PersistentFlags().BoolVar(&versionFlag, "version", constant.DefaultVersionFlag, "show version numner")
 
 	viper.BindPFlag("config", RootCmd.PersistentFlags().Lookup("config"))
 }

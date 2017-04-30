@@ -26,7 +26,7 @@ func runECloseCmd(cmd *cobra.Command, args []string) error {
 }
 
 func init() {
-	CloseCmd.PersistentFlags().StringVarP(&gRPCServer, "grpc-server", "g", constant.DefaultGRPCServer, "Indigo gRPC Server to connect to")
+	CloseCmd.PersistentFlags().StringVar(&gRPCServer, "grpc-server", constant.DefaultGRPCServer, "Indigo gRPC Server to connect to")
 
 	RootCmd.AddCommand(CloseCmd)
 }

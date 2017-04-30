@@ -44,9 +44,9 @@ func runEStartGRPCCmd(cmd *cobra.Command, args []string) error {
 }
 
 func init() {
-	StartGRPCCmd.Flags().IntP("port", "p", constant.DefaultGRPCPort, "port number to be used when Indigo gRPC Server starts up")
-	StartGRPCCmd.Flags().StringP("data-dir", "d", constant.DefaultDataDir, "path of the directory where Indigo gRPC Server stores the data")
-	StartGRPCCmd.Flags().BoolP("open-existing-index", "e", constant.DefaultOpenExistingIndex, "flag to open indices when started to Indigo gRPC Server")
+	StartGRPCCmd.Flags().Int("port", constant.DefaultGRPCPort, "port number to be used when Indigo gRPC Server starts up")
+	StartGRPCCmd.Flags().String("data-dir", constant.DefaultDataDir, "path of the directory where Indigo gRPC Server stores the data")
+	StartGRPCCmd.Flags().Bool("open-existing-index", constant.DefaultOpenExistingIndex, "flag to open indices when started to Indigo gRPC Server")
 
 	viper.BindPFlag("grpc.port", StartGRPCCmd.Flags().Lookup("port"))
 	viper.BindPFlag("grpc.data_dir", StartGRPCCmd.Flags().Lookup("data-dir"))

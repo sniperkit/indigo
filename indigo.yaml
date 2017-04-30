@@ -1,4 +1,4 @@
-log_output_format: text
+log_format: text
 log_output: ""
 log_level: "info"
 

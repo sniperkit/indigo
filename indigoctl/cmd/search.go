@@ -3,6 +3,7 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/blevesearch/bleve"
 	"github.com/mosuka/indigo/constant"
 	"github.com/mosuka/indigo/proto"
 	"github.com/spf13/cobra"
@@ -24,18 +25,36 @@ func runESearchCmd(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("required flag: --%s", cmd.Flag("index").Name)
 	}
 
-	if searchRequest == "" {
-		return fmt.Errorf("required flag: --%s", cmd.Flag("search-request").Name)
-	}
-
 	sr := make([]byte, 0)
-	file, err := os.Open(searchRequest)
-	if err != nil {
-		return err
-	}
-	defer file.Close()
 
-	sr, err = ioutil.ReadAll(file)
+	if searchRequest != "" {
+		file, err := os.Open(searchRequest)
+		if err != nil {
+			return err
+		}
+		defer file.Close()
+
+		sr, err = ioutil.ReadAll(file)
+		if err != nil {
+			return err
+		}
+	}
+
+	searchRequest := bleve.NewSearchRequest(nil)
+	if len(sr) > 0 {
+		err := searchRequest.UnmarshalJSON(sr)
+		if err != nil {
+			return err
+		}
+	}
+
+	searchRequest.Query = bleve.NewQueryStringQuery(query)
+	searchRequest.Size = size
+	searchRequest.From = from
+	searchRequest.Explain = explain
+	searchRequest.Fields = fields
+
+	sr, err := json.Marshal(searchRequest)
 	if err != nil {
 		return err
 	}
@@ -81,9 +100,14 @@ func runESearchCmd(cmd *cobra.Command, args []string) error {
 }
 
 func init() {
-	SearchCmd.Flags().StringVarP(&gRPCServer, "grpc-server", "g", constant.DefaultGRPCServer, "Indigo gRPC Server to connect to")
-	SearchCmd.Flags().StringVarP(&index, "index", "i", constant.DefaultIndex, "index name")
-	SearchCmd.Flags().StringVarP(&searchRequest, "search-request", "s", constant.DefaultSearchRequestFile, "search request file")
+	SearchCmd.Flags().StringVar(&gRPCServer, "grpc-server", constant.DefaultGRPCServer, "Indigo gRPC Server to connect to")
+	SearchCmd.Flags().StringVar(&index, "index", constant.DefaultIndex, "index name")
+	SearchCmd.Flags().StringVar(&searchRequest, "search-request", constant.DefaultSearchRequestFile, "search request file")
+	SearchCmd.Flags().StringVar(&query, "query", constant.DefaultQuery, "query string")
+	SearchCmd.Flags().IntVar(&size, "size", constant.DefaultSize, "number of hits to return")
+	SearchCmd.Flags().IntVar(&from, "from", constant.DefaultFrom, "starting from index of the hits to return")
+	SearchCmd.Flags().BoolVar(&explain, "explain", constant.DefaultExplain, "contain an explanation of how scoring of the hits was computed")
+	SearchCmd.Flags().StringSliceVar(&fields, "field", constant.DefaultFields, "specify a set of fields to return")
 
 	RootCmd.AddCommand(SearchCmd)
 }

@@ -3,7 +3,7 @@ package constant
 const (
 	DefaultVersionFlag       bool   = false
 	DefaultConfig            string = ""
-	DefaultLogOutputFormat   string = "text"
+	DefaultLogFormat         string = "text"
 	DefaultLogOutput         string = ""
 	DefaultLogLevel          string = "info"
 	DefaultGRPCPort          int    = 1289
@@ -25,4 +25,12 @@ const (
 	DefaultBulkRequest       string = ""
 	DefaultBatchSize         int32  = 1000
 	DefaultSearchRequestFile string = ""
+	DefaultQuery             string = ""
+	DefaultFrom              int    = 0
+	DefaultSize              int    = 10
+	DefaultExplain           bool   = false
+)
+
+var (
+	DefaultFields []string = []string{}
 )

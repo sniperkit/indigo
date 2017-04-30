@@ -34,6 +34,6 @@ func runERootCmd(cmd *cobra.Command, args []string) error {
 }
 
 func init() {
-	RootCmd.PersistentFlags().StringVarP(&outputFormat, "output-format", "f", constant.DefaultOutputFormat, "output format of the command execution result")
-	RootCmd.PersistentFlags().BoolVarP(&versionFlag, "verson", "v", constant.DefaultVersionFlag, "show version numner")
+	RootCmd.PersistentFlags().StringVar(&outputFormat, "output-format", constant.DefaultOutputFormat, "output format of the command execution result")
+	RootCmd.PersistentFlags().BoolVar(&versionFlag, "verson", constant.DefaultVersionFlag, "show version numner")
 }

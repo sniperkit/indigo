@@ -51,7 +51,7 @@ func runEDeleteIndexCmd(cmd *cobra.Command, args []string) error {
 }
 
 func init() {
-	DeleteIndexCmd.Flags().StringVarP(&index, "index", "i", constant.DefaultIndex, "index name")
+	DeleteIndexCmd.Flags().StringVar(&index, "index", constant.DefaultIndex, "index name")
 
 	DeleteCmd.AddCommand(DeleteIndexCmd)
 }

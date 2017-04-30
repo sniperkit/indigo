@@ -51,7 +51,7 @@ func runECloseIndexCmd(cmd *cobra.Command, args []string) error {
 }
 
 func init() {
-	CloseIndexCmd.Flags().StringVarP(&index, "index", "i", constant.DefaultIndex, "index name")
+	CloseIndexCmd.Flags().StringVar(&index, "index", constant.DefaultIndex, "index name")
 
 	CloseCmd.AddCommand(CloseIndexCmd)
 }

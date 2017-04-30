@@ -26,7 +26,7 @@ func runEOpenCmd(cmd *cobra.Command, args []string) error {
 }
 
 func init() {
-	OpenCmd.PersistentFlags().StringVarP(&gRPCServer, "grpc-server", "g", constant.DefaultGRPCServer, "Indigo gRPC Server to connect to")
+	OpenCmd.PersistentFlags().StringVar(&gRPCServer, "grpc-server", constant.DefaultGRPCServer, "Indigo gRPC Server to connect to")
 
 	RootCmd.AddCommand(OpenCmd)
 }

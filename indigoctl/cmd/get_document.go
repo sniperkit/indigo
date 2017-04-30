@@ -68,8 +68,8 @@ func runEGetDocumentCmd(cmd *cobra.Command, args []string) error {
 }
 
 func init() {
-	GetDocumentCmd.Flags().StringVarP(&index, "index", "i", constant.DefaultIndex, "index name")
-	GetDocumentCmd.Flags().StringVarP(&docID, "doc-id", "d", constant.DefaultDocID, "document id")
+	GetDocumentCmd.Flags().StringVar(&index, "index", constant.DefaultIndex, "index name")
+	GetDocumentCmd.Flags().StringVar(&docID, "doc-id", constant.DefaultDocID, "document id")
 
 	GetCmd.AddCommand(GetDocumentCmd)
 }
