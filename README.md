@@ -182,7 +182,7 @@ You can specify the index mapping describes how to your data model should be ind
 See [Introduction to Index Mappings](http://www.blevesearch.com/docs/Index-Mapping/) and [type IndexMappingImpl](https://godoc.org/github.com/blevesearch/bleve/mapping#IndexMappingImpl) for more details.  
 
 ```sh
-$ indigoctl create index -i example example/index_mapping.json -f json
+$ indigoctl create index --index example --index-mapping example/index_mapping.json --output-format json
 ```
 
 The result of the above `create index` command is:
@@ -190,7 +190,7 @@ The result of the above `create index` command is:
 ```json
 {
   "index_name": "example",
-  "index_dir": "data/example"
+  "index_dir": "/var/indigo/data/example"
 }
 ```
 
@@ -200,7 +200,7 @@ The result of the above `create index` command is:
 The `open index` command opens an existing closed index. You can display a help message by specifying the `- h` or` --help` option.
 
 ```sh
-$ indigoctl open index -i example -f json
+$ indigoctl open index --index example --output-format json
 ```
 
 The result of the above `open index` command is:
@@ -218,7 +218,7 @@ The result of the above `open index` command is:
 The `get index` command retrieves an index information about existing opened index. You can display a help message by specifying the `- h` or` --help` option.
 
 ```sh
-$ indigoctl get index -i example -f json
+$ indigoctl get index --index example --output-format json
 ```
 
 The result of the above `get index` command is:
@@ -360,7 +360,7 @@ The result of the above `get index` command is:
 The `close index` command closes an existing opened index. You can display a help message by specifying the `- h` or` --help` option.
 
 ```sh
-$ indigoctl close index -i example -f json
+$ indigoctl close index --index example --output-format json
 ```
 
 The result of the above `close index` command is:
@@ -377,7 +377,7 @@ The result of the above `close index` command is:
 The `delete index` command deletes an existing closed index. You can display a help message by specifying the `- h` or` --help` option.
 
 ```sh
-$ indigoctl delete index -i example -f json
+$ indigoctl delete index --index example --output-format json
 ```
 
 The result of the above `delete index` command is:
@@ -394,7 +394,7 @@ The result of the above `delete index` command is:
 The `list index` command lists opened indices. You can display a help message by specifying the `- h` or` --help` option.
 
 ```sh
-$ indigoctl list index -f json
+$ indigoctl list index --output-format json
 ```
 
 The result of the above `list index` command is:
@@ -425,7 +425,7 @@ The document example is following:
 ```
 
 ```sh
-$ indigoctl put document -i example -d 1 -F example/document_1.json -f json
+$ indigoctl put document --index example --doc-id 1 --doc-fields example/document_1.json --output-format json
 ```
 
 The result of the above `put document` command is:
@@ -442,7 +442,7 @@ The result of the above `put document` command is:
 The `get document` command retrieves a JSON formatted document on its id from a specified index. You can display a help message by specifying the `- h` or` --help` option.
 
 ```sh
-$ indigoctl get document -i example -d 1 -f json
+$ indigoctl get document --index example --doc-id 1 --output-format json
 ```
 
 The result of the above `get document` command is:
@@ -467,7 +467,7 @@ The result of the above `get document` command is:
 The `delete document` command deletes a document on its id from a specified index. You can display a help message by specifying the `- h` or` --help` option.
 
 ```sh
-$ indigoctl delete document -i example -d 1 -f json
+$ indigoctl delete document --index example --doc-id 1 --output-format json
 ```
 
 The result of the above `delete document` command is:
@@ -534,7 +534,7 @@ The bulk example is following:
 ```
 
 ```sh
-$ indigoctl bulk -i example -b example/bulk_put.json -f json
+$ indigoctl bulk --index example --bulk-request example/bulk_put.json --output-format json
 ```
 
 The result of the above `bulk` command is:
@@ -573,7 +573,7 @@ See [Queries](http://www.blevesearch.com/docs/Query/), [Query String Query](http
 You can display a help message by specifying the `- h` or` --help` option.
 
 ```sh
-$ indigoctl search -i example -s example/simple_query.json -f json
+$ indigoctl search --index example --query go --field name --field description
 ```
 
 The result of the above `search` command is:
@@ -585,134 +585,42 @@ The result of the above `search` command is:
     "hits": [
       {
         "fields": {
-          "category": "Library",
-          "description": "Apache Lucene is a high-performance, full-featured text search engine library written entirely in Java.",
-          "name": "Lucene",
-          "popularity": 4,
-          "release": "2000-03-30T00:00:00Z",
-          "type": "document"
-        },
-        "id": "2",
-        "index": "data/example",
-        "score": 0.28598991738818746,
-        "sort": [
-          "_score"
-        ]
-      },
-      {
-        "fields": {
-          "category": "Server",
-          "description": "Solr is an open source enterprise search platform, written in Java, from the Apache Lucene project.",
-          "name": "Solr",
-          "popularity": 5,
-          "release": "2006-12-22T00:00:00Z",
-          "type": "document"
-        },
-        "id": "5",
-        "index": "data/example",
-        "score": 0.2842565476963312,
-        "sort": [
-          "_score"
-        ]
-      },
-      {
-        "fields": {
-          "category": "Library",
-          "description": "Whoosh is a fast, featureful full-text indexing and searching library implemented in pure Python. ",
-          "name": "Whoosh",
-          "popularity": 3,
-          "release": "2008-02-20T00:00:00Z",
-          "type": "document"
-        },
-        "id": "3",
-        "index": "data/example",
-        "score": 0.2484309575477134,
-        "sort": [
-          "_score"
-        ]
-      },
-      {
-        "fields": {
-          "category": "Server",
-          "description": "Indigo is a full-text search and indexing server written in Go, built on top of Bleve.",
-          "name": "Indigo",
-          "popularity": 1,
-          "release": "2017-01-13T00:00:00Z",
-          "type": "document"
-        },
-        "id": "7",
-        "index": "data/example",
-        "score": 0.24526800905441196,
-        "sort": [
-          "_score"
-        ]
-      },
-      {
-        "fields": {
-          "category": "Library",
-          "description": "Ferret is a super fast, highly configurable search library written in Ruby.",
-          "name": "Ferret",
-          "popularity": 2,
-          "release": "2005-10-01T00:00:00Z",
-          "type": "document"
-        },
-        "id": "4",
-        "index": "data/example",
-        "score": 0.2057485301587168,
-        "sort": [
-          "_score"
-        ]
-      },
-      {
-        "fields": {
-          "category": "Server",
-          "description": "Elasticsearch is a search engine based on Lucene, written in Java.",
-          "name": "Elasticsearch",
-          "popularity": 5,
-          "release": "2010-02-08T00:00:00Z",
-          "type": "document"
-        },
-        "id": "6",
-        "index": "data/example",
-        "score": 0.11396329383474207,
-        "sort": [
-          "_score"
-        ]
-      },
-      {
-        "fields": {
-          "category": "Library",
           "description": "Bleve is a full-text search and indexing library for Go.",
-          "name": "Bleve",
-          "popularity": 3,
-          "release": "2014-04-18T00:00:00Z",
-          "type": "document"
+          "name": "Bleve"
         },
         "id": "1",
-        "index": "data/example",
-        "score": 0.0853843602235094,
+        "index": "/var/indigo/data/example",
+        "score": 0.28504426124611976,
+        "sort": [
+          "_score"
+        ]
+      },
+      {
+        "fields": {
+          "description": "Indigo is a full-text search and indexing server written in Go, built on top of Bleve.",
+          "name": "Indigo"
+        },
+        "id": "7",
+        "index": "/var/indigo/data/example",
+        "score": 0.27236920508525625,
         "sort": [
           "_score"
         ]
       }
     ],
-    "max_score": 0.28598991738818746,
+    "max_score": 0.28504426124611976,
     "request": {
       "explain": false,
       "facets": null,
       "fields": [
         "name",
-        "description",
-        "category",
-        "popularity",
-        "release",
-        "type"
+        "description"
       ],
       "from": 0,
       "highlight": null,
       "includeLocations": false,
       "query": {
-        "query": "description:*"
+        "query": "go"
       },
       "size": 10,
       "sort": [
@@ -724,8 +632,8 @@ The result of the above `search` command is:
       "successful": 1,
       "total": 1
     },
-    "took": 7725035,
-    "total_hits": 7
+    "took": 423105,
+    "total_hits": 2
   }
 }
 ```
