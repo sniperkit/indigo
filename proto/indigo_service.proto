@@ -9,7 +9,6 @@ service Indigo {
     rpc CloseIndex(CloseIndexRequest) returns (CloseIndexResponse) {}
     rpc ListIndex(ListIndexRequest) returns (ListIndexResponse) {}
     rpc GetIndex(GetIndexRequest) returns (GetIndexResponse) {}
-//    rpc CreateAlias(CreateAliasRequest) returns (CreateAliasResponse) {}
     rpc PutDocument(PutDocumentRequest) returns (PutDocumentResponse) {}
     rpc GetDocument(GetDocumentRequest) returns (GetDocumentResponse) {}
     rpc DeleteDocument(DeleteDocumentRequest) returns (DeleteDocumentResponse) {}
@@ -72,16 +71,6 @@ message GetIndexResponse {
     bytes index_stats = 2;
     bytes index_mapping = 3;
 }
-
-//message CreateAliasRequest {
-//    string alias = 1;
-//    repeated string indices = 2;
-//}
-//
-//message CreateAliasResponse {
-//    string alias = 1;
-//    repeated string indices = 2;
-//}
 
 message PutDocumentRequest {
     string index = 1;
