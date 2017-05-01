@@ -3,7 +3,7 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/mosuka/indigo/constant"
+	"github.com/mosuka/indigo/defaultvalue"
 	"github.com/mosuka/indigo/proto"
 	"github.com/spf13/cobra"
 	"golang.org/x/net/context"
@@ -82,11 +82,11 @@ func runECreateIndexCmd(cmd *cobra.Command, args []string) error {
 }
 
 func init() {
-	CreateIndexCmd.Flags().StringVar(&index, "index", constant.DefaultIndex, "index name")
-	CreateIndexCmd.Flags().StringVar(&indexMapping, "index-mapping", constant.DefaultIndexMapping, "index mapping")
-	CreateIndexCmd.Flags().StringVar(&indexType, "index-type", constant.DefaultIndexType, "index type")
-	CreateIndexCmd.Flags().StringVar(&kvStore, "kvstore", constant.DefaultKVStore, "kvstore")
-	CreateIndexCmd.Flags().StringVar(&kvConfig, "kvconfig", constant.DefaultKVConfigFile, "kvconfig")
+	CreateIndexCmd.Flags().StringVar(&index, "index", defaultvalue.DefaultIndex, "index name")
+	CreateIndexCmd.Flags().StringVar(&indexMapping, "index-mapping", defaultvalue.DefaultIndexMapping, "index mapping")
+	CreateIndexCmd.Flags().StringVar(&indexType, "index-type", defaultvalue.DefaultIndexType, "index type")
+	CreateIndexCmd.Flags().StringVar(&kvStore, "kvstore", defaultvalue.DefaultKVStore, "kvstore")
+	CreateIndexCmd.Flags().StringVar(&kvConfig, "kvconfig", defaultvalue.DefaultKVConfigFile, "kvconfig")
 
 	CreateCmd.AddCommand(CreateIndexCmd)
 }

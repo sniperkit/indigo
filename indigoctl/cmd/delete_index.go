@@ -3,7 +3,7 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/mosuka/indigo/constant"
+	"github.com/mosuka/indigo/defaultvalue"
 	"github.com/mosuka/indigo/proto"
 	"github.com/spf13/cobra"
 	"golang.org/x/net/context"
@@ -51,7 +51,7 @@ func runEDeleteIndexCmd(cmd *cobra.Command, args []string) error {
 }
 
 func init() {
-	DeleteIndexCmd.Flags().StringVar(&index, "index", constant.DefaultIndex, "index name")
+	DeleteIndexCmd.Flags().StringVar(&index, "index", defaultvalue.DefaultIndex, "index name")
 
 	DeleteCmd.AddCommand(DeleteIndexCmd)
 }

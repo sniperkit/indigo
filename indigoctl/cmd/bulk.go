@@ -3,7 +3,7 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/mosuka/indigo/constant"
+	"github.com/mosuka/indigo/defaultvalue"
 	"github.com/mosuka/indigo/proto"
 	"github.com/spf13/cobra"
 	"golang.org/x/net/context"
@@ -69,10 +69,10 @@ func runEBulkCmd(cmd *cobra.Command, args []string) error {
 }
 
 func init() {
-	BulkCmd.Flags().StringVar(&gRPCServer, "grpc-server", constant.DefaultGRPCServer, "Indigo gRPC Server to connect to")
-	BulkCmd.Flags().StringVar(&index, "index", constant.DefaultIndex, "index name")
-	BulkCmd.Flags().StringVar(&bulkRequest, "bulk-request", constant.DefaultBulkRequest, "bulk request")
-	BulkCmd.Flags().Int32Var(&batchSize, "batch-size", constant.DefaultBatchSize, "batch size of bulk request")
+	BulkCmd.Flags().StringVar(&gRPCServer, "grpc-server", defaultvalue.DefaultGRPCServer, "Indigo gRPC Server to connect to")
+	BulkCmd.Flags().StringVar(&index, "index", defaultvalue.DefaultIndex, "index name")
+	BulkCmd.Flags().StringVar(&bulkRequest, "bulk-request", defaultvalue.DefaultBulkRequest, "bulk request")
+	BulkCmd.Flags().Int32Var(&batchSize, "batch-size", defaultvalue.DefaultBatchSize, "batch size of bulk request")
 
 	RootCmd.AddCommand(BulkCmd)
 }

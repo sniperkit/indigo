@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/mosuka/indigo/constant"
+	"github.com/mosuka/indigo/defaultvalue"
 	ver "github.com/mosuka/indigo/version"
 	"github.com/spf13/cobra"
 	"os"
@@ -34,6 +34,6 @@ func runERootCmd(cmd *cobra.Command, args []string) error {
 }
 
 func init() {
-	RootCmd.PersistentFlags().StringVar(&outputFormat, "output-format", constant.DefaultOutputFormat, "output format of the command execution result")
-	RootCmd.PersistentFlags().BoolVar(&versionFlag, "verson", constant.DefaultVersionFlag, "show version numner")
+	RootCmd.PersistentFlags().StringVar(&outputFormat, "output-format", defaultvalue.DefaultOutputFormat, "output format of the command execution result")
+	RootCmd.PersistentFlags().BoolVar(&versionFlag, "verson", defaultvalue.DefaultVersionFlag, "show version numner")
 }

@@ -1,4 +1,4 @@
-package constant
+package defaultvalue
 
 const (
 	DefaultVersionFlag       bool   = false

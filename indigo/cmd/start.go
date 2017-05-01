@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/mosuka/indigo/constant"
+	"github.com/mosuka/indigo/defaultvalue"
 	"github.com/mosuka/indigo/version"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -128,9 +128,9 @@ func persistentPostRunEStartCmd(cmd *cobra.Command, args []string) error {
 }
 
 func init() {
-	StartCmd.PersistentFlags().String("log-format", constant.DefaultLogFormat, "log format of Indigo Server")
-	StartCmd.PersistentFlags().String("log-output", constant.DefaultLogOutput, "log output destination of Indigo Server")
-	StartCmd.PersistentFlags().String("log-level", constant.DefaultLogLevel, "log level of log output by Indigo Server")
+	StartCmd.PersistentFlags().String("log-format", defaultvalue.DefaultLogFormat, "log format of Indigo Server")
+	StartCmd.PersistentFlags().String("log-output", defaultvalue.DefaultLogOutput, "log output destination of Indigo Server")
+	StartCmd.PersistentFlags().String("log-level", defaultvalue.DefaultLogLevel, "log level of log output by Indigo Server")
 
 	viper.BindPFlag("log_format", StartCmd.PersistentFlags().Lookup("log-format"))
 	viper.BindPFlag("log_output", StartCmd.PersistentFlags().Lookup("log-output"))

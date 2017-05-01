@@ -3,7 +3,7 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/mosuka/indigo/constant"
+	"github.com/mosuka/indigo/defaultvalue"
 	"github.com/mosuka/indigo/proto"
 	"github.com/spf13/cobra"
 	"golang.org/x/net/context"
@@ -68,8 +68,8 @@ func runEOpenIndexCmd(cmd *cobra.Command, args []string) error {
 }
 
 func init() {
-	OpenIndexCmd.Flags().StringVar(&index, "index", constant.DefaultIndex, "index name")
-	OpenIndexCmd.Flags().StringVar(&runtimeConfig, "runtime-config", constant.DefaultRuntimeConfig, "runtime config")
+	OpenIndexCmd.Flags().StringVar(&index, "index", defaultvalue.DefaultIndex, "index name")
+	OpenIndexCmd.Flags().StringVar(&runtimeConfig, "runtime-config", defaultvalue.DefaultRuntimeConfig, "runtime config")
 
 	OpenCmd.AddCommand(OpenIndexCmd)
 }

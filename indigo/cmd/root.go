@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/mosuka/indigo/constant"
+	"github.com/mosuka/indigo/defaultvalue"
 	ver "github.com/mosuka/indigo/version"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -35,17 +35,17 @@ func runERootCmd(cmd *cobra.Command, args []string) error {
 }
 
 func LoadConfig() {
-	viper.SetDefault("log_format", constant.DefaultLogFormat)
-	viper.SetDefault("log_output", constant.DefaultLogOutput)
-	viper.SetDefault("log_level", constant.DefaultLogLevel)
+	viper.SetDefault("log_format", defaultvalue.DefaultLogFormat)
+	viper.SetDefault("log_output", defaultvalue.DefaultLogOutput)
+	viper.SetDefault("log_level", defaultvalue.DefaultLogLevel)
 
-	viper.SetDefault("grpc.port", constant.DefaultGRPCPort)
-	viper.SetDefault("grpc.data_dir", constant.DefaultDataDir)
-	viper.SetDefault("grpc.open_existing_index", constant.DefaultOpenExistingIndex)
+	viper.SetDefault("grpc.port", defaultvalue.DefaultGRPCPort)
+	viper.SetDefault("grpc.data_dir", defaultvalue.DefaultDataDir)
+	viper.SetDefault("grpc.open_existing_index", defaultvalue.DefaultOpenExistingIndex)
 
-	viper.SetDefault("rest.port", constant.DefaultRESTPort)
-	viper.SetDefault("rest.base_uri", constant.DefaultBaseURI)
-	viper.SetDefault("rest.grpc_server", constant.DefaultGRPCServer)
+	viper.SetDefault("rest.port", defaultvalue.DefaultRESTPort)
+	viper.SetDefault("rest.base_uri", defaultvalue.DefaultBaseURI)
+	viper.SetDefault("rest.grpc_server", defaultvalue.DefaultGRPCServer)
 
 	if viper.GetString("config") != "" {
 		viper.SetConfigFile(viper.GetString("config"))
@@ -65,8 +65,8 @@ func LoadConfig() {
 func init() {
 	cobra.OnInitialize(LoadConfig)
 
-	RootCmd.PersistentFlags().String("config", constant.DefaultConfig, "configuration file of Indigo Server")
-	RootCmd.PersistentFlags().BoolVar(&versionFlag, "version", constant.DefaultVersionFlag, "show version numner")
+	RootCmd.PersistentFlags().String("config", defaultvalue.DefaultConfig, "configuration file of Indigo Server")
+	RootCmd.PersistentFlags().BoolVar(&versionFlag, "version", defaultvalue.DefaultVersionFlag, "show version numner")
 
 	viper.BindPFlag("config", RootCmd.PersistentFlags().Lookup("config"))
 }

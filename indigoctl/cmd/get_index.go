@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/blevesearch/bleve"
 	"github.com/blevesearch/bleve/mapping"
-	"github.com/mosuka/indigo/constant"
+	"github.com/mosuka/indigo/defaultvalue"
 	"github.com/mosuka/indigo/proto"
 	"github.com/spf13/cobra"
 	"golang.org/x/net/context"
@@ -73,7 +73,7 @@ func runEGetIndexCmd(cmd *cobra.Command, args []string) error {
 }
 
 func init() {
-	GetIndexCmd.Flags().StringVar(&index, "index", constant.DefaultIndex, "index name")
+	GetIndexCmd.Flags().StringVar(&index, "index", defaultvalue.DefaultIndex, "index name")
 
 	GetCmd.AddCommand(GetIndexCmd)
 }

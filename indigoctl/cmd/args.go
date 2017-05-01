@@ -1,33 +1,27 @@
 package cmd
 
 import (
-	"github.com/mosuka/indigo/constant"
+	"github.com/mosuka/indigo/defaultvalue"
 )
 
 var (
-	versionFlag  bool   = constant.DefaultVersionFlag
-	outputFormat string = constant.DefaultOutputFormat
-
-	gRPCServer string = constant.DefaultGRPCServer
-
-	index string = constant.DefaultIndex
-
-	bulkRequest string = constant.DefaultBulkRequest
-	batchSize   int32  = constant.DefaultBatchSize
-
-	indexMapping  string = constant.DefaultIndexMapping
-	indexType     string = constant.DefaultIndexType
-	kvStore       string = constant.DefaultKVStore
-	kvConfig      string = constant.DefaultKVConfigFile
-	runtimeConfig string = constant.DefaultRuntimeConfig
-
-	docID     string = constant.DefaultDocID
-	docFields string = constant.DefaultDocFields
-
-	searchRequest string   = constant.DefaultSearchRequestFile
-	query         string   = constant.DefaultQuery
-	size          int      = constant.DefaultSize
-	from          int      = constant.DefaultFrom
-	explain       bool     = constant.DefaultExplain
-	fields        []string = constant.DefaultFields
+	versionFlag   bool     = defaultvalue.DefaultVersionFlag
+	outputFormat  string   = defaultvalue.DefaultOutputFormat
+	gRPCServer    string   = defaultvalue.DefaultGRPCServer
+	index         string   = defaultvalue.DefaultIndex
+	bulkRequest   string   = defaultvalue.DefaultBulkRequest
+	batchSize     int32    = defaultvalue.DefaultBatchSize
+	indexMapping  string   = defaultvalue.DefaultIndexMapping
+	indexType     string   = defaultvalue.DefaultIndexType
+	kvStore       string   = defaultvalue.DefaultKVStore
+	kvConfig      string   = defaultvalue.DefaultKVConfigFile
+	runtimeConfig string   = defaultvalue.DefaultRuntimeConfig
+	docID         string   = defaultvalue.DefaultDocID
+	docFields     string   = defaultvalue.DefaultDocFields
+	searchRequest string   = defaultvalue.DefaultSearchRequestFile
+	query         string   = defaultvalue.DefaultQuery
+	size          int      = defaultvalue.DefaultSize
+	from          int      = defaultvalue.DefaultFrom
+	explain       bool     = defaultvalue.DefaultExplain
+	fields        []string = defaultvalue.DefaultFields
 )

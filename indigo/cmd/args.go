@@ -1,9 +1,9 @@
 package cmd
 
 import (
-	"github.com/mosuka/indigo/constant"
+	"github.com/mosuka/indigo/defaultvalue"
 )
 
 var (
-	versionFlag bool = constant.DefaultVersionFlag
+	versionFlag bool = defaultvalue.DefaultVersionFlag
 )

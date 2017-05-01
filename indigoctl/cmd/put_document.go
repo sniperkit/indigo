@@ -3,7 +3,7 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/mosuka/indigo/constant"
+	"github.com/mosuka/indigo/defaultvalue"
 	"github.com/mosuka/indigo/proto"
 	"github.com/spf13/cobra"
 	"golang.org/x/net/context"
@@ -73,9 +73,9 @@ func runEPutDocumentCmd(cmd *cobra.Command, args []string) error {
 }
 
 func init() {
-	PutDocumentCmd.Flags().StringVar(&index, "index", constant.DefaultIndex, "index name")
-	PutDocumentCmd.Flags().StringVar(&docID, "id", constant.DefaultDocID, "document id")
-	PutDocumentCmd.Flags().StringVar(&docFields, "fields", constant.DefaultDocFields, "document fields")
+	PutDocumentCmd.Flags().StringVar(&index, "index", defaultvalue.DefaultIndex, "index name")
+	PutDocumentCmd.Flags().StringVar(&docID, "id", defaultvalue.DefaultDocID, "document id")
+	PutDocumentCmd.Flags().StringVar(&docFields, "fields", defaultvalue.DefaultDocFields, "document fields")
 
 	PutCmd.AddCommand(PutDocumentCmd)
 }

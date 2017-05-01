@@ -592,7 +592,6 @@ type IndigoClient interface {
 	CloseIndex(ctx context.Context, in *CloseIndexRequest, opts ...grpc.CallOption) (*CloseIndexResponse, error)
 	ListIndex(ctx context.Context, in *ListIndexRequest, opts ...grpc.CallOption) (*ListIndexResponse, error)
 	GetIndex(ctx context.Context, in *GetIndexRequest, opts ...grpc.CallOption) (*GetIndexResponse, error)
-	//    rpc CreateAlias(CreateAliasRequest) returns (CreateAliasResponse) {}
 	PutDocument(ctx context.Context, in *PutDocumentRequest, opts ...grpc.CallOption) (*PutDocumentResponse, error)
 	GetDocument(ctx context.Context, in *GetDocumentRequest, opts ...grpc.CallOption) (*GetDocumentResponse, error)
 	DeleteDocument(ctx context.Context, in *DeleteDocumentRequest, opts ...grpc.CallOption) (*DeleteDocumentResponse, error)
@@ -716,7 +715,6 @@ type IndigoServer interface {
 	CloseIndex(context.Context, *CloseIndexRequest) (*CloseIndexResponse, error)
 	ListIndex(context.Context, *ListIndexRequest) (*ListIndexResponse, error)
 	GetIndex(context.Context, *GetIndexRequest) (*GetIndexResponse, error)
-	//    rpc CreateAlias(CreateAliasRequest) returns (CreateAliasResponse) {}
 	PutDocument(context.Context, *PutDocumentRequest) (*PutDocumentResponse, error)
 	GetDocument(context.Context, *GetDocumentRequest) (*GetDocumentResponse, error)
 	DeleteDocument(context.Context, *DeleteDocumentRequest) (*DeleteDocumentResponse, error)

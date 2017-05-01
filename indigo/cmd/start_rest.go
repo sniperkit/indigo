@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"github.com/mosuka/indigo/constant"
+	"github.com/mosuka/indigo/defaultvalue"
 	"github.com/mosuka/indigo/indigo/rest"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -44,9 +44,9 @@ func runEStartRESTCmd(cmd *cobra.Command, args []string) error {
 }
 
 func init() {
-	StartRESTCmd.Flags().Int("port", constant.DefaultRESTPort, "port number to be used when Indigo REST Server starts up")
-	StartRESTCmd.Flags().String("base-uri", constant.DefaultBaseURI, "base URI of API endpoint on Indigo REST Server")
-	StartRESTCmd.Flags().String("grpc-server", constant.DefaultGRPCServer, "Indigo gRPC server that Indigo REST Server connect to")
+	StartRESTCmd.Flags().Int("port", defaultvalue.DefaultRESTPort, "port number to be used when Indigo REST Server starts up")
+	StartRESTCmd.Flags().String("base-uri", defaultvalue.DefaultBaseURI, "base URI of API endpoint on Indigo REST Server")
+	StartRESTCmd.Flags().String("grpc-server", defaultvalue.DefaultGRPCServer, "Indigo gRPC server that Indigo REST Server connect to")
 
 	viper.BindPFlag("rest.port", StartRESTCmd.Flags().Lookup("port"))
 	viper.BindPFlag("rest.base_uri", StartRESTCmd.Flags().Lookup("base-uri"))

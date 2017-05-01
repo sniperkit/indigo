@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"github.com/mosuka/indigo/constant"
+	"github.com/mosuka/indigo/defaultvalue"
 	"github.com/spf13/cobra"
 )
 
@@ -26,7 +26,7 @@ func runECloseCmd(cmd *cobra.Command, args []string) error {
 }
 
 func init() {
-	CloseCmd.PersistentFlags().StringVar(&gRPCServer, "grpc-server", constant.DefaultGRPCServer, "Indigo gRPC Server to connect to")
+	CloseCmd.PersistentFlags().StringVar(&gRPCServer, "grpc-server", defaultvalue.DefaultGRPCServer, "Indigo gRPC Server to connect to")
 
 	RootCmd.AddCommand(CloseCmd)
 }
