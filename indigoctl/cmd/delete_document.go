@@ -23,7 +23,7 @@ func runEDeleteDocumentCmd(cmd *cobra.Command, args []string) error {
 	}
 
 	if docID == "" {
-		return fmt.Errorf("required flag: --%s", cmd.Flag("doc-id").Name)
+		return fmt.Errorf("required flag: --%s", cmd.Flag("id").Name)
 	}
 
 	conn, err := grpc.Dial(gRPCServer, grpc.WithInsecure())
@@ -56,7 +56,7 @@ func runEDeleteDocumentCmd(cmd *cobra.Command, args []string) error {
 
 func init() {
 	DeleteDocumentCmd.Flags().StringVar(&index, "index", constant.DefaultIndex, "index name")
-	DeleteDocumentCmd.Flags().StringVar(&docID, "doc-id", constant.DefaultDocID, "document id")
+	DeleteDocumentCmd.Flags().StringVar(&docID, "id", constant.DefaultDocID, "document id")
 
 	DeleteCmd.AddCommand(DeleteDocumentCmd)
 }

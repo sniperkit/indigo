@@ -25,11 +25,11 @@ func runEPutDocumentCmd(cmd *cobra.Command, args []string) error {
 	}
 
 	if docID == "" {
-		return fmt.Errorf("required flag: --%s", cmd.Flag("doc-id").Name)
+		return fmt.Errorf("required flag: --%s", cmd.Flag("id").Name)
 	}
 
 	if docFields == "" {
-		return fmt.Errorf("required flag: --%s", cmd.Flag("doc-fields").Name)
+		return fmt.Errorf("required flag: --%s", cmd.Flag("fields").Name)
 	}
 
 	document := make([]byte, 0)
@@ -74,8 +74,8 @@ func runEPutDocumentCmd(cmd *cobra.Command, args []string) error {
 
 func init() {
 	PutDocumentCmd.Flags().StringVar(&index, "index", constant.DefaultIndex, "index name")
-	PutDocumentCmd.Flags().StringVar(&docID, "doc-id", constant.DefaultDocID, "document id")
-	PutDocumentCmd.Flags().StringVar(&docFields, "doc-fields", constant.DefaultDocFields, "document fields")
+	PutDocumentCmd.Flags().StringVar(&docID, "id", constant.DefaultDocID, "document id")
+	PutDocumentCmd.Flags().StringVar(&docFields, "fields", constant.DefaultDocFields, "document fields")
 
 	PutCmd.AddCommand(PutDocumentCmd)
 }

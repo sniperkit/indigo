@@ -23,7 +23,7 @@ func runEGetDocumentCmd(cmd *cobra.Command, args []string) error {
 	}
 
 	if docID == "" {
-		return fmt.Errorf("required flag: --%s", cmd.Flag("doc-id").Name)
+		return fmt.Errorf("required flag: --%s", cmd.Flag("id").Name)
 	}
 
 	conn, err := grpc.Dial(gRPCServer, grpc.WithInsecure())
@@ -69,7 +69,7 @@ func runEGetDocumentCmd(cmd *cobra.Command, args []string) error {
 
 func init() {
 	GetDocumentCmd.Flags().StringVar(&index, "index", constant.DefaultIndex, "index name")
-	GetDocumentCmd.Flags().StringVar(&docID, "doc-id", constant.DefaultDocID, "document id")
+	GetDocumentCmd.Flags().StringVar(&docID, "id", constant.DefaultDocID, "document id")
 
 	GetCmd.AddCommand(GetDocumentCmd)
 }
