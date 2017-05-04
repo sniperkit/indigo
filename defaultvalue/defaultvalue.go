@@ -33,4 +33,5 @@ const (
 
 var (
 	DefaultFields []string = []string{}
+	DefaultSorts  []string = []string{"-_score"}
 )

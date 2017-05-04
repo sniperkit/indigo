@@ -24,4 +24,5 @@ var (
 	from          int      = defaultvalue.DefaultFrom
 	explain       bool     = defaultvalue.DefaultExplain
 	fields        []string = defaultvalue.DefaultFields
+	sorts         []string = defaultvalue.DefaultSorts
 )
