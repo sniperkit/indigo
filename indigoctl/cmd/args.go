@@ -25,4 +25,6 @@ var (
 	explain       bool     = defaultvalue.DefaultExplain
 	fields        []string = defaultvalue.DefaultFields
 	sorts         []string = defaultvalue.DefaultSorts
+	facets        string   = defaultvalue.DefaultFacets
+	highlight     string   = defaultvalue.DefaultHighlight
 )

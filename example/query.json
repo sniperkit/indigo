@@ -12,6 +12,10 @@
     "release",
     "type"
   ],
+  "sort": [
+    "-_score",
+    "name"
+  ],
   "facets": {
     "Category count": {
       "size": 10,

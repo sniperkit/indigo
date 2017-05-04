@@ -69,6 +69,22 @@ func runESearchCmd(cmd *cobra.Command, args []string) error {
 	if cmd.Flag("sort").Changed {
 		searchRequest.SortBy(sorts)
 	}
+	if cmd.Flag("facets").Changed {
+		facetRequest := bleve.FacetsRequest{}
+		err := json.Unmarshal([]byte(facets), &facetRequest)
+		if err != nil {
+			return err
+		}
+		searchRequest.Facets = facetRequest
+	}
+	if cmd.Flag("highlight").Changed {
+		highlightRequest := bleve.NewHighlight()
+		err := json.Unmarshal([]byte(highlight), highlightRequest)
+		if err != nil {
+			return err
+		}
+		searchRequest.Highlight = highlightRequest
+	}
 
 	sr, err := json.Marshal(searchRequest)
 	if err != nil {
@@ -125,6 +141,8 @@ func init() {
 	SearchCmd.Flags().BoolVar(&explain, "explain", defaultvalue.DefaultExplain, "contain an explanation of how scoring of the hits was computed")
 	SearchCmd.Flags().StringSliceVar(&fields, "field", defaultvalue.DefaultFields, "specify a set of fields to return")
 	SearchCmd.Flags().StringSliceVar(&sorts, "sort", defaultvalue.DefaultSorts, "sorting to perform")
+	SearchCmd.Flags().StringVar(&facets, "facets", defaultvalue.DefaultFacets, "faceting to perform")
+	SearchCmd.Flags().StringVar(&highlight, "highlight", defaultvalue.DefaultHighlight, "highlighting to perform")
 
 	RootCmd.AddCommand(SearchCmd)
 }

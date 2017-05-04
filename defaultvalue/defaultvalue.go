@@ -29,9 +29,11 @@ const (
 	DefaultFrom              int    = 0
 	DefaultSize              int    = 10
 	DefaultExplain           bool   = false
+	DefaultFacets            string = ""
+	DefaultHighlight         string = ""
 )
 
 var (
 	DefaultFields []string = []string{}
-	DefaultSorts  []string = []string{"-_score"}
+	DefaultSorts  []string = []string{}
 )
