@@ -24,6 +24,9 @@ func runESearchCmd(cmd *cobra.Command, args []string) error {
 	if index == "" {
 		return fmt.Errorf("required flag: --%s", cmd.Flag("index").Name)
 	}
+	if query == "" {
+		return fmt.Errorf("required flag: --%s", cmd.Flag("query").Name)
+	}
 
 	sr := make([]byte, 0)
 
@@ -48,11 +51,24 @@ func runESearchCmd(cmd *cobra.Command, args []string) error {
 		}
 	}
 
-	searchRequest.Query = bleve.NewQueryStringQuery(query)
-	searchRequest.Size = size
-	searchRequest.From = from
-	searchRequest.Explain = explain
-	searchRequest.Fields = fields
+	if cmd.Flag("query").Changed {
+		searchRequest.Query = bleve.NewQueryStringQuery(query)
+	}
+	if cmd.Flag("size").Changed {
+		searchRequest.Size = size
+	}
+	if cmd.Flag("from").Changed {
+		searchRequest.From = from
+	}
+	if cmd.Flag("explain").Changed {
+		searchRequest.Explain = explain
+	}
+	if cmd.Flag("field").Changed {
+		searchRequest.Fields = fields
+	}
+	if cmd.Flag("sort").Changed {
+		searchRequest.SortBy(sorts)
+	}
 
 	sr, err := json.Marshal(searchRequest)
 	if err != nil {
@@ -108,6 +124,7 @@ func init() {
 	SearchCmd.Flags().IntVar(&from, "from", defaultvalue.DefaultFrom, "starting from index of the hits to return")
 	SearchCmd.Flags().BoolVar(&explain, "explain", defaultvalue.DefaultExplain, "contain an explanation of how scoring of the hits was computed")
 	SearchCmd.Flags().StringSliceVar(&fields, "field", defaultvalue.DefaultFields, "specify a set of fields to return")
+	SearchCmd.Flags().StringSliceVar(&sorts, "sort", defaultvalue.DefaultSorts, "sorting to perform")
 
 	RootCmd.AddCommand(SearchCmd)
 }
