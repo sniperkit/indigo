@@ -541,7 +541,7 @@ The result of the above `bulk` command is:
 
 ```json
 {
-  "put_count": 7,
+  "put_count": 7
 }
 ```
 
