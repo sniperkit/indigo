@@ -85,6 +85,14 @@ func runESearchCmd(cmd *cobra.Command, args []string) error {
 		}
 		searchRequest.Highlight = highlightRequest
 	}
+	if cmd.Flag("highlight-style").Changed || cmd.Flag("highlight-field").Changed {
+		highlightRequest := bleve.NewHighlightWithStyle(highlightStyle)
+		highlightRequest.Fields = highlightFields
+		searchRequest.Highlight = highlightRequest
+	}
+	if cmd.Flag("include-locations").Changed {
+		searchRequest.IncludeLocations = includeLocations
+	}
 
 	sr, err := json.Marshal(searchRequest)
 	if err != nil {
@@ -143,6 +151,9 @@ func init() {
 	SearchCmd.Flags().StringSliceVar(&sorts, "sort", defaultvalue.DefaultSorts, "sorting to perform")
 	SearchCmd.Flags().StringVar(&facets, "facets", defaultvalue.DefaultFacets, "faceting to perform")
 	SearchCmd.Flags().StringVar(&highlight, "highlight", defaultvalue.DefaultHighlight, "highlighting to perform")
+	SearchCmd.Flags().StringVar(&highlightStyle, "highlight-style", defaultvalue.DefaultHighlightStyle, "highlighting style")
+	SearchCmd.Flags().StringSliceVar(&highlightFields, "highlight-field", defaultvalue.DefaultHighlightFields, "specify a set of fields to highlight")
+	SearchCmd.Flags().BoolVar(&includeLocations, "include-locations", defaultvalue.DefaultIncludeLocations, "include terms locations")
 
 	RootCmd.AddCommand(SearchCmd)
 }

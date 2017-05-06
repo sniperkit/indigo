@@ -31,9 +31,12 @@ const (
 	DefaultExplain           bool   = false
 	DefaultFacets            string = ""
 	DefaultHighlight         string = ""
+	DefaultHighlightStyle    string = "html"
+	DefaultIncludeLocations  bool   = false
 )
 
 var (
-	DefaultFields []string = []string{}
-	DefaultSorts  []string = []string{}
+	DefaultFields          []string = []string{}
+	DefaultSorts           []string = []string{}
+	DefaultHighlightFields []string = []string{}
 )
