@@ -18,8 +18,13 @@ var DeleteIndexCmd = &cobra.Command{
 }
 
 func runEDeleteIndexCmd(cmd *cobra.Command, args []string) error {
-	if index == "" {
-		return fmt.Errorf("required flag: --%s", cmd.Flag("index").Name)
+	deleteIndexRequest := &proto.DeleteIndexRequest{}
+
+	if cmd.Flag("index").Changed {
+		if cmd.Flag("index").Value.String() == "" {
+			return fmt.Errorf("required flag: --%s", cmd.Flag("index").Name)
+		}
+		deleteIndexRequest.Index = cmd.Flag("index").Value.String()
 	}
 
 	conn, err := grpc.Dial(gRPCServer, grpc.WithInsecure())
@@ -29,7 +34,7 @@ func runEDeleteIndexCmd(cmd *cobra.Command, args []string) error {
 	defer conn.Close()
 
 	client := proto.NewIndigoClient(conn)
-	resp, err := client.DeleteIndex(context.Background(), &proto.DeleteIndexRequest{Index: index})
+	resp, err := client.DeleteIndex(context.Background(), deleteIndexRequest)
 	if err != nil {
 		return err
 	}
@@ -51,7 +56,7 @@ func runEDeleteIndexCmd(cmd *cobra.Command, args []string) error {
 }
 
 func init() {
-	DeleteIndexCmd.Flags().StringVar(&index, "index", defaultvalue.DefaultIndex, "index name")
+	DeleteIndexCmd.Flags().String("index", defaultvalue.DefaultIndex, "index name")
 
 	DeleteCmd.AddCommand(DeleteIndexCmd)
 }

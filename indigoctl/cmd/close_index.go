@@ -3,7 +3,6 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/mosuka/indigo/defaultvalue"
 	"github.com/mosuka/indigo/proto"
 	"github.com/spf13/cobra"
 	"golang.org/x/net/context"
@@ -18,8 +17,13 @@ var CloseIndexCmd = &cobra.Command{
 }
 
 func runECloseIndexCmd(cmd *cobra.Command, args []string) error {
-	if index == "" {
-		return fmt.Errorf("required flag: --%s", cmd.Flag("index").Name)
+	closeIndexRequest := &proto.CloseIndexRequest{}
+
+	if cmd.Flag("index").Changed {
+		if cmd.Flag("index").Value.String() == "" {
+			return fmt.Errorf("required flag: --%s", cmd.Flag("index").Name)
+		}
+		closeIndexRequest.Index = cmd.Flag("index").Value.String()
 	}
 
 	conn, err := grpc.Dial(gRPCServer, grpc.WithInsecure())
@@ -29,7 +33,7 @@ func runECloseIndexCmd(cmd *cobra.Command, args []string) error {
 	defer conn.Close()
 
 	client := proto.NewIndigoClient(conn)
-	resp, err := client.CloseIndex(context.Background(), &proto.CloseIndexRequest{Index: index})
+	resp, err := client.CloseIndex(context.Background(), closeIndexRequest)
 	if err != nil {
 		return err
 	}
@@ -51,7 +55,8 @@ func runECloseIndexCmd(cmd *cobra.Command, args []string) error {
 }
 
 func init() {
-	CloseIndexCmd.Flags().StringVar(&index, "index", defaultvalue.DefaultIndex, "index name")
+	CloseIndexCmd.MarkFlagRequired("index")
+	CloseIndexCmd.Flags().String("index", "", "index name")
 
 	CloseCmd.AddCommand(CloseIndexCmd)
 }
