@@ -4,10 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/blevesearch/bleve/mapping"
-	"github.com/mosuka/indigo/defaultvalue"
 	"github.com/mosuka/indigo/proto"
 	"github.com/spf13/cobra"
-	"golang.org/x/crypto/ssh/terminal"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"io/ioutil"
@@ -31,10 +29,11 @@ type CreateIndexResource struct {
 
 func runECreateIndexCmd(cmd *cobra.Command, args []string) error {
 	var resourceBytes []byte = nil
-	if terminal.IsTerminal(0) {
-		if len(args) > 0 {
-			resourceBytes = []byte(args[0])
-			file, err := os.Open(args[0])
+	if cmd.Flag("resource").Changed {
+		if cmd.Flag("resource").Value.String() == "-" {
+			resourceBytes, _ = ioutil.ReadAll(os.Stdin)
+		} else {
+			file, err := os.Open(cmd.Flag("resource").Value.String())
 			if err != nil {
 				return err
 			}
@@ -45,8 +44,6 @@ func runECreateIndexCmd(cmd *cobra.Command, args []string) error {
 				return err
 			}
 		}
-	} else {
-		resourceBytes, _ = ioutil.ReadAll(os.Stdin)
 	}
 
 	createIndexResource := CreateIndexResource{}
@@ -124,11 +121,12 @@ func runECreateIndexCmd(cmd *cobra.Command, args []string) error {
 }
 
 func init() {
-	CreateIndexCmd.Flags().String("index", defaultvalue.DefaultIndex, "index name")
-	CreateIndexCmd.Flags().String("index-mapping", defaultvalue.DefaultIndexMapping, "index mapping")
-	CreateIndexCmd.Flags().String("index-type", defaultvalue.DefaultIndexType, "index type")
-	CreateIndexCmd.Flags().String("kvstore", defaultvalue.DefaultKVStore, "kvstore")
-	CreateIndexCmd.Flags().String("kvconfig", defaultvalue.DefaultKVConfigFile, "kvconfig")
+	CreateIndexCmd.Flags().String("resource", "", "resource file")
+	CreateIndexCmd.Flags().String("index", "", "index name")
+	CreateIndexCmd.Flags().String("index-mapping", "", "index mapping")
+	CreateIndexCmd.Flags().String("index-type", "", "index type")
+	CreateIndexCmd.Flags().String("kvstore", "", "kvstore")
+	CreateIndexCmd.Flags().String("kvconfig", "", "kvconfig")
 
 	CreateCmd.AddCommand(CreateIndexCmd)
 }

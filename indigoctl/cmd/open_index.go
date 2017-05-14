@@ -3,10 +3,8 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/mosuka/indigo/defaultvalue"
 	"github.com/mosuka/indigo/proto"
 	"github.com/spf13/cobra"
-	//"golang.org/x/crypto/ssh/terminal"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"io/ioutil"
@@ -27,7 +25,6 @@ type OpenIndexResource struct {
 
 func runEOpenIndexCmd(cmd *cobra.Command, args []string) error {
 	var resourceBytes []byte = nil
-
 	if cmd.Flag("resource").Changed {
 		if cmd.Flag("resource").Value.String() == "-" {
 			resourceBytes, _ = ioutil.ReadAll(os.Stdin)
@@ -100,8 +97,8 @@ func runEOpenIndexCmd(cmd *cobra.Command, args []string) error {
 
 func init() {
 	OpenIndexCmd.Flags().String("resource", "", "resource file")
-	OpenIndexCmd.Flags().String("index", defaultvalue.DefaultIndex, "index name")
-	OpenIndexCmd.Flags().String("runtime-config", defaultvalue.DefaultRuntimeConfig, "runtime config")
+	OpenIndexCmd.Flags().String("index", "", "index name")
+	OpenIndexCmd.Flags().String("runtime-config", "", "runtime config")
 
 	OpenCmd.AddCommand(OpenIndexCmd)
 }
