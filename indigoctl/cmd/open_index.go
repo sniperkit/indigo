@@ -6,6 +6,7 @@ import (
 	"github.com/mosuka/indigo/defaultvalue"
 	"github.com/mosuka/indigo/proto"
 	"github.com/spf13/cobra"
+	//"golang.org/x/crypto/ssh/terminal"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"io/ioutil"
@@ -13,30 +14,60 @@ import (
 )
 
 var OpenIndexCmd = &cobra.Command{
-	Use:   "index",
+	Use:   "index RESOURCE_FILENAME",
 	Short: "opens the index to the Indigo gRPC Server",
 	Long:  `The open index command opens the index to the Indigo gRPC Server.`,
 	RunE:  runEOpenIndexCmd,
 }
 
+type OpenIndexResource struct {
+	Index         string                 `json:"index,omitempty"`
+	RuntimeConfig map[string]interface{} `json:"runtime_config,omitempty"`
+}
+
 func runEOpenIndexCmd(cmd *cobra.Command, args []string) error {
-	if index == "" {
-		return fmt.Errorf("required flag: --%s", cmd.Flag("index").Name)
+	var resourceBytes []byte = nil
+
+	if cmd.Flag("resource").Changed {
+		if cmd.Flag("resource").Value.String() == "-" {
+			resourceBytes, _ = ioutil.ReadAll(os.Stdin)
+		} else {
+			file, err := os.Open(cmd.Flag("resource").Value.String())
+			if err != nil {
+				return err
+			}
+			defer file.Close()
+
+			resourceBytes, err = ioutil.ReadAll(file)
+			if err != nil {
+				return err
+			}
+		}
 	}
 
-	var rc []byte = nil
+	openIndexResource := OpenIndexResource{}
+	err := json.Unmarshal(resourceBytes, &openIndexResource)
+	if err != nil {
+		return err
+	}
 
-	if runtimeConfig != "" {
-		file, err := os.Open(runtimeConfig)
-		if err != nil {
-			return err
-		}
-		defer file.Close()
+	runtimeConfigBytes, err := json.Marshal(openIndexResource.RuntimeConfig)
+	if err != nil {
+		return err
+	}
 
-		rc, err = ioutil.ReadAll(file)
-		if err != nil {
-			return err
-		}
+	openIndexRequest := &proto.OpenIndexRequest{
+		Index:         openIndexResource.Index,
+		RuntimeConfig: runtimeConfigBytes,
+	}
+
+	if cmd.Flag("index").Changed {
+		openIndexRequest.Index = cmd.Flag("index").Value.String()
+	}
+
+	if cmd.Flag("runtime-config").Changed {
+		runtimeConfigBytes := []byte(cmd.Flag("runtime-config").Value.String())
+		openIndexRequest.RuntimeConfig = runtimeConfigBytes
 	}
 
 	conn, err := grpc.Dial(gRPCServer, grpc.WithInsecure())
@@ -46,7 +77,7 @@ func runEOpenIndexCmd(cmd *cobra.Command, args []string) error {
 	defer conn.Close()
 
 	client := proto.NewIndigoClient(conn)
-	resp, err := client.OpenIndex(context.Background(), &proto.OpenIndexRequest{Index: index, RuntimeConfig: rc})
+	resp, err := client.OpenIndex(context.Background(), openIndexRequest)
 	if err != nil {
 		return err
 	}
@@ -68,8 +99,9 @@ func runEOpenIndexCmd(cmd *cobra.Command, args []string) error {
 }
 
 func init() {
-	OpenIndexCmd.Flags().StringVar(&index, "index", defaultvalue.DefaultIndex, "index name")
-	OpenIndexCmd.Flags().StringVar(&runtimeConfig, "runtime-config", defaultvalue.DefaultRuntimeConfig, "runtime config")
+	OpenIndexCmd.Flags().String("resource", "", "resource file")
+	OpenIndexCmd.Flags().String("index", defaultvalue.DefaultIndex, "index name")
+	OpenIndexCmd.Flags().String("runtime-config", defaultvalue.DefaultRuntimeConfig, "runtime config")
 
 	OpenCmd.AddCommand(OpenIndexCmd)
 }
