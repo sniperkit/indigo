@@ -12,7 +12,7 @@ import (
 )
 
 var OpenIndexCmd = &cobra.Command{
-	Use:   "index RESOURCE_FILENAME",
+	Use:   "index",
 	Short: "opens the index to the Indigo gRPC Server",
 	Long:  `The open index command opens the index to the Indigo gRPC Server.`,
 	RunE:  runEOpenIndexCmd,

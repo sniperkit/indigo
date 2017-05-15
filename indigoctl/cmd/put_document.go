@@ -3,7 +3,6 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/mosuka/indigo/defaultvalue"
 	"github.com/mosuka/indigo/proto"
 	"github.com/spf13/cobra"
 	"golang.org/x/net/context"
@@ -19,29 +18,59 @@ var PutDocumentCmd = &cobra.Command{
 	RunE:  runEPutDocumentCmd,
 }
 
+type PutDocumentResource struct {
+	Index  string      `json:"index,omitempty"`
+	Id     string      `json:"id,omitempty"`
+	Fields interface{} `json:"fields,omitempty"`
+}
+
 func runEPutDocumentCmd(cmd *cobra.Command, args []string) error {
-	if index == "" {
-		return fmt.Errorf("required flag: --%s", cmd.Flag("index").Name)
+	var resourceBytes []byte = nil
+	if cmd.Flag("resource").Changed {
+		if cmd.Flag("resource").Value.String() == "-" {
+			resourceBytes, _ = ioutil.ReadAll(os.Stdin)
+		} else {
+			file, err := os.Open(cmd.Flag("resource").Value.String())
+			if err != nil {
+				return err
+			}
+			defer file.Close()
+
+			resourceBytes, err = ioutil.ReadAll(file)
+			if err != nil {
+				return err
+			}
+		}
 	}
 
-	if docID == "" {
-		return fmt.Errorf("required flag: --%s", cmd.Flag("id").Name)
-	}
-
-	if docFields == "" {
-		return fmt.Errorf("required flag: --%s", cmd.Flag("fields").Name)
-	}
-
-	document := make([]byte, 0)
-	file, err := os.Open(docFields)
+	putDocumentResource := PutDocumentResource{}
+	err := json.Unmarshal(resourceBytes, &putDocumentResource)
 	if err != nil {
 		return err
 	}
-	defer file.Close()
 
-	document, err = ioutil.ReadAll(file)
+	fieldsBytes, err := json.Marshal(putDocumentResource.Fields)
 	if err != nil {
 		return err
+	}
+
+	putDocumentRequest := &proto.PutDocumentRequest{
+		Index:  putDocumentResource.Index,
+		Id:     putDocumentResource.Id,
+		Fields: fieldsBytes,
+	}
+
+	if cmd.Flag("index").Changed {
+		putDocumentRequest.Index = cmd.Flag("index").Value.String()
+	}
+
+	if cmd.Flag("id").Changed {
+		putDocumentRequest.Id = cmd.Flag("id").Value.String()
+	}
+
+	if cmd.Flag("fields").Changed {
+		fieldsBytes := []byte(cmd.Flag("fields").Value.String())
+		putDocumentRequest.Fields = fieldsBytes
 	}
 
 	conn, err := grpc.Dial(gRPCServer, grpc.WithInsecure())
@@ -51,7 +80,7 @@ func runEPutDocumentCmd(cmd *cobra.Command, args []string) error {
 	defer conn.Close()
 
 	client := proto.NewIndigoClient(conn)
-	resp, err := client.PutDocument(context.Background(), &proto.PutDocumentRequest{Index: index, Id: docID, Fields: document})
+	resp, err := client.PutDocument(context.Background(), putDocumentRequest)
 	if err != nil {
 		return err
 	}
@@ -73,9 +102,10 @@ func runEPutDocumentCmd(cmd *cobra.Command, args []string) error {
 }
 
 func init() {
-	PutDocumentCmd.Flags().StringVar(&index, "index", defaultvalue.DefaultIndex, "index name")
-	PutDocumentCmd.Flags().StringVar(&docID, "id", defaultvalue.DefaultDocID, "document id")
-	PutDocumentCmd.Flags().StringVar(&docFields, "fields", defaultvalue.DefaultDocFields, "document fields")
+	PutDocumentCmd.Flags().String("resource", "", "resource file")
+	PutDocumentCmd.Flags().String("index", "", "index name")
+	PutDocumentCmd.Flags().String("id", "", "document id")
+	PutDocumentCmd.Flags().String("fields", "", "document fields")
 
 	PutCmd.AddCommand(PutDocumentCmd)
 }

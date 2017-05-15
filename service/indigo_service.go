@@ -414,14 +414,6 @@ func (igs *IndigoGRPCService) GetIndex(ctx context.Context, req *proto.GetIndexR
 	}, err
 }
 
-//func (igs *IndigoGRPCService) CreateAlias(ctx context.Context, req *proto.CreateAliasRequest) (*proto.CreateAliasResponse, error) {
-//
-//	return &proto.CreateAliasResponse{
-//		Alias:   req.Alias,
-//		Indices: req.Indices,
-//	}, nil
-//}
-
 func (igs *IndigoGRPCService) PutDocument(ctx context.Context, req *proto.PutDocumentRequest) (*proto.PutDocumentResponse, error) {
 	index, open := igs.indices[req.Index]
 	if !open {

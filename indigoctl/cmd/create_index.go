@@ -13,7 +13,7 @@ import (
 )
 
 var CreateIndexCmd = &cobra.Command{
-	Use:   "index RESOURCE_FILENAME",
+	Use:   "index",
 	Short: "creates the index to the Indigo gRPC Server",
 	Long:  `The create index command creates the index to the Indigo gRPC Server.`,
 	RunE:  runECreateIndexCmd,
