@@ -19,7 +19,19 @@ var BulkCmd = &cobra.Command{
 	RunE:  runEBulkCmd,
 }
 
+type BulkRequest struct {
+	Method string      `json:"method,omitempty"`
+	Id     string      `json:"id,omitempty"`
+	Fields interface{} `json:"fields,omitempty"`
+}
+
+type BulkResource struct {
+	BatchSize    int32         `json:"batch_size,omitempty"`
+	BulkRequests []BulkRequest `json:"bulk_requests,omitempty"`
+}
+
 func runEBulkCmd(cmd *cobra.Command, args []string) error {
+	index := cmd.Flag("index").Value.String()
 	if index == "" {
 		return fmt.Errorf("required flag: --%s", cmd.Flag("index").Name)
 	}
@@ -47,7 +59,7 @@ func runEBulkCmd(cmd *cobra.Command, args []string) error {
 	defer conn.Close()
 
 	client := proto.NewIndigoClient(conn)
-	resp, err := client.Bulk(context.Background(), &proto.BulkRequest{Index: index, BulkRequest: br, BatchSize: batchSize})
+	resp, err := client.Bulk(context.Background(), &proto.BulkRequest{Index: index, BulkRequests: br, BatchSize: batchSize})
 	if err != nil {
 		return err
 	}
@@ -70,7 +82,7 @@ func runEBulkCmd(cmd *cobra.Command, args []string) error {
 
 func init() {
 	BulkCmd.Flags().StringVar(&gRPCServer, "grpc-server", defaultvalue.DefaultGRPCServer, "Indigo gRPC Server to connect to")
-	BulkCmd.Flags().StringVar(&index, "index", defaultvalue.DefaultIndex, "index name")
+	BulkCmd.Flags().String("index", "", "index name")
 	BulkCmd.Flags().StringVar(&bulkRequest, "bulk-request", defaultvalue.DefaultBulkRequest, "bulk request")
 	BulkCmd.Flags().Int32Var(&batchSize, "batch-size", defaultvalue.DefaultBatchSize, "batch size of bulk request")
 

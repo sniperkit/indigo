@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/blevesearch/bleve"
 	"github.com/blevesearch/bleve/mapping"
-	"github.com/mosuka/indigo/defaultvalue"
 	"github.com/mosuka/indigo/proto"
 	"github.com/spf13/cobra"
 	"golang.org/x/net/context"
@@ -19,9 +18,20 @@ var GetIndexCmd = &cobra.Command{
 	RunE:  runEGetIndexCmd,
 }
 
+type GetIndexResponse struct {
+	DocumentCount uint64                    `json:"document_count"`
+	IndexStats    map[string]interface{}    `json:"index_stats"`
+	IndexMapping  *mapping.IndexMappingImpl `json:"index_mapping"`
+}
+
 func runEGetIndexCmd(cmd *cobra.Command, args []string) error {
+	index := cmd.Flag("index").Value.String()
 	if index == "" {
 		return fmt.Errorf("required flag: --%s", cmd.Flag("index").Name)
+	}
+
+	getIndexRequest := &proto.GetIndexRequest{
+		Index: index,
 	}
 
 	conn, err := grpc.Dial(gRPCServer, grpc.WithInsecure())
@@ -31,7 +41,7 @@ func runEGetIndexCmd(cmd *cobra.Command, args []string) error {
 	defer conn.Close()
 
 	client := proto.NewIndigoClient(conn)
-	resp, err := client.GetIndex(context.Background(), &proto.GetIndexRequest{Index: index})
+	resp, err := client.GetIndex(context.Background(), getIndexRequest)
 	if err != nil {
 		return err
 	}
@@ -46,11 +56,7 @@ func runEGetIndexCmd(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	r := struct {
-		DocumentCount uint64                    `json:"document_count"`
-		IndexStats    map[string]interface{}    `json:"index_stats"`
-		IndexMapping  *mapping.IndexMappingImpl `json:"index_mapping"`
-	}{
+	r := GetIndexResponse{
 		DocumentCount: resp.DocumentCount,
 		IndexStats:    indexStats,
 		IndexMapping:  indexMapping,
@@ -73,7 +79,7 @@ func runEGetIndexCmd(cmd *cobra.Command, args []string) error {
 }
 
 func init() {
-	GetIndexCmd.Flags().StringVar(&index, "index", defaultvalue.DefaultIndex, "index name")
+	GetIndexCmd.Flags().String("index", "", "index name")
 
 	GetCmd.AddCommand(GetIndexCmd)
 }

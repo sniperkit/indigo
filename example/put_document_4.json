@@ -1,5 +1,4 @@
 {
-  "id": "4",
   "fields": {
     "name": "Ferret",
     "description": "Ferret is a super fast, highly configurable search library written in Ruby.",

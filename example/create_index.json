@@ -1,5 +1,4 @@
 {
-  "index": "example",
   "index_mapping": {
     "types": {
       "document": {

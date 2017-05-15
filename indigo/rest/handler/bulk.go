@@ -60,7 +60,7 @@ func (h *BulkHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		}).Warn("unexpected batch size")
 	}
 
-	resp, err := h.client.Bulk(context.Background(), &proto.BulkRequest{Index: index, BulkRequest: bulkRequest, BatchSize: batchSize})
+	resp, err := h.client.Bulk(context.Background(), &proto.BulkRequest{Index: index, BulkRequests: bulkRequest, BatchSize: batchSize})
 	if err != nil {
 		log.WithFields(log.Fields{
 			"err": err,

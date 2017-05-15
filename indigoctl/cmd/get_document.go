@@ -3,7 +3,6 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/mosuka/indigo/defaultvalue"
 	"github.com/mosuka/indigo/proto"
 	"github.com/spf13/cobra"
 	"golang.org/x/net/context"
@@ -17,13 +16,25 @@ var GetDocumentCmd = &cobra.Command{
 	RunE:  runEGetDocumentCmd,
 }
 
+type GetDocumentResponse struct {
+	Id     string      `json:"id"`
+	Fields interface{} `json:"fields"`
+}
+
 func runEGetDocumentCmd(cmd *cobra.Command, args []string) error {
+	index := cmd.Flag("index").Value.String()
 	if index == "" {
 		return fmt.Errorf("required flag: --%s", cmd.Flag("index").Name)
 	}
 
-	if docID == "" {
+	id := cmd.Flag("id").Value.String()
+	if id == "" {
 		return fmt.Errorf("required flag: --%s", cmd.Flag("id").Name)
+	}
+
+	getDocumentRequest := &proto.GetDocumentRequest{
+		Index: index,
+		Id:    id,
 	}
 
 	conn, err := grpc.Dial(gRPCServer, grpc.WithInsecure())
@@ -33,21 +44,18 @@ func runEGetDocumentCmd(cmd *cobra.Command, args []string) error {
 	defer conn.Close()
 
 	client := proto.NewIndigoClient(conn)
-	resp, err := client.GetDocument(context.Background(), &proto.GetDocumentRequest{Index: index, Id: docID})
+	resp, err := client.GetDocument(context.Background(), getDocumentRequest)
 	if err != nil {
 		return err
 	}
 
-	fields := make(map[string]interface{})
+	var fields interface{} = nil
 	if err := json.Unmarshal(resp.Fields, &fields); err != nil {
 		return err
 	}
 
-	r := struct {
-		ID     string                 `json:"id"`
-		Fields map[string]interface{} `json:"fields"`
-	}{
-		ID:     docID,
+	r := GetDocumentResponse{
+		Id:     resp.Id,
 		Fields: fields,
 	}
 
@@ -68,8 +76,8 @@ func runEGetDocumentCmd(cmd *cobra.Command, args []string) error {
 }
 
 func init() {
-	GetDocumentCmd.Flags().StringVar(&index, "index", defaultvalue.DefaultIndex, "index name")
-	GetDocumentCmd.Flags().StringVar(&docID, "id", defaultvalue.DefaultDocID, "document id")
+	GetDocumentCmd.Flags().String("index", "", "index name")
+	GetDocumentCmd.Flags().String("id", "", "document id")
 
 	GetCmd.AddCommand(GetDocumentCmd)
 }

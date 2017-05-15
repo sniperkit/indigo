@@ -103,7 +103,7 @@ message DeleteDocumentResponse {
 
 message BulkRequest {
     string index = 1;
-    bytes bulk_request = 2;
+    bytes bulk_requests = 2;
     int32 batch_size = 3;
 }
 

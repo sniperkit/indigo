@@ -17,6 +17,8 @@ var ListIndexCmd = &cobra.Command{
 }
 
 func runEListIndexCmd(cmd *cobra.Command, args []string) error {
+	listIndexRequest := &proto.ListIndexRequest{}
+
 	conn, err := grpc.Dial(gRPCServer, grpc.WithInsecure())
 	if err != nil {
 		return err
@@ -24,7 +26,7 @@ func runEListIndexCmd(cmd *cobra.Command, args []string) error {
 	defer conn.Close()
 
 	client := proto.NewIndigoClient(conn)
-	resp, err := client.ListIndex(context.Background(), &proto.ListIndexRequest{})
+	resp, err := client.ListIndex(context.Background(), listIndexRequest)
 	if err != nil {
 		return err
 	}

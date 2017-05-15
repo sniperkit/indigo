@@ -19,11 +19,15 @@ var OpenIndexCmd = &cobra.Command{
 }
 
 type OpenIndexResource struct {
-	Index         string                 `json:"index,omitempty"`
 	RuntimeConfig map[string]interface{} `json:"runtime_config,omitempty"`
 }
 
 func runEOpenIndexCmd(cmd *cobra.Command, args []string) error {
+	index := cmd.Flag("index").Value.String()
+	if index == "" {
+		return fmt.Errorf("required flag: --%s", cmd.Flag("index").Name)
+	}
+
 	var resourceBytes []byte = nil
 	if cmd.Flag("resource").Changed {
 		if cmd.Flag("resource").Value.String() == "-" {
@@ -54,7 +58,7 @@ func runEOpenIndexCmd(cmd *cobra.Command, args []string) error {
 	}
 
 	openIndexRequest := &proto.OpenIndexRequest{
-		Index:         openIndexResource.Index,
+		Index:         index,
 		RuntimeConfig: runtimeConfigBytes,
 	}
 
@@ -96,8 +100,8 @@ func runEOpenIndexCmd(cmd *cobra.Command, args []string) error {
 }
 
 func init() {
-	OpenIndexCmd.Flags().String("resource", "", "resource file")
 	OpenIndexCmd.Flags().String("index", "", "index name")
+	OpenIndexCmd.Flags().String("resource", "", "resource file")
 	OpenIndexCmd.Flags().String("runtime-config", "", "runtime config")
 
 	OpenCmd.AddCommand(OpenIndexCmd)

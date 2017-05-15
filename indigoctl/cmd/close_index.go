@@ -17,13 +17,13 @@ var CloseIndexCmd = &cobra.Command{
 }
 
 func runECloseIndexCmd(cmd *cobra.Command, args []string) error {
-	closeIndexRequest := &proto.CloseIndexRequest{}
+	index := cmd.Flag("index").Value.String()
+	if index == "" {
+		return fmt.Errorf("required flag: --%s", cmd.Flag("index").Name)
+	}
 
-	if cmd.Flag("index").Changed {
-		if cmd.Flag("index").Value.String() == "" {
-			return fmt.Errorf("required flag: --%s", cmd.Flag("index").Name)
-		}
-		closeIndexRequest.Index = cmd.Flag("index").Value.String()
+	closeIndexRequest := &proto.CloseIndexRequest{
+		Index: index,
 	}
 
 	conn, err := grpc.Dial(gRPCServer, grpc.WithInsecure())
@@ -55,7 +55,6 @@ func runECloseIndexCmd(cmd *cobra.Command, args []string) error {
 }
 
 func init() {
-	CloseIndexCmd.MarkFlagRequired("index")
 	CloseIndexCmd.Flags().String("index", "", "index name")
 
 	CloseCmd.AddCommand(CloseIndexCmd)

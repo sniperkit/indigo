@@ -606,8 +606,8 @@ func (igs *IndigoGRPCService) Bulk(ctx context.Context, req *proto.BulkRequest) 
 	}
 
 	var bulkRequest interface{}
-	if req.BulkRequest != nil {
-		err := json.Unmarshal(req.BulkRequest, &bulkRequest)
+	if req.BulkRequests != nil {
+		err := json.Unmarshal(req.BulkRequests, &bulkRequest)
 		if err != nil {
 			log.WithFields(log.Fields{
 				"index": req.Index,

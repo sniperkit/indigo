@@ -1,5 +1,4 @@
 {
-  "id": "6",
   "fields": {
     "name": "Elasticsearch",
     "description": "Elasticsearch is a search engine based on Lucene, written in Java.",

@@ -20,7 +20,6 @@ var CreateIndexCmd = &cobra.Command{
 }
 
 type CreateIndexResource struct {
-	Index        string                    `json:"index,omitempty"`
 	IndexMapping *mapping.IndexMappingImpl `json:"index_mapping,omitempty"`
 	IndexType    string                    `json:"index_type,omitempty"`
 	Kvstore      string                    `json:"kvstore,omitempty"`
@@ -28,6 +27,11 @@ type CreateIndexResource struct {
 }
 
 func runECreateIndexCmd(cmd *cobra.Command, args []string) error {
+	index := cmd.Flag("index").Value.String()
+	if index == "" {
+		return fmt.Errorf("required flag: --%s", cmd.Flag("index").Name)
+	}
+
 	var resourceBytes []byte = nil
 	if cmd.Flag("resource").Changed {
 		if cmd.Flag("resource").Value.String() == "-" {
@@ -63,15 +67,11 @@ func runECreateIndexCmd(cmd *cobra.Command, args []string) error {
 	}
 
 	createIndexRequest := &proto.CreateIndexRequest{
-		Index:        createIndexResource.Index,
+		Index:        index,
 		IndexMapping: indexMappingBytes,
 		IndexType:    createIndexResource.IndexType,
 		Kvstore:      createIndexResource.Kvstore,
 		Kvconfig:     kvconfigBytes,
-	}
-
-	if cmd.Flag("index").Changed {
-		createIndexRequest.Index = cmd.Flag("index").Value.String()
 	}
 
 	if cmd.Flag("index-mapping").Changed {
@@ -121,8 +121,8 @@ func runECreateIndexCmd(cmd *cobra.Command, args []string) error {
 }
 
 func init() {
-	CreateIndexCmd.Flags().String("resource", "", "resource file")
 	CreateIndexCmd.Flags().String("index", "", "index name")
+	CreateIndexCmd.Flags().String("resource", "", "resource file")
 	CreateIndexCmd.Flags().String("index-mapping", "", "index mapping")
 	CreateIndexCmd.Flags().String("index-type", "", "index type")
 	CreateIndexCmd.Flags().String("kvstore", "", "kvstore")

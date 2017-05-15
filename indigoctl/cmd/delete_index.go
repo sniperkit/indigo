@@ -3,7 +3,6 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/mosuka/indigo/defaultvalue"
 	"github.com/mosuka/indigo/proto"
 	"github.com/spf13/cobra"
 	"golang.org/x/net/context"
@@ -18,13 +17,13 @@ var DeleteIndexCmd = &cobra.Command{
 }
 
 func runEDeleteIndexCmd(cmd *cobra.Command, args []string) error {
-	deleteIndexRequest := &proto.DeleteIndexRequest{}
+	index := cmd.Flag("index").Value.String()
+	if index == "" {
+		return fmt.Errorf("required flag: --%s", cmd.Flag("index").Name)
+	}
 
-	if cmd.Flag("index").Changed {
-		if cmd.Flag("index").Value.String() == "" {
-			return fmt.Errorf("required flag: --%s", cmd.Flag("index").Name)
-		}
-		deleteIndexRequest.Index = cmd.Flag("index").Value.String()
+	deleteIndexRequest := &proto.DeleteIndexRequest{
+		Index: index,
 	}
 
 	conn, err := grpc.Dial(gRPCServer, grpc.WithInsecure())
@@ -56,7 +55,7 @@ func runEDeleteIndexCmd(cmd *cobra.Command, args []string) error {
 }
 
 func init() {
-	DeleteIndexCmd.Flags().String("index", defaultvalue.DefaultIndex, "index name")
+	DeleteIndexCmd.Flags().String("index", "", "index name")
 
 	DeleteCmd.AddCommand(DeleteIndexCmd)
 }
