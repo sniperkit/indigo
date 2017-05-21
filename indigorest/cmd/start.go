@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/mosuka/indigo/indigo/grpc"
+	"github.com/mosuka/indigo/indigorest/rest"
 	"github.com/mosuka/indigo/version"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -17,8 +17,8 @@ var logOutput *os.File
 
 var StartCmd = &cobra.Command{
 	Use:                "start",
-	Short:              "starts the Indigo Server",
-	Long:               `The start command starts the Indigo Server.`,
+	Short:              "starts the Indigo REST Server",
+	Long:               `The start command starts the Indigo REST Server.`,
 	PersistentPreRunE:  persistentPreRunEStartCmd,
 	RunE:               runEStartCmd,
 	PersistentPostRunE: persistentPostRunEStartCmd,
@@ -109,8 +109,8 @@ func persistentPreRunEStartCmd(cmd *cobra.Command, args []string) error {
 }
 
 func runEStartCmd(cmd *cobra.Command, args []string) error {
-	server := grpc.NewIndigoGRPCServer(viper.GetInt("port"), viper.GetString("data_dir"))
-	server.Start(viper.GetBool("open_existing_index"))
+	server := rest.NewIndigoRESTServer(viper.GetInt("port"), viper.GetString("base_uri"), viper.GetString("server"))
+	server.Start()
 
 	signalChan := make(chan os.Signal, 1)
 	signal.Notify(signalChan,
@@ -145,16 +145,16 @@ func init() {
 	StartCmd.Flags().String("log-format", DefaultLogFormat, "log format of Indigo Server")
 	StartCmd.Flags().String("log-output", DefaultLogOutput, "log output destination of Indigo Server")
 	StartCmd.Flags().String("log-level", DefaultLogLevel, "log level of log output by Indigo Server")
-	StartCmd.Flags().Int("port", DefaultPort, "port number to be used when Indigo gRPC Server starts up")
-	StartCmd.Flags().String("data-dir", DefaultDataDir, "path of the directory where Indigo gRPC Server stores the data")
-	StartCmd.Flags().Bool("open-existing-index", DefaultOpenExistingIndex, "flag to open indices when started to Indigo gRPC Server")
+	StartCmd.Flags().Int("port", DefaultPort, "port number to be used when Indigo REST Server starts up")
+	StartCmd.Flags().String("base-uri", DefaultBaseURI, "base URI of API endpoint on Indigo REST Server")
+	StartCmd.Flags().String("server", DefaultServer, "Indigo gRPC server that Indigo REST Server connect to")
 
 	viper.BindPFlag("log_format", StartCmd.Flags().Lookup("log-format"))
 	viper.BindPFlag("log_output", StartCmd.Flags().Lookup("log-output"))
 	viper.BindPFlag("log_level", StartCmd.Flags().Lookup("log-level"))
 	viper.BindPFlag("port", StartCmd.Flags().Lookup("port"))
-	viper.BindPFlag("data_dir", StartCmd.Flags().Lookup("data-dir"))
-	viper.BindPFlag("open_existing_index", StartCmd.Flags().Lookup("open-existing-index"))
+	viper.BindPFlag("base_uri", StartCmd.Flags().Lookup("base-uri"))
+	viper.BindPFlag("server", StartCmd.Flags().Lookup("server"))
 
 	RootCmd.AddCommand(StartCmd)
 }

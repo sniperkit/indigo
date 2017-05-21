@@ -1,11 +1,16 @@
 package cmd
 
 import (
-	"github.com/mosuka/indigo/defaultvalue"
 	"github.com/spf13/cobra"
 )
 
-var PutCmd = &cobra.Command{
+type PutCommandOptions struct {
+	gRPCServer string
+}
+
+var putCmdOpts PutCommandOptions
+
+var putCmd = &cobra.Command{
 	Use:   "put",
 	Short: "puts the object from the Indigo gRPC Server",
 	Long:  `The put command puts the object from tlhe Indigo gRPC Server.`,
@@ -26,7 +31,7 @@ func runEPutCmd(cmd *cobra.Command, args []string) error {
 }
 
 func init() {
-	PutCmd.PersistentFlags().StringVar(&gRPCServer, "grpc-server", defaultvalue.DefaultGRPCServer, "Indigo gRPC Server to connect to")
+	putCmd.PersistentFlags().StringVar(&putCmdOpts.gRPCServer, "grpc-server", DefaultServer, "Indigo gRPC Server to connect to")
 
-	RootCmd.AddCommand(PutCmd)
+	RootCmd.AddCommand(putCmd)
 }

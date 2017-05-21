@@ -2,14 +2,20 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/mosuka/indigo/defaultvalue"
 	ver "github.com/mosuka/indigo/version"
 	"github.com/spf13/cobra"
 	"os"
 )
 
+type RootCommandOptions struct {
+	outputFormat string
+	versionFlag  bool
+}
+
+var rootCmdOpts RootCommandOptions
+
 var RootCmd = &cobra.Command{
-	Use:               "indigo",
+	Use:               "indigoctl",
 	Short:             "CLI for controling Indigo Server",
 	Long:              `The Command Line Interface for controling the Indigo Server.`,
 	PersistentPreRunE: persistentPreRunERootCmd,
@@ -17,7 +23,7 @@ var RootCmd = &cobra.Command{
 }
 
 func persistentPreRunERootCmd(cmd *cobra.Command, args []string) error {
-	if versionFlag {
+	if rootCmdOpts.versionFlag {
 		fmt.Printf("%s\n", ver.Version)
 		os.Exit(0)
 	}
@@ -34,6 +40,6 @@ func runERootCmd(cmd *cobra.Command, args []string) error {
 }
 
 func init() {
-	RootCmd.PersistentFlags().StringVar(&outputFormat, "output-format", defaultvalue.DefaultOutputFormat, "output format of the command execution result")
-	RootCmd.PersistentFlags().BoolVar(&versionFlag, "verson", defaultvalue.DefaultVersionFlag, "show version numner")
+	RootCmd.PersistentFlags().StringVar(&rootCmdOpts.outputFormat, "output-format", DefaultOutputFormat, "output format of the command execution result")
+	RootCmd.PersistentFlags().BoolVar(&rootCmdOpts.versionFlag, "version", DefaultVersionFlag, "show version number")
 }

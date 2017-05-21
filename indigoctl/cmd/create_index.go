@@ -12,7 +12,18 @@ import (
 	"os"
 )
 
-var CreateIndexCmd = &cobra.Command{
+type CreateIndexCommandOptions struct {
+	index        string
+	resource     string
+	indexMapping string
+	indexType    string
+	kvstore      string
+	kvconfig     string
+}
+
+var createIndexCmdOpts CreateIndexCommandOptions
+
+var createIndexCmd = &cobra.Command{
 	Use:   "index",
 	Short: "creates the index to the Indigo gRPC Server",
 	Long:  `The create index command creates the index to the Indigo gRPC Server.`,
@@ -27,17 +38,16 @@ type CreateIndexResource struct {
 }
 
 func runECreateIndexCmd(cmd *cobra.Command, args []string) error {
-	index := cmd.Flag("index").Value.String()
-	if index == "" {
+	if createIndexCmdOpts.index == "" {
 		return fmt.Errorf("required flag: --%s", cmd.Flag("index").Name)
 	}
 
 	var resourceBytes []byte = nil
 	if cmd.Flag("resource").Changed {
-		if cmd.Flag("resource").Value.String() == "-" {
+		if createIndexCmdOpts.resource == "-" {
 			resourceBytes, _ = ioutil.ReadAll(os.Stdin)
 		} else {
-			file, err := os.Open(cmd.Flag("resource").Value.String())
+			file, err := os.Open(createIndexCmdOpts.resource)
 			if err != nil {
 				return err
 			}
@@ -66,8 +76,8 @@ func runECreateIndexCmd(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	createIndexRequest := &proto.CreateIndexRequest{
-		Index:        index,
+	protoCreateIndexRequest := &proto.CreateIndexRequest{
+		Index:        createIndexCmdOpts.index,
 		IndexMapping: indexMappingBytes,
 		IndexType:    createIndexResource.IndexType,
 		Kvstore:      createIndexResource.Kvstore,
@@ -75,36 +85,34 @@ func runECreateIndexCmd(cmd *cobra.Command, args []string) error {
 	}
 
 	if cmd.Flag("index-mapping").Changed {
-		indexMappingBytes := []byte(cmd.Flag("index-mapping").Value.String())
-		createIndexRequest.IndexMapping = indexMappingBytes
+		protoCreateIndexRequest.IndexMapping = []byte(createIndexCmdOpts.indexMapping)
 	}
 
 	if cmd.Flag("index-type").Changed {
-		createIndexRequest.IndexType = cmd.Flag("index-type").Value.String()
+		protoCreateIndexRequest.IndexType = createIndexCmdOpts.indexType
 	}
 
 	if cmd.Flag("kvstore").Changed {
-		createIndexRequest.Kvstore = cmd.Flag("kvstore").Value.String()
+		protoCreateIndexRequest.Kvstore = createIndexCmdOpts.kvstore
 	}
 
 	if cmd.Flag("kvconfig").Changed {
-		kvconfigBytes := []byte(cmd.Flag("kvconfig").Value.String())
-		createIndexRequest.Kvconfig = kvconfigBytes
+		protoCreateIndexRequest.Kvconfig = []byte(createIndexCmdOpts.kvconfig)
 	}
 
-	conn, err := grpc.Dial(gRPCServer, grpc.WithInsecure())
+	conn, err := grpc.Dial(createCmdOpts.gRPCServer, grpc.WithInsecure())
 	if err != nil {
 		return err
 	}
 	defer conn.Close()
 
 	client := proto.NewIndigoClient(conn)
-	resp, err := client.CreateIndex(context.Background(), createIndexRequest)
+	resp, err := client.CreateIndex(context.Background(), protoCreateIndexRequest)
 	if err != nil {
 		return err
 	}
 
-	switch outputFormat {
+	switch rootCmdOpts.outputFormat {
 	case "text":
 		fmt.Printf("%s\n", resp.String())
 	case "json":
@@ -121,12 +129,12 @@ func runECreateIndexCmd(cmd *cobra.Command, args []string) error {
 }
 
 func init() {
-	CreateIndexCmd.Flags().String("index", "", "index name")
-	CreateIndexCmd.Flags().String("resource", "", "resource file")
-	CreateIndexCmd.Flags().String("index-mapping", "", "index mapping")
-	CreateIndexCmd.Flags().String("index-type", "", "index type")
-	CreateIndexCmd.Flags().String("kvstore", "", "kvstore")
-	CreateIndexCmd.Flags().String("kvconfig", "", "kvconfig")
+	createIndexCmd.Flags().StringVar(&createIndexCmdOpts.index, "index", DefaultIndex, "index name")
+	createIndexCmd.Flags().StringVar(&createIndexCmdOpts.resource, "resource", DefaultResource, "resource file")
+	createIndexCmd.Flags().StringVar(&createIndexCmdOpts.indexMapping, "index-mapping", DefaultIndexMapping, "index mapping")
+	createIndexCmd.Flags().StringVar(&createIndexCmdOpts.indexType, "index-type", DefaultIndexType, "index type")
+	createIndexCmd.Flags().StringVar(&createIndexCmdOpts.kvstore, "kvstore", DefaultKvstore, "kvstore")
+	createIndexCmd.Flags().StringVar(&createIndexCmdOpts.kvconfig, "kvconfig", DefaultKvconfig, "kvconfig")
 
-	CreateCmd.AddCommand(CreateIndexCmd)
+	createCmd.AddCommand(createIndexCmd)
 }

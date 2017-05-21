@@ -3,7 +3,6 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/mosuka/indigo/defaultvalue"
 	"github.com/mosuka/indigo/proto"
 	"github.com/spf13/cobra"
 	"golang.org/x/net/context"
@@ -12,12 +11,14 @@ import (
 	"os"
 )
 
-var BulkCmd = &cobra.Command{
-	Use:   "bulk",
-	Short: "indexes the documents in bulk to the Indigo gRPC Server",
-	Long:  `The bulk command indexes the documents in bulk to the Indigo gRPC Server.`,
-	RunE:  runEBulkCmd,
+type BulkCommandOptions struct {
+	gRPCServer string
+	index      string
+	batchSize  int32
+	resource   string
 }
+
+var bulkCmdOpts BulkCommandOptions
 
 type BulkRequest struct {
 	Method string      `json:"method,omitempty"`
@@ -30,41 +31,70 @@ type BulkResource struct {
 	BulkRequests []BulkRequest `json:"bulk_requests,omitempty"`
 }
 
+var bulkCmd = &cobra.Command{
+	Use:   "bulk",
+	Short: "indexes the documents in bulk to the Indigo gRPC Server",
+	Long:  `The bulk command indexes the documents in bulk to the Indigo gRPC Server.`,
+	RunE:  runEBulkCmd,
+}
+
 func runEBulkCmd(cmd *cobra.Command, args []string) error {
-	index := cmd.Flag("index").Value.String()
-	if index == "" {
+	if bulkCmdOpts.index == "" {
 		return fmt.Errorf("required flag: --%s", cmd.Flag("index").Name)
 	}
 
-	if bulkRequest == "" {
-		return fmt.Errorf("required flag: --%s", cmd.Flag("bulk-request").Name)
+	var resourceBytes []byte = nil
+	if cmd.Flag("resource").Changed {
+		if bulkCmdOpts.resource == "-" {
+			resourceBytes, _ = ioutil.ReadAll(os.Stdin)
+		} else {
+			file, err := os.Open(bulkCmdOpts.resource)
+			if err != nil {
+				return err
+			}
+			defer file.Close()
+
+			resourceBytes, err = ioutil.ReadAll(file)
+			if err != nil {
+				return err
+			}
+		}
 	}
 
-	br := make([]byte, 0)
-	file, err := os.Open(bulkRequest)
+	bulkResource := BulkResource{}
+	err := json.Unmarshal(resourceBytes, &bulkResource)
 	if err != nil {
 		return err
 	}
-	defer file.Close()
 
-	br, err = ioutil.ReadAll(file)
+	bulkRequestsBytes, err := json.Marshal(bulkResource.BulkRequests)
 	if err != nil {
 		return err
 	}
 
-	conn, err := grpc.Dial(gRPCServer, grpc.WithInsecure())
+	protoBulkRequest := &proto.BulkRequest{
+		Index:        bulkCmdOpts.index,
+		BatchSize:    bulkResource.BatchSize,
+		BulkRequests: bulkRequestsBytes,
+	}
+
+	if cmd.Flag("batch-size").Changed {
+		protoBulkRequest.BatchSize = bulkCmdOpts.batchSize
+	}
+
+	conn, err := grpc.Dial(bulkCmdOpts.gRPCServer, grpc.WithInsecure())
 	if err != nil {
 		return err
 	}
 	defer conn.Close()
 
 	client := proto.NewIndigoClient(conn)
-	resp, err := client.Bulk(context.Background(), &proto.BulkRequest{Index: index, BulkRequests: br, BatchSize: batchSize})
+	resp, err := client.Bulk(context.Background(), protoBulkRequest)
 	if err != nil {
 		return err
 	}
 
-	switch outputFormat {
+	switch rootCmdOpts.outputFormat {
 	case "text":
 		fmt.Printf("%s\n", resp.String())
 	case "json":
@@ -81,10 +111,10 @@ func runEBulkCmd(cmd *cobra.Command, args []string) error {
 }
 
 func init() {
-	BulkCmd.Flags().StringVar(&gRPCServer, "grpc-server", defaultvalue.DefaultGRPCServer, "Indigo gRPC Server to connect to")
-	BulkCmd.Flags().String("index", "", "index name")
-	BulkCmd.Flags().StringVar(&bulkRequest, "bulk-request", defaultvalue.DefaultBulkRequest, "bulk request")
-	BulkCmd.Flags().Int32Var(&batchSize, "batch-size", defaultvalue.DefaultBatchSize, "batch size of bulk request")
+	bulkCmd.Flags().StringVar(&bulkCmdOpts.gRPCServer, "grpc-server", DefaultServer, "Indigo gRPC Server to connect to")
+	bulkCmd.Flags().StringVar(&bulkCmdOpts.index, "index", DefaultIndex, "index name")
+	bulkCmd.Flags().Int32Var(&bulkCmdOpts.batchSize, "batch-size", DefaultBatchSize, "batch size of bulk request")
+	bulkCmd.Flags().StringVar(&bulkCmdOpts.resource, "resource", DefaultResource, "resource file")
 
-	RootCmd.AddCommand(BulkCmd)
+	RootCmd.AddCommand(bulkCmd)
 }

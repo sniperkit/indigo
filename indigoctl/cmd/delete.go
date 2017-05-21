@@ -1,11 +1,16 @@
 package cmd
 
 import (
-	"github.com/mosuka/indigo/defaultvalue"
 	"github.com/spf13/cobra"
 )
 
-var DeleteCmd = &cobra.Command{
+type DeleteCommandOptions struct {
+	gRPCServer string
+}
+
+var deleteCmdOpts DeleteCommandOptions
+
+var deleteCmd = &cobra.Command{
 	Use:   "delete",
 	Short: "deletes the object to the Indigo gRPC Server",
 	Long:  `The delete command deletes the object to the Indigo gRPC Server.`,
@@ -26,7 +31,7 @@ func runEDeleteCmd(cmd *cobra.Command, args []string) error {
 }
 
 func init() {
-	DeleteCmd.PersistentFlags().StringVar(&gRPCServer, "grpc-server", defaultvalue.DefaultGRPCServer, "Indigo gRPC Server to connect to")
+	deleteCmd.PersistentFlags().StringVar(&deleteCmdOpts.gRPCServer, "grpc-server", DefaultServer, "Indigo gRPC Server to connect to")
 
-	RootCmd.AddCommand(DeleteCmd)
+	RootCmd.AddCommand(deleteCmd)
 }

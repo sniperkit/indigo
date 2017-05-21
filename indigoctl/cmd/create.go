@@ -1,11 +1,16 @@
 package cmd
 
 import (
-	"github.com/mosuka/indigo/defaultvalue"
 	"github.com/spf13/cobra"
 )
 
-var CreateCmd = &cobra.Command{
+type CreateCommandOptions struct {
+	gRPCServer string
+}
+
+var createCmdOpts CreateCommandOptions
+
+var createCmd = &cobra.Command{
 	Use:   "create",
 	Short: "creates the object to the Indigo gRPC Server",
 	Long:  `The create command creates the object to the Indigo gRPC Server.`,
@@ -26,7 +31,7 @@ func runECreateCmd(cmd *cobra.Command, args []string) error {
 }
 
 func init() {
-	CreateCmd.PersistentFlags().StringVar(&gRPCServer, "grpc-server", defaultvalue.DefaultGRPCServer, "Indigo gRPC Server to connect to")
+	createCmd.PersistentFlags().StringVar(&createCmdOpts.gRPCServer, "grpc-server", DefaultServer, "Indigo gRPC Server to connect to")
 
-	RootCmd.AddCommand(CreateCmd)
+	RootCmd.AddCommand(createCmd)
 }

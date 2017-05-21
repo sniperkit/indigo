@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/blevesearch/bleve"
-	"github.com/mosuka/indigo/defaultvalue"
 	"github.com/mosuka/indigo/proto"
 	"github.com/spf13/cobra"
 	"golang.org/x/net/context"
@@ -13,7 +12,30 @@ import (
 	"os"
 )
 
-var SearchCmd = &cobra.Command{
+type SearchCommandOptions struct {
+	gRPCServer       string
+	index            string
+	resource         string
+	query            string
+	size             int
+	from             int
+	explain          bool
+	fields           []string
+	sorts            []string
+	facets           string
+	highlight        string
+	highlightStyle   string
+	highlightFields  []string
+	includeLocations bool
+}
+
+var searchCmdOpts SearchCommandOptions
+
+type SearchResponse struct {
+	SearchResult map[string]interface{} `json:"search_result"`
+}
+
+var searchCmd = &cobra.Command{
 	Use:   "search",
 	Short: "searches the documents from the Indigo gRPC Server",
 	Long:  `The search command searches the documents from the Indigo gRPC Server.`,
@@ -21,85 +43,99 @@ var SearchCmd = &cobra.Command{
 }
 
 func runESearchCmd(cmd *cobra.Command, args []string) error {
-	if index == "" {
+	if searchCmdOpts.index == "" {
 		return fmt.Errorf("required flag: --%s", cmd.Flag("index").Name)
 	}
-	if query == "" {
-		return fmt.Errorf("required flag: --%s", cmd.Flag("query").Name)
-	}
 
-	sr := make([]byte, 0)
+	var resourceBytes []byte = nil
+	if cmd.Flag("resource").Changed {
+		if searchCmdOpts.resource == "-" {
+			resourceBytes, _ = ioutil.ReadAll(os.Stdin)
+		} else {
+			file, err := os.Open(searchCmdOpts.resource)
+			if err != nil {
+				return err
+			}
+			defer file.Close()
 
-	if searchRequest != "" {
-		file, err := os.Open(searchRequest)
-		if err != nil {
-			return err
-		}
-		defer file.Close()
-
-		sr, err = ioutil.ReadAll(file)
-		if err != nil {
-			return err
+			resourceBytes, err = ioutil.ReadAll(file)
+			if err != nil {
+				return err
+			}
 		}
 	}
 
 	searchRequest := bleve.NewSearchRequest(nil)
-	if len(sr) > 0 {
-		err := searchRequest.UnmarshalJSON(sr)
+	if len(resourceBytes) > 0 {
+		err := searchRequest.UnmarshalJSON(resourceBytes)
 		if err != nil {
 			return err
 		}
 	}
 
 	if cmd.Flag("query").Changed {
-		searchRequest.Query = bleve.NewQueryStringQuery(query)
+		searchRequest.Query = bleve.NewQueryStringQuery(searchCmdOpts.query)
 	}
+
 	if cmd.Flag("size").Changed {
-		searchRequest.Size = size
+		searchRequest.Size = searchCmdOpts.size
 	}
+
 	if cmd.Flag("from").Changed {
-		searchRequest.From = from
+		searchRequest.From = searchCmdOpts.from
 	}
+
 	if cmd.Flag("explain").Changed {
-		searchRequest.Explain = explain
+		searchRequest.Explain = searchCmdOpts.explain
 	}
+
 	if cmd.Flag("field").Changed {
-		searchRequest.Fields = fields
+		searchRequest.Fields = searchCmdOpts.fields
 	}
+
 	if cmd.Flag("sort").Changed {
-		searchRequest.SortBy(sorts)
+		searchRequest.SortBy(searchCmdOpts.sorts)
 	}
+
 	if cmd.Flag("facets").Changed {
 		facetRequest := bleve.FacetsRequest{}
-		err := json.Unmarshal([]byte(facets), &facetRequest)
+		err := json.Unmarshal([]byte(searchCmdOpts.facets), &facetRequest)
 		if err != nil {
 			return err
 		}
 		searchRequest.Facets = facetRequest
 	}
+
 	if cmd.Flag("highlight").Changed {
 		highlightRequest := bleve.NewHighlight()
-		err := json.Unmarshal([]byte(highlight), highlightRequest)
+		err := json.Unmarshal([]byte(searchCmdOpts.highlight), highlightRequest)
 		if err != nil {
 			return err
 		}
 		searchRequest.Highlight = highlightRequest
 	}
+
 	if cmd.Flag("highlight-style").Changed || cmd.Flag("highlight-field").Changed {
-		highlightRequest := bleve.NewHighlightWithStyle(highlightStyle)
-		highlightRequest.Fields = highlightFields
+		highlightRequest := bleve.NewHighlightWithStyle(searchCmdOpts.highlightStyle)
+		highlightRequest.Fields = searchCmdOpts.highlightFields
 		searchRequest.Highlight = highlightRequest
 	}
+
 	if cmd.Flag("include-locations").Changed {
-		searchRequest.IncludeLocations = includeLocations
+		searchRequest.IncludeLocations = searchCmdOpts.includeLocations
 	}
 
-	sr, err := json.Marshal(searchRequest)
+	searchRequestBytes, err := json.Marshal(searchRequest)
 	if err != nil {
 		return err
 	}
 
-	conn, err := grpc.Dial(gRPCServer, grpc.WithInsecure())
+	protoSearchRequest := &proto.SearchRequest{
+		Index:         searchCmdOpts.index,
+		SearchRequest: searchRequestBytes,
+	}
+
+	conn, err := grpc.Dial(searchCmdOpts.gRPCServer, grpc.WithInsecure())
 	if err != nil {
 		return err
 	}
@@ -107,7 +143,7 @@ func runESearchCmd(cmd *cobra.Command, args []string) error {
 
 	client := proto.NewIndigoClient(conn)
 
-	resp, err := client.Search(context.Background(), &proto.SearchRequest{Index: index, SearchRequest: sr})
+	resp, err := client.Search(context.Background(), protoSearchRequest)
 	if err != nil {
 		return err
 	}
@@ -117,13 +153,11 @@ func runESearchCmd(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	r := struct {
-		SearchResult map[string]interface{} `json:"search_result"`
-	}{
+	r := SearchResponse{
 		SearchResult: searchResult,
 	}
 
-	switch outputFormat {
+	switch rootCmdOpts.outputFormat {
 	case "text":
 		fmt.Printf("%s\n", resp.String())
 	case "json":
@@ -140,20 +174,20 @@ func runESearchCmd(cmd *cobra.Command, args []string) error {
 }
 
 func init() {
-	SearchCmd.Flags().StringVar(&gRPCServer, "grpc-server", defaultvalue.DefaultGRPCServer, "Indigo gRPC Server to connect to")
-	SearchCmd.Flags().StringVar(&index, "index", defaultvalue.DefaultIndex, "index name")
-	SearchCmd.Flags().StringVar(&searchRequest, "search-request", defaultvalue.DefaultSearchRequestFile, "search request file")
-	SearchCmd.Flags().StringVar(&query, "query", defaultvalue.DefaultQuery, "query string")
-	SearchCmd.Flags().IntVar(&size, "size", defaultvalue.DefaultSize, "number of hits to return")
-	SearchCmd.Flags().IntVar(&from, "from", defaultvalue.DefaultFrom, "starting from index of the hits to return")
-	SearchCmd.Flags().BoolVar(&explain, "explain", defaultvalue.DefaultExplain, "contain an explanation of how scoring of the hits was computed")
-	SearchCmd.Flags().StringSliceVar(&fields, "field", defaultvalue.DefaultFields, "specify a set of fields to return")
-	SearchCmd.Flags().StringSliceVar(&sorts, "sort", defaultvalue.DefaultSorts, "sorting to perform")
-	SearchCmd.Flags().StringVar(&facets, "facets", defaultvalue.DefaultFacets, "faceting to perform")
-	SearchCmd.Flags().StringVar(&highlight, "highlight", defaultvalue.DefaultHighlight, "highlighting to perform")
-	SearchCmd.Flags().StringVar(&highlightStyle, "highlight-style", defaultvalue.DefaultHighlightStyle, "highlighting style")
-	SearchCmd.Flags().StringSliceVar(&highlightFields, "highlight-field", defaultvalue.DefaultHighlightFields, "specify a set of fields to highlight")
-	SearchCmd.Flags().BoolVar(&includeLocations, "include-locations", defaultvalue.DefaultIncludeLocations, "include terms locations")
+	searchCmd.Flags().StringVar(&searchCmdOpts.gRPCServer, "grpc-server", DefaultServer, "Indigo gRPC Server to connect to")
+	searchCmd.Flags().StringVar(&searchCmdOpts.index, "index", DefaultIndex, "index name")
+	searchCmd.Flags().StringVar(&searchCmdOpts.resource, "resource", DefaultResource, "resource file")
+	searchCmd.Flags().StringVar(&searchCmdOpts.query, "query", DefaultQuery, "query string")
+	searchCmd.Flags().IntVar(&searchCmdOpts.size, "size", DefaultSize, "number of hits to return")
+	searchCmd.Flags().IntVar(&searchCmdOpts.from, "from", DefaultFrom, "starting from index of the hits to return")
+	searchCmd.Flags().BoolVar(&searchCmdOpts.explain, "explain", DefaultExplain, "contain an explanation of how scoring of the hits was computed")
+	searchCmd.Flags().StringSliceVar(&searchCmdOpts.fields, "field", DefaultFields, "specify a set of fields to return")
+	searchCmd.Flags().StringSliceVar(&searchCmdOpts.sorts, "sort", DefaultSorts, "sorting to perform")
+	searchCmd.Flags().StringVar(&searchCmdOpts.facets, "facets", DefaultFacets, "faceting to perform")
+	searchCmd.Flags().StringVar(&searchCmdOpts.highlight, "highlight", DefaultHighlight, "highlighting to perform")
+	searchCmd.Flags().StringVar(&searchCmdOpts.highlightStyle, "highlight-style", DefaultHighlightStyle, "highlighting style")
+	searchCmd.Flags().StringSliceVar(&searchCmdOpts.highlightFields, "highlight-field", DefaultHighlightFields, "specify a set of fields to highlight")
+	searchCmd.Flags().BoolVar(&searchCmdOpts.includeLocations, "include-locations", DefaultIncludeLocations, "include terms locations")
 
-	RootCmd.AddCommand(SearchCmd)
+	RootCmd.AddCommand(searchCmd)
 }

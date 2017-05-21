@@ -11,7 +11,15 @@ import (
 	"os"
 )
 
-var OpenIndexCmd = &cobra.Command{
+type OpenIndexCommandOptions struct {
+	index         string
+	resource      string
+	runtimeConfig string
+}
+
+var openIndexCmdOpts OpenIndexCommandOptions
+
+var openIndexCmd = &cobra.Command{
 	Use:   "index",
 	Short: "opens the index to the Indigo gRPC Server",
 	Long:  `The open index command opens the index to the Indigo gRPC Server.`,
@@ -23,17 +31,16 @@ type OpenIndexResource struct {
 }
 
 func runEOpenIndexCmd(cmd *cobra.Command, args []string) error {
-	index := cmd.Flag("index").Value.String()
-	if index == "" {
+	if openIndexCmdOpts.index == "" {
 		return fmt.Errorf("required flag: --%s", cmd.Flag("index").Name)
 	}
 
 	var resourceBytes []byte = nil
 	if cmd.Flag("resource").Changed {
-		if cmd.Flag("resource").Value.String() == "-" {
+		if openIndexCmdOpts.resource == "-" {
 			resourceBytes, _ = ioutil.ReadAll(os.Stdin)
 		} else {
-			file, err := os.Open(cmd.Flag("resource").Value.String())
+			file, err := os.Open(openIndexCmdOpts.resource)
 			if err != nil {
 				return err
 			}
@@ -57,33 +64,32 @@ func runEOpenIndexCmd(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	openIndexRequest := &proto.OpenIndexRequest{
-		Index:         index,
+	protoOpenIndexRequest := &proto.OpenIndexRequest{
+		Index:         openIndexCmdOpts.index,
 		RuntimeConfig: runtimeConfigBytes,
 	}
 
 	if cmd.Flag("index").Changed {
-		openIndexRequest.Index = cmd.Flag("index").Value.String()
+		protoOpenIndexRequest.Index = openIndexCmdOpts.index
 	}
 
 	if cmd.Flag("runtime-config").Changed {
-		runtimeConfigBytes := []byte(cmd.Flag("runtime-config").Value.String())
-		openIndexRequest.RuntimeConfig = runtimeConfigBytes
+		protoOpenIndexRequest.RuntimeConfig = []byte(openIndexCmdOpts.runtimeConfig)
 	}
 
-	conn, err := grpc.Dial(gRPCServer, grpc.WithInsecure())
+	conn, err := grpc.Dial(openCmdOpts.gRPCServer, grpc.WithInsecure())
 	if err != nil {
 		return err
 	}
 	defer conn.Close()
 
 	client := proto.NewIndigoClient(conn)
-	resp, err := client.OpenIndex(context.Background(), openIndexRequest)
+	resp, err := client.OpenIndex(context.Background(), protoOpenIndexRequest)
 	if err != nil {
 		return err
 	}
 
-	switch outputFormat {
+	switch rootCmdOpts.outputFormat {
 	case "text":
 		fmt.Printf("%s\n", resp.String())
 	case "json":
@@ -100,9 +106,9 @@ func runEOpenIndexCmd(cmd *cobra.Command, args []string) error {
 }
 
 func init() {
-	OpenIndexCmd.Flags().String("index", "", "index name")
-	OpenIndexCmd.Flags().String("resource", "", "resource file")
-	OpenIndexCmd.Flags().String("runtime-config", "", "runtime config")
+	openIndexCmd.Flags().StringVar(&openIndexCmdOpts.index, "index", DefaultIndex, "index name")
+	openIndexCmd.Flags().StringVar(&openIndexCmdOpts.resource, "resource", DefaultResource, "resource file")
+	openIndexCmd.Flags().StringVar(&openIndexCmdOpts.runtimeConfig, "runtime-config", DefaultRuntimeConfig, "runtime config")
 
-	OpenCmd.AddCommand(OpenIndexCmd)
+	openCmd.AddCommand(openIndexCmd)
 }

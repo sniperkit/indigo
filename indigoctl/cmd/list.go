@@ -1,11 +1,16 @@
 package cmd
 
 import (
-	"github.com/mosuka/indigo/defaultvalue"
 	"github.com/spf13/cobra"
 )
 
-var ListCmd = &cobra.Command{
+type ListCommandOptions struct {
+	gRPCServer string
+}
+
+var listCmdOpts ListCommandOptions
+
+var listCmd = &cobra.Command{
 	Use:   "list",
 	Short: "lists the object from the Indigo gRPC Server",
 	Long:  `The list command lists the object from the Indigo gRPC Server.`,
@@ -26,7 +31,7 @@ func runEListCmd(cmd *cobra.Command, args []string) error {
 }
 
 func init() {
-	ListCmd.PersistentFlags().StringVar(&gRPCServer, "grpc-server", defaultvalue.DefaultGRPCServer, "Indigo gRPC Server to connect to")
+	listCmd.PersistentFlags().StringVar(&listCmdOpts.gRPCServer, "grpc-server", DefaultServer, "Indigo gRPC Server to connect to")
 
-	RootCmd.AddCommand(ListCmd)
+	RootCmd.AddCommand(listCmd)
 }

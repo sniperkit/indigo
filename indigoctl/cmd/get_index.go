@@ -11,12 +11,11 @@ import (
 	"google.golang.org/grpc"
 )
 
-var GetIndexCmd = &cobra.Command{
-	Use:   "index",
-	Short: "gets the index information from the Indigo gRPC Server",
-	Long:  `The get index command gets the index information from the Indigo gRPC Server.`,
-	RunE:  runEGetIndexCmd,
+type GetIndexCommandOptions struct {
+	index string
 }
+
+var getIndexCmdOpts GetIndexCommandOptions
 
 type GetIndexResponse struct {
 	DocumentCount uint64                    `json:"document_count"`
@@ -24,24 +23,30 @@ type GetIndexResponse struct {
 	IndexMapping  *mapping.IndexMappingImpl `json:"index_mapping"`
 }
 
+var getIndexCmd = &cobra.Command{
+	Use:   "index",
+	Short: "gets the index information from the Indigo gRPC Server",
+	Long:  `The get index command gets the index information from the Indigo gRPC Server.`,
+	RunE:  runEGetIndexCmd,
+}
+
 func runEGetIndexCmd(cmd *cobra.Command, args []string) error {
-	index := cmd.Flag("index").Value.String()
-	if index == "" {
+	if getIndexCmdOpts.index == "" {
 		return fmt.Errorf("required flag: --%s", cmd.Flag("index").Name)
 	}
 
-	getIndexRequest := &proto.GetIndexRequest{
-		Index: index,
+	protoGetIndexRequest := &proto.GetIndexRequest{
+		Index: getIndexCmdOpts.index,
 	}
 
-	conn, err := grpc.Dial(gRPCServer, grpc.WithInsecure())
+	conn, err := grpc.Dial(getCmdOpts.gRPCServer, grpc.WithInsecure())
 	if err != nil {
 		return err
 	}
 	defer conn.Close()
 
 	client := proto.NewIndigoClient(conn)
-	resp, err := client.GetIndex(context.Background(), getIndexRequest)
+	resp, err := client.GetIndex(context.Background(), protoGetIndexRequest)
 	if err != nil {
 		return err
 	}
@@ -62,7 +67,7 @@ func runEGetIndexCmd(cmd *cobra.Command, args []string) error {
 		IndexMapping:  indexMapping,
 	}
 
-	switch outputFormat {
+	switch rootCmdOpts.outputFormat {
 	case "text":
 		fmt.Printf("%s\n", r)
 	case "json":
@@ -79,7 +84,7 @@ func runEGetIndexCmd(cmd *cobra.Command, args []string) error {
 }
 
 func init() {
-	GetIndexCmd.Flags().String("index", "", "index name")
+	getIndexCmd.Flags().StringVar(&getIndexCmdOpts.index, "index", DefaultIndex, "index name")
 
-	GetCmd.AddCommand(GetIndexCmd)
+	getCmd.AddCommand(getIndexCmd)
 }

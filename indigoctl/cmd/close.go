@@ -1,11 +1,16 @@
 package cmd
 
 import (
-	"github.com/mosuka/indigo/defaultvalue"
 	"github.com/spf13/cobra"
 )
 
-var CloseCmd = &cobra.Command{
+type CloseCommandOptions struct {
+	gRPCServer string
+}
+
+var closeCmdOpts CloseCommandOptions
+
+var closeCmd = &cobra.Command{
 	Use:   "close",
 	Short: "closes the object to the Indigo gRPC Server",
 	Long:  `The open command creates the object to the Indigo gRPC Server.`,
@@ -26,7 +31,7 @@ func runECloseCmd(cmd *cobra.Command, args []string) error {
 }
 
 func init() {
-	CloseCmd.PersistentFlags().StringVar(&gRPCServer, "grpc-server", defaultvalue.DefaultGRPCServer, "Indigo gRPC Server to connect to")
+	closeCmd.PersistentFlags().StringVar(&closeCmdOpts.gRPCServer, "grpc-server", DefaultServer, "Indigo gRPC Server to connect to")
 
-	RootCmd.AddCommand(CloseCmd)
+	RootCmd.AddCommand(closeCmd)
 }

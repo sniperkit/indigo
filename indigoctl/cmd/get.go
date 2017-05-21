@@ -1,11 +1,16 @@
 package cmd
 
 import (
-	"github.com/mosuka/indigo/defaultvalue"
 	"github.com/spf13/cobra"
 )
 
-var GetCmd = &cobra.Command{
+type GetCommandOptions struct {
+	gRPCServer string
+}
+
+var getCmdOpts GetCommandOptions
+
+var getCmd = &cobra.Command{
 	Use:   "get",
 	Short: "gets the object from the Indigo gRPC Server",
 	Long:  `The get command gets the object from the Indigo gRPC Server.`,
@@ -26,7 +31,7 @@ func runEGetCmd(cmd *cobra.Command, args []string) error {
 }
 
 func init() {
-	GetCmd.PersistentFlags().StringVar(&gRPCServer, "grpc-server", defaultvalue.DefaultGRPCServer, "Indigo gRPC Server to connect to")
+	getCmd.PersistentFlags().StringVar(&getCmdOpts.gRPCServer, "grpc-server", DefaultServer, "Indigo gRPC Server to connect to")
 
-	RootCmd.AddCommand(GetCmd)
+	RootCmd.AddCommand(getCmd)
 }

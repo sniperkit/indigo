@@ -21,27 +21,57 @@ func NewPutDocumentHandler(client proto.IndigoClient) *PutDocumentHandler {
 	}
 }
 
+type PutDocumentResource struct {
+	Fields interface{} `json:"fields,omitempty"`
+}
+
 func (h *PutDocumentHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	log.WithFields(log.Fields{
 		"req": req,
 	}).Info("")
 
 	vars := mux.Vars(req)
-
 	index := vars["index"]
 	id := vars["id"]
 
-	fields, err := ioutil.ReadAll(req.Body)
+	resourceBytes, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		log.WithFields(log.Fields{
-			"req": req,
-		}).Error("failed to create document fields")
+			"err": err,
+		}).Error("failed to read request body")
 
 		Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	resp, err := h.client.PutDocument(context.Background(), &proto.PutDocumentRequest{Index: index, Id: id, Fields: fields})
+	putDocumentResource := PutDocumentResource{}
+	err = json.Unmarshal(resourceBytes, &putDocumentResource)
+	if err != nil {
+		log.WithFields(log.Fields{
+			"err": err,
+		}).Error("failed to create put document resource")
+
+		Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	fieldsBytes, err := json.Marshal(putDocumentResource.Fields)
+	if err != nil {
+		log.WithFields(log.Fields{
+			"err": err,
+		}).Error("failed to create fields")
+
+		Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	protoPutDocumentRequest := &proto.PutDocumentRequest{
+		Index:  index,
+		Id:     id,
+		Fields: fieldsBytes,
+	}
+
+	resp, err := h.client.PutDocument(context.Background(), protoPutDocumentRequest)
 	if err != nil {
 		log.WithFields(log.Fields{
 			"req": req,

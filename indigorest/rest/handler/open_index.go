@@ -21,26 +21,55 @@ func NewOpenIndexHandler(client proto.IndigoClient) *OpenIndexHandler {
 	}
 }
 
+type OpenIndexResource struct {
+	RuntimeConfig map[string]interface{} `json:"runtime_config,omitempty"`
+}
+
 func (h *OpenIndexHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	log.WithFields(log.Fields{
 		"req": req,
 	}).Info("")
 
 	vars := mux.Vars(req)
-
 	index := vars["index"]
 
-	runtimeConfig, err := ioutil.ReadAll(req.Body)
+	resourceBytes, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		log.WithFields(log.Fields{
 			"err": err,
-		}).Error("faild to create runtime config")
+		}).Error("failed to read request body")
 
 		Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	resp, err := h.client.OpenIndex(context.Background(), &proto.OpenIndexRequest{Index: index, RuntimeConfig: runtimeConfig})
+	openIndexResource := OpenIndexResource{}
+	err = json.Unmarshal(resourceBytes, &openIndexResource)
+	if err != nil {
+		log.WithFields(log.Fields{
+			"err": err,
+		}).Error("failed to create open index resource")
+
+		Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	runtimeConfigBytes, err := json.Marshal(openIndexResource.RuntimeConfig)
+	if err != nil {
+		log.WithFields(log.Fields{
+			"err": err,
+		}).Error("failed to create runtime config")
+
+		Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	protoOpenIndexRequest := &proto.OpenIndexRequest{
+		Index:         index,
+		RuntimeConfig: runtimeConfigBytes,
+	}
+
+	resp, err := h.client.OpenIndex(context.Background(), protoOpenIndexRequest)
 	if err != nil {
 		log.WithFields(log.Fields{
 			"err": err,

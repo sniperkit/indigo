@@ -30,7 +30,11 @@ func (h *GetIndexHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	vars := mux.Vars(req)
 	index := vars["index"]
 
-	resp, err := h.client.GetIndex(context.Background(), &proto.GetIndexRequest{Index: index})
+	protoGetIndexRequest := &proto.GetIndexRequest{
+		Index: index,
+	}
+
+	resp, err := h.client.GetIndex(context.Background(), protoGetIndexRequest)
 	if err != nil {
 		log.WithFields(log.Fields{
 			"err": err,

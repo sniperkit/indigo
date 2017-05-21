@@ -15,9 +15,9 @@ type RootCommandOptions struct {
 var rootCmdOpts RootCommandOptions
 
 var RootCmd = &cobra.Command{
-	Use:               "indigo",
-	Short:             "CLI for Indigo Server",
-	Long:              `The Command Line Interface for the Indigo Server.`,
+	Use:               "indigorest",
+	Short:             "CLI for Indigo REST Server",
+	Long:              `The Command Line Interface for the Indigo REST Server.`,
 	PersistentPreRunE: persistentPreRunERootCmd,
 	RunE:              runERootCmd,
 }
@@ -45,19 +45,19 @@ func LoadConfig() {
 	viper.SetDefault("log_level", DefaultLogLevel)
 
 	viper.SetDefault("port", DefaultPort)
-	viper.SetDefault("data_dir", DefaultDataDir)
-	viper.SetDefault("open_existing_index", DefaultOpenExistingIndex)
+	viper.SetDefault("base_uri", DefaultBaseURI)
+	viper.SetDefault("server", DefaultServer)
 
 	if viper.GetString("config") != "" {
 		viper.SetConfigFile(viper.GetString("config"))
 	} else {
-		viper.SetConfigName("indigo")
+		viper.SetConfigName("indigorest")
 		viper.SetConfigType("yaml")
 		viper.AddConfigPath("/etc/indigo")
 		viper.AddConfigPath("${HOME}/indigo")
 		viper.AddConfigPath("./indigo")
 	}
-	viper.SetEnvPrefix("indigo")
+	viper.SetEnvPrefix("indigorest")
 	viper.AutomaticEnv()
 
 	viper.ReadInConfig()

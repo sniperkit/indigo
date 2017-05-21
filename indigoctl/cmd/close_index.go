@@ -9,7 +9,13 @@ import (
 	"google.golang.org/grpc"
 )
 
-var CloseIndexCmd = &cobra.Command{
+type CloseIndexCommandOptions struct {
+	index string
+}
+
+var closeIndexCmdOpts CloseIndexCommandOptions
+
+var closeIndexCmd = &cobra.Command{
 	Use:   "index",
 	Short: "closes the index to the Indigo gRPC Server",
 	Long:  `The close index command closes the index to the Indigo gRPC Server.`,
@@ -17,28 +23,27 @@ var CloseIndexCmd = &cobra.Command{
 }
 
 func runECloseIndexCmd(cmd *cobra.Command, args []string) error {
-	index := cmd.Flag("index").Value.String()
-	if index == "" {
+	if closeIndexCmdOpts.index == "" {
 		return fmt.Errorf("required flag: --%s", cmd.Flag("index").Name)
 	}
 
-	closeIndexRequest := &proto.CloseIndexRequest{
-		Index: index,
+	protoCloseIndexRequest := &proto.CloseIndexRequest{
+		Index: closeIndexCmdOpts.index,
 	}
 
-	conn, err := grpc.Dial(gRPCServer, grpc.WithInsecure())
+	conn, err := grpc.Dial(closeCmdOpts.gRPCServer, grpc.WithInsecure())
 	if err != nil {
 		return err
 	}
 	defer conn.Close()
 
 	client := proto.NewIndigoClient(conn)
-	resp, err := client.CloseIndex(context.Background(), closeIndexRequest)
+	resp, err := client.CloseIndex(context.Background(), protoCloseIndexRequest)
 	if err != nil {
 		return err
 	}
 
-	switch outputFormat {
+	switch rootCmdOpts.outputFormat {
 	case "text":
 		fmt.Printf("%s\n", resp.String())
 	case "json":
@@ -55,7 +60,7 @@ func runECloseIndexCmd(cmd *cobra.Command, args []string) error {
 }
 
 func init() {
-	CloseIndexCmd.Flags().String("index", "", "index name")
+	closeIndexCmd.Flags().StringVar(&closeIndexCmdOpts.index, "index", DefaultIndex, "index name")
 
-	CloseCmd.AddCommand(CloseIndexCmd)
+	closeCmd.AddCommand(closeIndexCmd)
 }

@@ -37,3 +37,4 @@ vendor/*
 /data
 /indigo/indigo
 /indigoctl/indigoctl
+/indigorest/indigorest

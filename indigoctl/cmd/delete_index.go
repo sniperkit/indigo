@@ -9,7 +9,13 @@ import (
 	"google.golang.org/grpc"
 )
 
-var DeleteIndexCmd = &cobra.Command{
+type DeleteIndexCommandOptions struct {
+	index string
+}
+
+var deleteIndexCmdOpts DeleteIndexCommandOptions
+
+var deleteIndexCmd = &cobra.Command{
 	Use:   "index",
 	Short: "deletes the index from the Indigo gRPC Server",
 	Long:  `The delete index command deletes the index from the Indigo gRPC Server.`,
@@ -17,28 +23,27 @@ var DeleteIndexCmd = &cobra.Command{
 }
 
 func runEDeleteIndexCmd(cmd *cobra.Command, args []string) error {
-	index := cmd.Flag("index").Value.String()
-	if index == "" {
+	if deleteIndexCmdOpts.index == "" {
 		return fmt.Errorf("required flag: --%s", cmd.Flag("index").Name)
 	}
 
-	deleteIndexRequest := &proto.DeleteIndexRequest{
-		Index: index,
+	protoDeleteIndexRequest := &proto.DeleteIndexRequest{
+		Index: deleteIndexCmdOpts.index,
 	}
 
-	conn, err := grpc.Dial(gRPCServer, grpc.WithInsecure())
+	conn, err := grpc.Dial(deleteCmdOpts.gRPCServer, grpc.WithInsecure())
 	if err != nil {
 		return err
 	}
 	defer conn.Close()
 
 	client := proto.NewIndigoClient(conn)
-	resp, err := client.DeleteIndex(context.Background(), deleteIndexRequest)
+	resp, err := client.DeleteIndex(context.Background(), protoDeleteIndexRequest)
 	if err != nil {
 		return err
 	}
 
-	switch outputFormat {
+	switch rootCmdOpts.outputFormat {
 	case "text":
 		fmt.Printf("%s\n", resp.String())
 	case "json":
@@ -55,7 +60,7 @@ func runEDeleteIndexCmd(cmd *cobra.Command, args []string) error {
 }
 
 func init() {
-	DeleteIndexCmd.Flags().String("index", "", "index name")
+	deleteIndexCmd.Flags().StringVar(&deleteIndexCmdOpts.index, "index", DefaultIndex, "index name")
 
-	DeleteCmd.AddCommand(DeleteIndexCmd)
+	deleteCmd.AddCommand(deleteIndexCmd)
 }

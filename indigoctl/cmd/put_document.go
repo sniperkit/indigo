@@ -11,34 +11,41 @@ import (
 	"os"
 )
 
-var PutDocumentCmd = &cobra.Command{
+type PutDocumentCommandOptions struct {
+	index    string
+	id       string
+	fields   string
+	resource string
+}
+
+var putDocumentCmdOpts PutDocumentCommandOptions
+
+type PutDocumentResource struct {
+	Fields interface{} `json:"fields,omitempty"`
+}
+
+var putDocumentCmd = &cobra.Command{
 	Use:   "document",
 	Short: "puts the document to the Indigo gRPC Server",
 	Long:  `The index document command puts the document to the Indigo gRPC Server.`,
 	RunE:  runEPutDocumentCmd,
 }
 
-type PutDocumentResource struct {
-	Fields interface{} `json:"fields,omitempty"`
-}
-
 func runEPutDocumentCmd(cmd *cobra.Command, args []string) error {
-	index := cmd.Flag("index").Value.String()
-	if index == "" {
+	if putDocumentCmdOpts.index == "" {
 		return fmt.Errorf("required flag: --%s", cmd.Flag("index").Name)
 	}
 
-	id := cmd.Flag("id").Value.String()
-	if id == "" {
+	if putDocumentCmdOpts.id == "" {
 		return fmt.Errorf("required flag: --%s", cmd.Flag("id").Name)
 	}
 
 	var resourceBytes []byte = nil
 	if cmd.Flag("resource").Changed {
-		if cmd.Flag("resource").Value.String() == "-" {
+		if putDocumentCmdOpts.resource == "-" {
 			resourceBytes, _ = ioutil.ReadAll(os.Stdin)
 		} else {
-			file, err := os.Open(cmd.Flag("resource").Value.String())
+			file, err := os.Open(putDocumentCmdOpts.resource)
 			if err != nil {
 				return err
 			}
@@ -62,30 +69,29 @@ func runEPutDocumentCmd(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	putDocumentRequest := &proto.PutDocumentRequest{
-		Index:  index,
-		Id:     id,
+	protoPutDocumentRequest := &proto.PutDocumentRequest{
+		Index:  putDocumentCmdOpts.index,
+		Id:     putDocumentCmdOpts.id,
 		Fields: fieldsBytes,
 	}
 
 	if cmd.Flag("fields").Changed {
-		fieldsBytes := []byte(cmd.Flag("fields").Value.String())
-		putDocumentRequest.Fields = fieldsBytes
+		protoPutDocumentRequest.Fields = []byte(putDocumentCmdOpts.fields)
 	}
 
-	conn, err := grpc.Dial(gRPCServer, grpc.WithInsecure())
+	conn, err := grpc.Dial(putCmdOpts.gRPCServer, grpc.WithInsecure())
 	if err != nil {
 		return err
 	}
 	defer conn.Close()
 
 	client := proto.NewIndigoClient(conn)
-	resp, err := client.PutDocument(context.Background(), putDocumentRequest)
+	resp, err := client.PutDocument(context.Background(), protoPutDocumentRequest)
 	if err != nil {
 		return err
 	}
 
-	switch outputFormat {
+	switch rootCmdOpts.outputFormat {
 	case "text":
 		fmt.Printf("%s\n", resp.String())
 	case "json":
@@ -102,10 +108,10 @@ func runEPutDocumentCmd(cmd *cobra.Command, args []string) error {
 }
 
 func init() {
-	PutDocumentCmd.Flags().String("index", "", "index name")
-	PutDocumentCmd.Flags().String("id", "", "document id")
-	PutDocumentCmd.Flags().String("resource", "", "resource file")
-	PutDocumentCmd.Flags().String("fields", "", "document fields")
+	putDocumentCmd.Flags().StringVar(&putDocumentCmdOpts.index, "index", DefaultIndex, "index name")
+	putDocumentCmd.Flags().StringVar(&putDocumentCmdOpts.id, "id", DefaultId, "document id")
+	putDocumentCmd.Flags().StringVar(&putDocumentCmdOpts.resource, "resource", DefaultResource, "resource file")
+	putDocumentCmd.Flags().StringVar(&putDocumentCmdOpts.fields, "fields", DefaultDocFields, "document fields")
 
-	PutCmd.AddCommand(PutDocumentCmd)
+	putCmd.AddCommand(putDocumentCmd)
 }

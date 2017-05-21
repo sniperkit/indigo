@@ -2,12 +2,6 @@ log_format: text
 log_output: ""
 log_level: "info"
 
-grpc:
-  port: 1289
-  data_dir: "/var/indigo/data"
-  open_existing_index: true
-
-rest:
-  port: 2289
-  base_uri: "/api"
-  grpc_server: "localhost:1289"
+port: 1289
+data_dir: "/var/indigo/data"
+open_existing_index: true

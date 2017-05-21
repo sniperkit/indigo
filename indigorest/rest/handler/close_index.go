@@ -26,10 +26,13 @@ func (h *CloseIndexHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) 
 	}).Info("")
 
 	vars := mux.Vars(req)
-
 	index := vars["index"]
 
-	resp, err := h.client.CloseIndex(context.Background(), &proto.CloseIndexRequest{Index: index})
+	protoCloseIndexRequest := &proto.CloseIndexRequest{
+		Index: index,
+	}
+
+	resp, err := h.client.CloseIndex(context.Background(), protoCloseIndexRequest)
 	if err != nil {
 		log.WithFields(log.Fields{
 			"req": req,

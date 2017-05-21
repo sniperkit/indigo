@@ -9,7 +9,14 @@ import (
 	"google.golang.org/grpc"
 )
 
-var DeleteDocumentCmd = &cobra.Command{
+type DeleteDocumentCommandOptions struct {
+	index string
+	id    string
+}
+
+var deleteDocumentCmdOpts DeleteDocumentCommandOptions
+
+var deleteDocumentCmd = &cobra.Command{
 	Use:   "document",
 	Short: "deletes the document from the Indigo gRPC Server",
 	Long:  `The delete document command deletes the document from the Indigo gRPC Server.`,
@@ -17,34 +24,32 @@ var DeleteDocumentCmd = &cobra.Command{
 }
 
 func runEDeleteDocumentCmd(cmd *cobra.Command, args []string) error {
-	index := cmd.Flag("index").Value.String()
-	if index == "" {
+	if deleteDocumentCmdOpts.index == "" {
 		return fmt.Errorf("required flag: --%s", cmd.Flag("index").Name)
 	}
 
-	id := cmd.Flag("id").Value.String()
-	if id == "" {
+	if deleteDocumentCmdOpts.id == "" {
 		return fmt.Errorf("required flag: --%s", cmd.Flag("id").Name)
 	}
 
-	deleteDocumentRequest := &proto.DeleteDocumentRequest{
-		Index: index,
-		Id:    id,
+	protoDeleteDocumentRequest := &proto.DeleteDocumentRequest{
+		Index: deleteDocumentCmdOpts.index,
+		Id:    deleteDocumentCmdOpts.id,
 	}
 
-	conn, err := grpc.Dial(gRPCServer, grpc.WithInsecure())
+	conn, err := grpc.Dial(deleteCmdOpts.gRPCServer, grpc.WithInsecure())
 	if err != nil {
 		return err
 	}
 	defer conn.Close()
 
 	client := proto.NewIndigoClient(conn)
-	resp, err := client.DeleteDocument(context.Background(), deleteDocumentRequest)
+	resp, err := client.DeleteDocument(context.Background(), protoDeleteDocumentRequest)
 	if err != nil {
 		return err
 	}
 
-	switch outputFormat {
+	switch rootCmdOpts.outputFormat {
 	case "text":
 		fmt.Printf("%s\n", resp.String())
 	case "json":
@@ -61,8 +66,8 @@ func runEDeleteDocumentCmd(cmd *cobra.Command, args []string) error {
 }
 
 func init() {
-	DeleteDocumentCmd.Flags().String("index", "", "index name")
-	DeleteDocumentCmd.Flags().String("id", "", "document id")
+	deleteDocumentCmd.Flags().StringVar(&deleteDocumentCmdOpts.index, "index", DefaultIndex, "index name")
+	deleteDocumentCmd.Flags().StringVar(&deleteDocumentCmdOpts.id, "id", DefaultId, "document id")
 
-	DeleteCmd.AddCommand(DeleteDocumentCmd)
+	deleteCmd.AddCommand(deleteDocumentCmd)
 }

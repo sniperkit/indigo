@@ -26,11 +26,15 @@ func (h *GetDocumentHandler) ServeHTTP(w http.ResponseWriter, req *http.Request)
 	}).Info("")
 
 	vars := mux.Vars(req)
-
 	index := vars["index"]
 	id := vars["id"]
 
-	resp, err := h.client.GetDocument(context.Background(), &proto.GetDocumentRequest{Index: index, Id: id})
+	protoGetDocumentRequest := &proto.GetDocumentRequest{
+		Index: index,
+		Id:    id,
+	}
+
+	resp, err := h.client.GetDocument(context.Background(), protoGetDocumentRequest)
 	if err != nil {
 		log.WithFields(log.Fields{
 			"req": req,

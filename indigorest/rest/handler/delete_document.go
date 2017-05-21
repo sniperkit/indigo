@@ -10,30 +10,35 @@ import (
 	"net/http"
 )
 
-type DeleteIndexHandler struct {
+type DeleteDocumentHandler struct {
 	client proto.IndigoClient
 }
 
-func NewDeleteIndexHandler(client proto.IndigoClient) *DeleteIndexHandler {
-	return &DeleteIndexHandler{
+func NewDeleteDocumentHandler(client proto.IndigoClient) *DeleteDocumentHandler {
+	return &DeleteDocumentHandler{
 		client: client,
 	}
 }
 
-func (h *DeleteIndexHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
+func (h *DeleteDocumentHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	log.WithFields(log.Fields{
 		"req": req,
 	}).Info("")
 
 	vars := mux.Vars(req)
-
 	index := vars["index"]
+	id := vars["id"]
 
-	resp, err := h.client.DeleteIndex(context.Background(), &proto.DeleteIndexRequest{Index: index})
+	protoDeleteDocumentRequest := &proto.DeleteDocumentRequest{
+		Index: index,
+		Id:    id,
+	}
+
+	resp, err := h.client.DeleteDocument(context.Background(), protoDeleteDocumentRequest)
 	if err != nil {
 		log.WithFields(log.Fields{
 			"req": req,
-		}).Error("failed to delete index")
+		}).Error("failed to delete document")
 
 		Error(w, err.Error(), http.StatusServiceUnavailable)
 		return

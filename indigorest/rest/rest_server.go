@@ -3,7 +3,7 @@ package rest
 import (
 	"fmt"
 	"github.com/gorilla/mux"
-	"github.com/mosuka/indigo/indigo/rest/handler"
+	"github.com/mosuka/indigo/indigorest/rest/handler"
 	"github.com/mosuka/indigo/proto"
 	log "github.com/sirupsen/logrus"
 	"google.golang.org/grpc"

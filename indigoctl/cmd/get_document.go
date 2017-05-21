@@ -9,7 +9,14 @@ import (
 	"google.golang.org/grpc"
 )
 
-var GetDocumentCmd = &cobra.Command{
+type GetDocumentCommandOptions struct {
+	index string
+	id    string
+}
+
+var getDocumentCmdOpts GetDocumentCommandOptions
+
+var getDocumentCmd = &cobra.Command{
 	Use:   "document",
 	Short: "gets the document from the Indigo gRPC Server",
 	Long:  `The get document command gets the document from the Indigo gRPC Server.`,
@@ -22,29 +29,27 @@ type GetDocumentResponse struct {
 }
 
 func runEGetDocumentCmd(cmd *cobra.Command, args []string) error {
-	index := cmd.Flag("index").Value.String()
-	if index == "" {
+	if getDocumentCmdOpts.index == "" {
 		return fmt.Errorf("required flag: --%s", cmd.Flag("index").Name)
 	}
 
-	id := cmd.Flag("id").Value.String()
-	if id == "" {
+	if getDocumentCmdOpts.id == "" {
 		return fmt.Errorf("required flag: --%s", cmd.Flag("id").Name)
 	}
 
-	getDocumentRequest := &proto.GetDocumentRequest{
-		Index: index,
-		Id:    id,
+	protoGetDocumentRequest := &proto.GetDocumentRequest{
+		Index: getDocumentCmdOpts.index,
+		Id:    getDocumentCmdOpts.id,
 	}
 
-	conn, err := grpc.Dial(gRPCServer, grpc.WithInsecure())
+	conn, err := grpc.Dial(getCmdOpts.gRPCServer, grpc.WithInsecure())
 	if err != nil {
 		return err
 	}
 	defer conn.Close()
 
 	client := proto.NewIndigoClient(conn)
-	resp, err := client.GetDocument(context.Background(), getDocumentRequest)
+	resp, err := client.GetDocument(context.Background(), protoGetDocumentRequest)
 	if err != nil {
 		return err
 	}
@@ -59,7 +64,7 @@ func runEGetDocumentCmd(cmd *cobra.Command, args []string) error {
 		Fields: fields,
 	}
 
-	switch outputFormat {
+	switch rootCmdOpts.outputFormat {
 	case "text":
 		fmt.Printf("%s\n", r)
 	case "json":
@@ -76,8 +81,8 @@ func runEGetDocumentCmd(cmd *cobra.Command, args []string) error {
 }
 
 func init() {
-	GetDocumentCmd.Flags().String("index", "", "index name")
-	GetDocumentCmd.Flags().String("id", "", "document id")
+	getDocumentCmd.Flags().StringVar(&getDocumentCmdOpts.index, "index", DefaultIndex, "index name")
+	getDocumentCmd.Flags().StringVar(&getDocumentCmdOpts.id, "id", DefaultId, "document id")
 
-	GetCmd.AddCommand(GetDocumentCmd)
+	getCmd.AddCommand(getDocumentCmd)
 }
