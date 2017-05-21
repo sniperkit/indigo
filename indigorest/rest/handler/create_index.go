@@ -6,6 +6,7 @@ import (
 	"github.com/blevesearch/bleve/mapping"
 	"github.com/gorilla/mux"
 	"github.com/mosuka/indigo/proto"
+	"github.com/mosuka/indigo/service"
 	log "github.com/sirupsen/logrus"
 	"golang.org/x/net/context"
 	"io/ioutil"
@@ -20,13 +21,6 @@ func NewCreateIndexHandler(client proto.IndigoClient) *CreateIndexHandler {
 	return &CreateIndexHandler{
 		client: client,
 	}
-}
-
-type CreateIndexResource struct {
-	IndexMapping *mapping.IndexMappingImpl `json:"index_mapping,omitempty"`
-	IndexType    string                    `json:"index_type,omitempty"`
-	Kvstore      string                    `json:"kvstore,omitempty"`
-	Kvconfig     map[string]interface{}    `json:"kvconfig,omitempty"`
 }
 
 func (h *CreateIndexHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
@@ -47,59 +41,63 @@ func (h *CreateIndexHandler) ServeHTTP(w http.ResponseWriter, req *http.Request)
 		return
 	}
 
-	createIndexResource := CreateIndexResource{}
-	err = json.Unmarshal(resourceBytes, &createIndexResource)
+	createIndexRequest := service.CreateIndexRequest{}
+	err = json.Unmarshal(resourceBytes, &createIndexRequest)
 	if err != nil {
 		log.WithFields(log.Fields{
 			"err": err,
-		}).Error("failed to create bulk resource")
+		}).Error("failed to create CreateIndexRequest")
 
 		Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	indexMappingBytes, err := json.Marshal(createIndexResource.IndexMapping)
+	createIndexRequest.Index = index
+
+	if req.URL.Query().Get("indexMapping") != "" {
+		indexMapping := &mapping.IndexMappingImpl{}
+		err := json.Unmarshal([]byte(req.URL.Query().Get("indexMapping")), indexMapping)
+		if err != nil {
+			log.WithFields(log.Fields{
+				"err": err,
+			}).Error("failed to create indexMapping")
+
+			Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		createIndexRequest.IndexMapping = indexMapping
+	}
+
+	if req.URL.Query().Get("indexType") != "" {
+		createIndexRequest.IndexType = req.URL.Query().Get("indexType")
+	}
+
+	if req.URL.Query().Get("kvstore") != "" {
+		createIndexRequest.Kvstore = req.URL.Query().Get("kvstore")
+	}
+
+	if req.URL.Query().Get("kvconfig") != "" {
+		kvconfig := make(map[string]interface{})
+		err := json.Unmarshal([]byte(req.URL.Query().Get("kvconfig")), kvconfig)
+		if err != nil {
+			log.WithFields(log.Fields{
+				"err": err,
+			}).Error("failed to create kvconfig")
+
+			Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		createIndexRequest.Kvconfig = kvconfig
+	}
+
+	protoCreateIndexRequest, err := createIndexRequest.ProtoMessage()
 	if err != nil {
 		log.WithFields(log.Fields{
-			"err": err,
-		}).Error("failed to create index mapping")
+			"req": req,
+		}).Error("failed to create index")
 
-		Error(w, err.Error(), http.StatusBadRequest)
+		Error(w, err.Error(), http.StatusServiceUnavailable)
 		return
-	}
-
-	kvconfigBytes, err := json.Marshal(createIndexResource.Kvconfig)
-	if err != nil {
-		log.WithFields(log.Fields{
-			"err": err,
-		}).Error("failed to create kvconfig")
-
-		Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-
-	protoCreateIndexRequest := &proto.CreateIndexRequest{
-		Index:        index,
-		IndexMapping: indexMappingBytes,
-		IndexType:    createIndexResource.IndexType,
-		Kvstore:      createIndexResource.Kvstore,
-		Kvconfig:     kvconfigBytes,
-	}
-
-	if req.URL.Query().Get("indexType") == "" {
-		protoCreateIndexRequest.IndexType = req.URL.Query().Get("indexType")
-	}
-
-	if protoCreateIndexRequest.IndexType == "" {
-		protoCreateIndexRequest.IndexType = DefaultIndexType
-	}
-
-	if req.URL.Query().Get("kvstore") == "" {
-		protoCreateIndexRequest.Kvstore = req.URL.Query().Get("kvstore")
-	}
-
-	if protoCreateIndexRequest.Kvstore == "" {
-		protoCreateIndexRequest.Kvstore = DefaultKvstore
 	}
 
 	resp, err := h.client.CreateIndex(context.Background(), protoCreateIndexRequest)

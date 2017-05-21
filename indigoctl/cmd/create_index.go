@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/blevesearch/bleve/mapping"
 	"github.com/mosuka/indigo/proto"
+	"github.com/mosuka/indigo/service"
 	"github.com/spf13/cobra"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
@@ -30,18 +31,7 @@ var createIndexCmd = &cobra.Command{
 	RunE:  runECreateIndexCmd,
 }
 
-type CreateIndexResource struct {
-	IndexMapping *mapping.IndexMappingImpl `json:"index_mapping,omitempty"`
-	IndexType    string                    `json:"index_type,omitempty"`
-	Kvstore      string                    `json:"kvstore,omitempty"`
-	Kvconfig     map[string]interface{}    `json:"kvconfig,omitempty"`
-}
-
 func runECreateIndexCmd(cmd *cobra.Command, args []string) error {
-	if createIndexCmdOpts.index == "" {
-		return fmt.Errorf("required flag: --%s", cmd.Flag("index").Name)
-	}
-
 	var resourceBytes []byte = nil
 	if cmd.Flag("resource").Changed {
 		if createIndexCmdOpts.resource == "-" {
@@ -60,44 +50,50 @@ func runECreateIndexCmd(cmd *cobra.Command, args []string) error {
 		}
 	}
 
-	createIndexResource := CreateIndexResource{}
-	err := json.Unmarshal(resourceBytes, &createIndexResource)
+	createIndexRequest := service.CreateIndexRequest{}
+	err := json.Unmarshal(resourceBytes, &createIndexRequest)
 	if err != nil {
 		return err
 	}
 
-	indexMappingBytes, err := json.Marshal(createIndexResource.IndexMapping)
-	if err != nil {
-		return err
+	// Index
+	if cmd.Flag("index").Changed {
+		createIndexRequest.Index = createIndexCmdOpts.index
 	}
 
-	kvconfigBytes, err := json.Marshal(createIndexResource.Kvconfig)
-	if err != nil {
-		return err
-	}
-
-	protoCreateIndexRequest := &proto.CreateIndexRequest{
-		Index:        createIndexCmdOpts.index,
-		IndexMapping: indexMappingBytes,
-		IndexType:    createIndexResource.IndexType,
-		Kvstore:      createIndexResource.Kvstore,
-		Kvconfig:     kvconfigBytes,
-	}
-
+	// IndexMapping
 	if cmd.Flag("index-mapping").Changed {
-		protoCreateIndexRequest.IndexMapping = []byte(createIndexCmdOpts.indexMapping)
+		indexMapping := &mapping.IndexMappingImpl{}
+		err := json.Unmarshal([]byte(createIndexCmdOpts.indexMapping), indexMapping)
+		if err != nil {
+			return err
+		}
+		createIndexRequest.IndexMapping = indexMapping
 	}
 
+	// IndexType
 	if cmd.Flag("index-type").Changed {
-		protoCreateIndexRequest.IndexType = createIndexCmdOpts.indexType
+		createIndexRequest.IndexType = createIndexCmdOpts.indexType
 	}
 
+	// Kvstore
 	if cmd.Flag("kvstore").Changed {
-		protoCreateIndexRequest.Kvstore = createIndexCmdOpts.kvstore
+		createIndexRequest.Kvstore = createIndexCmdOpts.kvstore
 	}
 
+	// Kvconfig
 	if cmd.Flag("kvconfig").Changed {
-		protoCreateIndexRequest.Kvconfig = []byte(createIndexCmdOpts.kvconfig)
+		kvconfig := make(map[string]interface{})
+		err := json.Unmarshal([]byte(createIndexCmdOpts.kvconfig), kvconfig)
+		if err != nil {
+			return err
+		}
+		createIndexRequest.Kvconfig = kvconfig
+	}
+
+	protoCreateIndexRequest, err := createIndexRequest.ProtoMessage()
+	if err != nil {
+		return err
 	}
 
 	conn, err := grpc.Dial(createCmdOpts.gRPCServer, grpc.WithInsecure())

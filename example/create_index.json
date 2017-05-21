@@ -1,4 +1,5 @@
 {
+  "index": "example",
   "index_mapping": {
     "types": {
       "document": {
@@ -114,6 +115,6 @@
   "kvconfig": {
     "create_if_missing": true,
     "error_if_exists": true,
-    "path": "./data/example/store"
+    "path": "/var/indigo/data/example/store"
   }
 }

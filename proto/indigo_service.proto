@@ -1,5 +1,7 @@
 syntax = "proto3";
 
+//import "google/protobuf/any.proto";
+
 package proto;
 
 service Indigo {
@@ -40,6 +42,7 @@ message DeleteIndexResponse {
 message OpenIndexRequest {
     string index = 1;
     bytes runtime_config = 2;
+//    google.protobuf.Any runtime_config = 2;
 }
 
 message OpenIndexResponse {
