@@ -3,7 +3,6 @@ package handler
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/gorilla/mux"
 	"github.com/mosuka/indigo/proto"
 	log "github.com/sirupsen/logrus"
 	"golang.org/x/net/context"
@@ -38,9 +37,6 @@ func (h *BulkHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		"req": req,
 	}).Info("")
 
-	vars := mux.Vars(req)
-	index := vars["index"]
-
 	resourceBytes, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		log.WithFields(log.Fields{
@@ -73,7 +69,6 @@ func (h *BulkHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	}
 
 	protoBulkRequest := &proto.BulkRequest{
-		Index:        index,
 		BatchSize:    bulkResource.BatchSize,
 		BulkRequests: bulkRequestsBytes,
 	}

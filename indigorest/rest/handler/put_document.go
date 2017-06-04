@@ -31,7 +31,6 @@ func (h *PutDocumentHandler) ServeHTTP(w http.ResponseWriter, req *http.Request)
 	}).Info("")
 
 	vars := mux.Vars(req)
-	index := vars["index"]
 	id := vars["id"]
 
 	resourceBytes, err := ioutil.ReadAll(req.Body)
@@ -66,7 +65,6 @@ func (h *PutDocumentHandler) ServeHTTP(w http.ResponseWriter, req *http.Request)
 	}
 
 	protoPutDocumentRequest := &proto.PutDocumentRequest{
-		Index:  index,
 		Id:     id,
 		Fields: fieldsBytes,
 	}

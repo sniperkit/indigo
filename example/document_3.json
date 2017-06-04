@@ -1,4 +1,5 @@
 {
+  "id": "3",
   "fields": {
     "name": "Whoosh",
     "description": "Whoosh is a fast, featureful full-text indexing and searching library implemented in pure Python.",

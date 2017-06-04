@@ -14,7 +14,6 @@ import (
 
 type SearchCommandOptions struct {
 	gRPCServer       string
-	index            string
 	resource         string
 	query            string
 	size             int
@@ -43,10 +42,6 @@ var searchCmd = &cobra.Command{
 }
 
 func runESearchCmd(cmd *cobra.Command, args []string) error {
-	if searchCmdOpts.index == "" {
-		return fmt.Errorf("required flag: --%s", cmd.Flag("index").Name)
-	}
-
 	var resourceBytes []byte = nil
 	if cmd.Flag("resource").Changed {
 		if searchCmdOpts.resource == "-" {
@@ -131,7 +126,6 @@ func runESearchCmd(cmd *cobra.Command, args []string) error {
 	}
 
 	protoSearchRequest := &proto.SearchRequest{
-		Index:         searchCmdOpts.index,
 		SearchRequest: searchRequestBytes,
 	}
 
@@ -175,7 +169,6 @@ func runESearchCmd(cmd *cobra.Command, args []string) error {
 
 func init() {
 	searchCmd.Flags().StringVar(&searchCmdOpts.gRPCServer, "grpc-server", DefaultServer, "Indigo gRPC Server to connect to")
-	searchCmd.Flags().StringVar(&searchCmdOpts.index, "index", DefaultIndex, "index name")
 	searchCmd.Flags().StringVar(&searchCmdOpts.resource, "resource", DefaultResource, "resource file")
 	searchCmd.Flags().StringVar(&searchCmdOpts.query, "query", DefaultQuery, "query string")
 	searchCmd.Flags().IntVar(&searchCmdOpts.size, "size", DefaultSize, "number of hits to return")

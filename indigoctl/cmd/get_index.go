@@ -11,12 +11,6 @@ import (
 	"google.golang.org/grpc"
 )
 
-type GetIndexCommandOptions struct {
-	index string
-}
-
-var getIndexCmdOpts GetIndexCommandOptions
-
 type GetIndexResponse struct {
 	DocumentCount uint64                    `json:"document_count"`
 	IndexStats    map[string]interface{}    `json:"index_stats"`
@@ -31,13 +25,7 @@ var getIndexCmd = &cobra.Command{
 }
 
 func runEGetIndexCmd(cmd *cobra.Command, args []string) error {
-	if getIndexCmdOpts.index == "" {
-		return fmt.Errorf("required flag: --%s", cmd.Flag("index").Name)
-	}
-
-	protoGetIndexRequest := &proto.GetIndexRequest{
-		Index: getIndexCmdOpts.index,
-	}
+	protoGetIndexRequest := &proto.GetIndexRequest{}
 
 	conn, err := grpc.Dial(getCmdOpts.gRPCServer, grpc.WithInsecure())
 	if err != nil {
@@ -84,7 +72,5 @@ func runEGetIndexCmd(cmd *cobra.Command, args []string) error {
 }
 
 func init() {
-	getIndexCmd.Flags().StringVar(&getIndexCmdOpts.index, "index", DefaultIndex, "index name")
-
 	getCmd.AddCommand(getIndexCmd)
 }

@@ -24,3 +24,4 @@ install:
 clean:
 	cd ${CURDIR}/indigo; go clean
 	cd ${CURDIR}/indigoctl; go clean
+	cd ${CURDIR}/indigorest; go clean

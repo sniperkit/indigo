@@ -5,11 +5,6 @@ syntax = "proto3";
 package proto;
 
 service Indigo {
-    rpc CreateIndex(CreateIndexRequest) returns (CreateIndexResponse) {}
-    rpc DeleteIndex(DeleteIndexRequest) returns (DeleteIndexResponse) {}
-    rpc OpenIndex(OpenIndexRequest) returns (OpenIndexResponse) {}
-    rpc CloseIndex(CloseIndexRequest) returns (CloseIndexResponse) {}
-    rpc ListIndex(ListIndexRequest) returns (ListIndexResponse) {}
     rpc GetIndex(GetIndexRequest) returns (GetIndexResponse) {}
     rpc PutDocument(PutDocumentRequest) returns (PutDocumentResponse) {}
     rpc GetDocument(GetDocumentRequest) returns (GetDocumentResponse) {}
@@ -18,76 +13,27 @@ service Indigo {
     rpc Search(SearchRequest) returns (SearchResponse) {}
 }
 
-message CreateIndexRequest {
-    string index = 1;
-    bytes index_mapping = 2;
-    string index_type = 3;
-    string kvstore = 4;
-    bytes kvconfig = 5;
-}
-
-message CreateIndexResponse {
-    string index = 1;
-    string index_dir = 2;
-}
-
-message DeleteIndexRequest {
-    string index = 1;
-}
-
-message DeleteIndexResponse {
-    string index = 1;
-}
-
-message OpenIndexRequest {
-    string index = 1;
-    bytes runtime_config = 2;
-//    google.protobuf.Any runtime_config = 2;
-}
-
-message OpenIndexResponse {
-    string index = 1;
-    string index_dir = 2;
-}
-
-message CloseIndexRequest {
-    string index = 1;
-}
-
-message CloseIndexResponse {
-    string index = 1;
-}
-
-message ListIndexRequest {
-}
-
-message ListIndexResponse {
-    repeated string indices = 1;
-}
-
 message GetIndexRequest {
-    string index = 1;
 }
 
 message GetIndexResponse {
-    uint64 document_count = 1;
-    bytes index_stats = 2;
-    bytes index_mapping = 3;
+    uint64 document_count = 2;
+    bytes index_stats = 3;
+    bytes index_mapping = 4;
+    //    google.protobuf.Any runtime_config = 2;
 }
 
 message PutDocumentRequest {
-    string index = 1;
-    string id = 2;
-    bytes fields = 3;
+    string id = 1;
+    bytes fields = 2;
 }
 
 message PutDocumentResponse {
-    bool success = 1;
+    int32 put_count = 1;
 }
 
 message GetDocumentRequest {
-    string index = 1;
-    string id = 2;
+    string id = 1;
 }
 
 message GetDocumentResponse {
@@ -96,29 +42,27 @@ message GetDocumentResponse {
 }
 
 message DeleteDocumentRequest {
-    string index = 1;
-    string id = 2;
+    string id = 1;
 }
 
 message DeleteDocumentResponse {
-    bool success = 1;
+    int32 delete_count = 1;
 }
 
 message BulkRequest {
-    string index = 1;
-    bytes bulk_requests = 2;
-    int32 batch_size = 3;
+    bytes bulk_requests = 1;
+    int32 batch_size = 2;
 }
 
 message BulkResponse {
-    int32 put_count = 1;
-    int32 put_error_count = 2;
-    int32 delete_count = 3;
+    string message = 1;
+    int32 put_count = 2;
+    int32 put_error_count = 3;
+    int32 delete_count = 4;
 }
 
 message SearchRequest {
-    string index = 1;
-    bytes search_request = 2;
+    bytes search_request = 1;
 }
 
 message SearchResponse {

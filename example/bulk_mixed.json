@@ -1,46 +1,49 @@
-[
-  {
-    "method" : "put",
-    "id": "1",
-    "fields": {
-      "name": "Bleve",
-      "description": "Bleve is a full-text search and indexing library for Go.",
-      "category": "Library",
-      "popularity": 3.0,
-      "release": "2014-04-18T00:00:00Z",
-      "type": "document"
+{
+  "batch_size": 1000,
+  "bulk_requests": [
+    {
+      "method" : "put",
+      "id": "1",
+      "fields": {
+        "name": "Bleve",
+        "description": "Bleve is a full-text search and indexing library for Go.",
+        "category": "Library",
+        "popularity": 3.0,
+        "release": "2014-04-18T00:00:00Z",
+        "type": "document"
+      }
+    },
+    {
+      "method" : "delete",
+      "id": "2"
+    },
+    {
+      "method" : "delete",
+      "id": "3"
+    },
+    {
+      "method" : "delete",
+      "id": "4"
+    },
+    {
+      "method" : "delete",
+      "id": "5"
+    },
+    {
+      "method" : "delete",
+      "id": "6"
+    },
+    {
+      "method" : "put",
+      "id": "7",
+      "fields": {
+        "name": "Indigo",
+        "description": "Indigo is a full-text search and indexing server written in Go, built on top of Bleve.",
+        "category": "Server",
+        "popularity": 1.0,
+        "release": "2017-01-13T00:00:00Z",
+        "type": "document"
+      }
     }
-  },
-  {
-    "method" : "delete",
-    "id": "2"
-  },
-  {
-    "method" : "delete",
-    "id": "3"
-  },
-  {
-    "method" : "delete",
-    "id": "4"
-  },
-  {
-    "method" : "delete",
-    "id": "5"
-  },
-  {
-    "method" : "delete",
-    "id": "6"
-  },
-  {
-    "method" : "put",
-    "id": "7",
-    "fields": {
-      "name": "Indigo",
-      "description": "Indigo is a full-text search and indexing server written in Go, built on top of Bleve.",
-      "category": "Server",
-      "popularity": 1.0,
-      "release": "2017-01-13T00:00:00Z",
-      "type": "document"
-    }
-  }
-]
+  ]
+}

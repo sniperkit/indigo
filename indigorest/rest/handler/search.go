@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"github.com/blevesearch/bleve"
-	"github.com/gorilla/mux"
 	"github.com/mosuka/indigo/proto"
 	log "github.com/sirupsen/logrus"
 	"golang.org/x/net/context"
@@ -32,9 +31,6 @@ func (h *SearchHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	log.WithFields(log.Fields{
 		"req": req,
 	}).Info("")
-
-	vars := mux.Vars(req)
-	index := vars["index"]
 
 	resourceBytes, err := ioutil.ReadAll(req.Body)
 	if err != nil {
@@ -161,7 +157,6 @@ func (h *SearchHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	}
 
 	protoSearchRequest := &proto.SearchRequest{
-		Index:         index,
 		SearchRequest: searchRequestBytes,
 	}
 

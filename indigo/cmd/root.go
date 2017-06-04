@@ -45,8 +45,13 @@ func LoadConfig() {
 	viper.SetDefault("log_level", DefaultLogLevel)
 
 	viper.SetDefault("port", DefaultPort)
-	viper.SetDefault("data_dir", DefaultDataDir)
-	viper.SetDefault("open_existing_index", DefaultOpenExistingIndex)
+	viper.SetDefault("path", DefaultPath)
+	viper.SetDefault("index_mapping", DefaultIndexMapping)
+	viper.SetDefault("index_type", DefaultIndexType)
+	viper.SetDefault("kvstore", DefaultKvstore)
+	viper.SetDefault("kvconfig", DefaultKvconfig)
+	viper.SetDefault("open_existing_index", DefaultDeleteIndexAtStartup)
+	viper.SetDefault("delete_index_at_shutdown", DefaultDeleteIndexAtShutdown)
 
 	if viper.GetString("config") != "" {
 		viper.SetConfigFile(viper.GetString("config"))
@@ -66,8 +71,8 @@ func LoadConfig() {
 func init() {
 	cobra.OnInitialize(LoadConfig)
 
-	RootCmd.PersistentFlags().String("config", DefaultConfig, "configuration file of Indigo Server")
-	RootCmd.PersistentFlags().BoolVar(&rootCmdOpts.versionFlag, "version", false, "show version numner")
+	RootCmd.PersistentFlags().String("config", DefaultConfig, "configuration file path")
+	RootCmd.PersistentFlags().BoolVar(&rootCmdOpts.versionFlag, "version", false, "show version number")
 
 	viper.BindPFlag("config", RootCmd.PersistentFlags().Lookup("config"))
 }

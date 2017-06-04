@@ -10,8 +10,7 @@ import (
 )
 
 type GetDocumentCommandOptions struct {
-	index string
-	id    string
+	id string
 }
 
 var getDocumentCmdOpts GetDocumentCommandOptions
@@ -29,17 +28,12 @@ type GetDocumentResponse struct {
 }
 
 func runEGetDocumentCmd(cmd *cobra.Command, args []string) error {
-	if getDocumentCmdOpts.index == "" {
-		return fmt.Errorf("required flag: --%s", cmd.Flag("index").Name)
-	}
-
 	if getDocumentCmdOpts.id == "" {
 		return fmt.Errorf("required flag: --%s", cmd.Flag("id").Name)
 	}
 
 	protoGetDocumentRequest := &proto.GetDocumentRequest{
-		Index: getDocumentCmdOpts.index,
-		Id:    getDocumentCmdOpts.id,
+		Id: getDocumentCmdOpts.id,
 	}
 
 	conn, err := grpc.Dial(getCmdOpts.gRPCServer, grpc.WithInsecure())
@@ -81,7 +75,6 @@ func runEGetDocumentCmd(cmd *cobra.Command, args []string) error {
 }
 
 func init() {
-	getDocumentCmd.Flags().StringVar(&getDocumentCmdOpts.index, "index", DefaultIndex, "index name")
 	getDocumentCmd.Flags().StringVar(&getDocumentCmdOpts.id, "id", DefaultId, "document id")
 
 	getCmd.AddCommand(getDocumentCmd)

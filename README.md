@@ -5,8 +5,6 @@ Indigo is a full text search and indexing server written in [Go](https://golang.
 The Indigo gRPC Server provides full text search and indexing functions through [gRPC](http://www.grpc.io) ([HTTP/2](https://en.wikipedia.org/wiki/HTTP/2) + [Protocol Buffers](https://developers.google.com/protocol-buffers/)).  
 The Indigo REST Server is a gateway, it provides a traditional JSON API ([HTTP/1.1](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol) + [JSON](http://www.json.org)) that communicating with the Indigo gRPC Server.  
 
-![](./img/Indigo%20Architecture.png "Indigo")
-
 
 ## Features
 
@@ -27,43 +25,45 @@ log_format: text
 log_output: ""
 log_level: "info"
 
-grpc:
-  port: 1289
-  data_dir: "/var/indigo/data"
-  open_existing_index: true
+port: 1289
+path: "/var/indigo/data"
 
-rest:
-  port: 2289
-  base_uri: "/api"
-  grpc_server: "localhost:1289"
+index_mapping: ""
+index_type: "upside_down"
+kvstore: "boltdb"
+kvconfig: ""
+
+delete_index_at_startup: false
+delete_index_at_shutdown: false
 ```
 
-| Parameter Name           | Environment variables           | Description                                                                                                                                        |
-| ------------------------ | ------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
-| log_format               | INDIGO_LOG_FORMAT               | The log output format of the Indigo gRPC or REST Server. You can choose `text`, `color` and `json`. Default is `text`                              |
-| log_output               | INDIGO_LOG_OUTPUT               | The log output destination of the Indigo gRPC or REST Server. Default is `stdout`                                                                  |
-| log_level                | INDIGO_LOG_LEVEL                | The log level of log output by Indigo gRPC or REST Server. You can choose `debug`, `info`, `warn`, `error`, `fatal` and `panic`. Default is `info` |
-| grpc.port                | INDIGO_GRPC_PORT                | Port number to be used when the Indigo gRPC Server starts up. default is `1289`                                                                    |
-| grpc.data_dir            | INDIGO_GRPC_DATA_DIR            | The path of the directory where Indigo gRPC Server stores the data. Default is `/var/indigo/data`                                                  |
-| grpc.open_existing_index | INDIGO_GRPC_OPEN_EXISTING_INDEX | Flag to open indices when started to Indigo gRPC Server. Default is `false`                                                                        |
-| rest.port                | INDIGO_REST_PORT                | Port number to be used when the Indigo REST Server starts up. default is `2289`                                                                    |
-| rest.base_uri            | INDIGO_REST_BASE_URI            | The base URI of API endpoint on the Indigo REST Server. Default is `/api`                                                                          |
-| rest.grpc_server         | INDIGO_REST_GRPC_SERVER         | Indigo gRPC server to which Indigo REST Server connects. Default is `localhost:1289`                                                               |
+| Parameter name | Environment variable | Command line option | Description |
+| --- | --- | --- | --- |
+| log_format               | INDIGO_LOG_FORMAT               | --log-format | log format. `text`, `color` and `json` are available. Default is `text` |
+| log_output               | INDIGO_LOG_OUTPUT               | --log-output | log output path. Default is `stdout` |
+| log_level                | INDIGO_LOG_LEVEL                | --log-level | log level. `debug`, `info`, `warn`, `error`, `fatal` and `panic` are available. Default is `info` |
+| port                     | INDIGO_PORT                     | --port | port number. default is `1289` |
+| path                     | INDIGO_PATH                     | --path | index directory path. Default is `/var/indigo/data/index` |
+| index_mapping            | INDIGO_INDEX_MAPPING            | --index-mapping |index mapping path. Default is `""` |
+| index_type               | INDIGO_INDEX_TYPE               | --index-type | index type. `upside_down` is available. Default is `upside_down` |
+| kvstore                  | INDIGO_KVSTORE                  | --kvstore | kvstore. `boltdb`, `goleveldb`, `gtreap` and `moss` are available. Default is `boltdb` |
+| kvconfig                 | INDIGO_KVCONFIG                 | --kvconfig | kvconfig path. Default is `""` |
+| delete_index_at_startup  | INDIGO_DELETE_INDEX_AT_STARTUP  | --delete-index-at-startup | delete index at startup. Default is `false` |
+| delete_index_at_shutdown | INDIGO_DELETE_INDEX_AT_SHUTDOWN | --delete-index-at-shutdown | delete index at shutdown. Default is `false` |
 
 
 
-## Start Indigo gRPC Server
+## Start Indigo Server
 
-The `start grpc` command starts Indigo gRPC Server. You can display a help message by specifying `-h` or `--help` option.
+The `start` command starts Indigo gRPC Server. You can display a help message by specifying `-h` or `--help` option.
 
 ```sh
-$ indigo start grpc
+$ indigo start
 ```
 
 
-## Create the index to the Indigo gRPC Server
+### Index Mapping
 
-The `create index` command creates the Index to the Indigo gRPC Server. Indigo provides support for multiple indices, including executing operations across several indices. You can display a help message by specifying `-h` or `--help` option.  
 You can specify the index mapping describes how to your data model should be indexed. it contains all of the details about which fields your documents can contain, and how those fields should be dealt with when adding documents to the index, or when querying those fields. The example is following:
 
 ```json
@@ -181,44 +181,13 @@ You can specify the index mapping describes how to your data model should be ind
 
 See [Introduction to Index Mappings](http://www.blevesearch.com/docs/Index-Mapping/) and [type IndexMappingImpl](https://godoc.org/github.com/blevesearch/bleve/mapping#IndexMappingImpl) for more details.  
 
-```sh
-$ indigoctl create index --index example --index-mapping example/index_mapping.json --output-format json
-```
 
-The result of the above `create index` command is:
-
-```json
-{
-  "index_name": "example",
-  "index_dir": "/var/indigo/data/example"
-}
-```
-
-
-## Open the index to the Indigo gRPC Server
-
-The `open index` command opens an existing closed index. You can display a help message by specifying the `- h` or` --help` option.
-
-```sh
-$ indigoctl open index --index example --output-format json
-```
-
-The result of the above `open index` command is:
-
-```json
-{
-  "index_name": "example",
-  "index_dir": "data/example"
-}
-```
-
-
-## Get the index information from the Indigo gRPC Server
+## Get the index information from the Indigo Server
 
 The `get index` command retrieves an index information about existing opened index. You can display a help message by specifying the `- h` or` --help` option.
 
 ```sh
-$ indigoctl get index --index example --output-format json
+$ indigoctl get index
 ```
 
 The result of the above `get index` command is:
@@ -355,94 +324,44 @@ The result of the above `get index` command is:
 ```
 
 
-## Close the index from the Indigo gRPC Server
-
-The `close index` command closes an existing opened index. You can display a help message by specifying the `- h` or` --help` option.
-
-```sh
-$ indigoctl close index --index example --output-format json
-```
-
-The result of the above `close index` command is:
-
-```json
-{
-  "index_name": "example"
-}
-```
-
-
-## Delete the index from the Indigo gRPC Server
-
-The `delete index` command deletes an existing closed index. You can display a help message by specifying the `- h` or` --help` option.
-
-```sh
-$ indigoctl delete index --index example --output-format json
-```
-
-The result of the above `delete index` command is:
-
-```json
-{
-  "index_name": "example"
-}
-```
-
-
-## List the indices from the Indigo gRPC Server
-
-The `list index` command lists opened indices. You can display a help message by specifying the `- h` or` --help` option.
-
-```sh
-$ indigoctl list index --output-format json
-```
-
-The result of the above `list index` command is:
-
-```json
-{
-  "indices": [
-    "example"
-  ]
-}
-```
-
-
-## Put the document to the Indigo gRPC Server
+## Put the document to the Indigo Server
 
 The `put document` command adds or updates a JSON formatted document in a specified index. You can display a help message by specifying the `- h` or` --help` option.  
 The document example is following:
 
 ```json
 {
-  "name": "Bleve",
-  "description": "Bleve is a full-text search and indexing library for Go.",
-  "category": "Library",
-  "popularity": 3.0,
-  "release": "2014-04-18T00:00:00Z",
-  "type": "document"
+  "id": "1",
+  "fields": {
+    "name": "Bleve",
+    "description": "Bleve is a full-text search and indexing library for Go.",
+    "category": "Library",
+    "popularity": 3.0,
+    "release": "2014-04-18T00:00:00Z",
+    "type": "document"
+  }
 }
 ```
 
 ```sh
-$ indigoctl put document --index example --doc-id 1 --doc-fields example/document_1.json --output-format json
+$ indigoctl put document --resource ../example/document_1.json
 ```
 
 The result of the above `put document` command is:
 
 ```json
 {
-  "success": true
+  "put_count": 1
 }
 ```
 
 
-## Get the document from the Indigo gRPC Server
+## Get the document from the Indigo Server
 
 The `get document` command retrieves a JSON formatted document on its id from a specified index. You can display a help message by specifying the `- h` or` --help` option.
 
 ```sh
-$ indigoctl get document --index example --doc-id 1 --output-format json
+$ indigoctl get document --id 1
 ```
 
 The result of the above `get document` command is:
@@ -467,19 +386,19 @@ The result of the above `get document` command is:
 The `delete document` command deletes a document on its id from a specified index. You can display a help message by specifying the `- h` or` --help` option.
 
 ```sh
-$ indigoctl delete document --index example --doc-id 1 --output-format json
+$ indigoctl delete document --id 1
 ```
 
 The result of the above `delete document` command is:
 
 ```json
 {
-  "success": true
+  "delete_count": 1
 }
 ```
 
 
-## Index the documents in bulk to the Indigo gRPC Server
+## Index the documents in bulk to the Indigo Server
 
 The `bulk` command makes it possible to perform many put/delete operations in a single command execution. This can greatly increase the indexing speed. You can display a help message by specifying the `- h` or` --help` option.
 The bulk example is following:
@@ -534,7 +453,7 @@ The bulk example is following:
 ```
 
 ```sh
-$ indigoctl bulk --index example --bulk-request example/bulk_put.json --output-format json
+$ indigoctl bulk --resource ../example/bulk_put.json
 ```
 
 The result of the above `bulk` command is:
@@ -546,25 +465,86 @@ The result of the above `bulk` command is:
 ```
 
 
-## Search the documents from the Indigo gRPC Server
+## Search the documents from the Indigo Server
 
 The `search` command can be executed with a search request, which includes the Query, within its file. Here is an example:
 
 ```json
 {
   "query": {
-    "query": "description:*"
+    "query": "name:*"
   },
   "size": 10,
   "from": 0,
   "fields": [
-    "name",
-    "description",
-    "category",
-    "popularity",
-    "release",
-    "type"
-  ]
+    "*"
+  ],
+  "sort": [
+    "-_score"
+  ],
+  "facets": {
+    "Category count": {
+      "size": 10,
+      "field": "category"
+    },
+    "Popularity range": {
+      "size": 10,
+      "field": "popularity",
+      "numeric_ranges": [
+        {
+          "name": "less than 1",
+          "max": 1
+        },
+        {
+          "name": "more than or equal to 1 and less than 2",
+          "min": 1,
+          "max": 2
+        },
+        {
+          "name": "more than or equal to 2 and less than 3",
+          "min": 2,
+          "max": 3
+        },
+        {
+          "name": "more than or equal to 3 and less than 4",
+          "min": 3,
+          "max": 4
+        },
+        {
+          "name": "more than or equal to 4 and less than 5",
+          "min": 4,
+          "max": 5
+        },
+        {
+          "name": "more than or equal to 5",
+          "min": 5
+        }
+      ]
+    },
+    "Release date range": {
+      "size": 10,
+      "field": "release",
+      "date_ranges": [
+        {
+          "name": "2001 - 2010",
+          "start": "2001-01-01T00:00:00Z",
+          "end": "2010-12-31T23:59:59Z"
+        },
+        {
+          "name": "2011 - 2020",
+          "start": "2011-01-01T00:00:00Z",
+          "end": "2020-12-31T23:59:59Z"
+        }
+      ]
+    }
+  },
+  "highlight": {
+    "style": "html",
+    "fields": [
+      "name",
+      "description"
+    ]
+  }
 }
 ```
 
@@ -573,7 +553,7 @@ See [Queries](http://www.blevesearch.com/docs/Query/), [Query String Query](http
 You can display a help message by specifying the `- h` or` --help` option.
 
 ```sh
-$ indigoctl search --index example --query go --field name --field description
+$ indigoctl search --resource ../example/search_request.json
 ```
 
 The result of the above `search` command is:
@@ -581,403 +561,118 @@ The result of the above `search` command is:
 ```json
 {
   "search_result": {
-    "facets": {},
+    "facets": {
+      "Category count": {
+        "field": "category",
+        "missing": 0,
+        "other": 0,
+        "terms": [
+          {
+            "count": 4,
+            "term": "Library"
+          },
+          {
+            "count": 3,
+            "term": "Server"
+          }
+        ],
+        "total": 7
+      },
+      "Popularity range": {
+        "field": "popularity",
+        "missing": 0,
+        "numeric_ranges": [
+          {
+            "count": 2,
+            "max": 4,
+            "min": 3,
+            "name": "more than or equal to 3 and less than 4"
+          },
+          {
+            "count": 2,
+            "min": 5,
+            "name": "more than or equal to 5"
+          },
+          {
+            "count": 1,
+            "max": 2,
+            "min": 1,
+            "name": "more than or equal to 1 and less than 2"
+          },
+          {
+            "count": 1,
+            "max": 3,
+            "min": 2,
+            "name": "more than or equal to 2 and less than 3"
+          },
+          {
+            "count": 1,
+            "max": 5,
+            "min": 4,
+            "name": "more than or equal to 4 and less than 5"
+          }
+        ],
+        "other": 0,
+        "total": 7
+      },
+      "Release date range": {
+        "date_ranges": [
+          {
+            "count": 4,
+            "end": "2010-12-31T23:59:59Z",
+            "name": "2001 - 2010",
+            "start": "2001-01-01T00:00:00Z"
+          },
+          {
+            "count": 2,
+            "end": "2020-12-31T23:59:59Z",
+            "name": "2011 - 2020",
+            "start": "2011-01-01T00:00:00Z"
+          }
+        ],
+        "field": "release",
+        "missing": 0,
+        "other": 0,
+        "total": 6
+      }
+    },
     "hits": [
       {
         "fields": {
+          "category": "Library",
           "description": "Bleve is a full-text search and indexing library for Go.",
-          "name": "Bleve"
+          "name": "Bleve",
+          "popularity": 3,
+          "release": "2014-04-18T00:00:00Z",
+          "type": "document"
+        },
+        "fragments": {
+          "description": [
+            "Bleve is a full-text search and indexing library for Go."
+          ],
+          "name": [
+            "\u003cmark\u003eBleve\u003c/mark\u003e"
+          ]
         },
         "id": "1",
-        "index": "/var/indigo/data/example",
-        "score": 0.28504426124611976,
-        "sort": [
-          "_score"
-        ]
-      },
-      {
-        "fields": {
-          "description": "Indigo is a full-text search and indexing server written in Go, built on top of Bleve.",
-          "name": "Indigo"
-        },
-        "id": "7",
-        "index": "/var/indigo/data/example",
-        "score": 0.27236920508525625,
-        "sort": [
-          "_score"
-        ]
-      }
-    ],
-    "max_score": 0.28504426124611976,
-    "request": {
-      "explain": false,
-      "facets": null,
-      "fields": [
-        "name",
-        "description"
-      ],
-      "from": 0,
-      "highlight": null,
-      "includeLocations": false,
-      "query": {
-        "query": "go"
-      },
-      "size": 10,
-      "sort": [
-        "-_score"
-      ]
-    },
-    "status": {
-      "failed": 0,
-      "successful": 1,
-      "total": 1
-    },
-    "took": 423105,
-    "total_hits": 2
-  }
-}
-```
-
-See [type SearchResult](https://godoc.org/github.com/blevesearch/bleve#SearchResult) for more details.
-
-
-
-
-
-
-
-
-## Start Indigo REST Server
-
-The `start rest` command starts Indigo REST Server. You can display a help message by specifying `-h` or `--help` option.
-
-```sh
-$ indigo start rest
-```
-
-
-## Create the index to the Indigo gRPC Server via the Indigo REST Server
-
-The create index API creates the Index to the Indigo gRPC Server. Indigo provides support for multiple indices, including executing operations across several indices.
-
-```sh
-$ curl -s -X PUT -H "Content-Type: application/json" --data-binary @example/index_mapping.json "http://localhost:2289/api/example"
-```
-
-The result of the above command is:
-
-```json
-{
-  "index_name": "example",
-  "index_dir": "data/example"
-}
-```
-
-
-## Open the index to the Indigo gRPC Server via the Indigo REST Server
-
-The open index API opens an existing closed index.
-
-```sh
-$ curl -s -X POST -H "Content-Type: application/json" --data-binary @example/runtime_config.json "http://localhost:2289/api/example/_open"
-```
-
-The result of the above command is:
-
-```json
-{
-  "index_name": "example",
-  "index_dir": "data/example"
-}
-```
-
-
-## Get the index information from the Indigo gRPC Server via the Indigo REST Server
-
-The get index API retrieves an index information about existing opened index.
-
-```sh
-$ curl -s -X GET "http://localhost:2289/api/example"
-```
-
-The result of the above command is:
-
-```json
-{
-  "document_count": 0,
-  "index_stats": {
-    "index": {
-      "analysis_time": 0,
-      "batches": 0,
-      "deletes": 0,
-      "errors": 0,
-      "index_time": 0,
-      "num_plain_text_bytes_indexed": 0,
-      "term_searchers_finished": 0,
-      "term_searchers_started": 0,
-      "updates": 0
-    },
-    "search_time": 0,
-    "searches": 0
-  },
-  "index_mapping": {
-    "types": {
-      "document": {
-        "enabled": true,
-        "dynamic": true,
-        "properties": {
-          "category": {
-            "enabled": true,
-            "dynamic": true,
-            "fields": [
-              {
-                "type": "text",
-                "analyzer": "keyword",
-                "store": true,
-                "index": true,
-                "include_term_vectors": true,
-                "include_in_all": true
-              }
-            ],
-            "default_analyzer": ""
-          },
-          "description": {
-            "enabled": true,
-            "dynamic": true,
-            "fields": [
-              {
-                "type": "text",
-                "analyzer": "en",
-                "store": true,
-                "index": true,
-                "include_term_vectors": true,
-                "include_in_all": true
-              }
-            ],
-            "default_analyzer": ""
-          },
+        "index": "/var/indigo/data/index",
+        "locations": {
           "name": {
-            "enabled": true,
-            "dynamic": true,
-            "fields": [
+            "bleve": [
               {
-                "type": "text",
-                "analyzer": "en",
-                "store": true,
-                "index": true,
-                "include_term_vectors": true,
-                "include_in_all": true
+                "array_positions": null,
+                "end": 5,
+                "pos": 1,
+                "start": 0
               }
-            ],
-            "default_analyzer": ""
-          },
-          "popularity": {
-            "enabled": true,
-            "dynamic": true,
-            "fields": [
-              {
-                "type": "number",
-                "store": true,
-                "index": true,
-                "include_in_all": true
-              }
-            ],
-            "default_analyzer": ""
-          },
-          "release": {
-            "enabled": true,
-            "dynamic": true,
-            "fields": [
-              {
-                "type": "datetime",
-                "store": true,
-                "index": true,
-                "include_in_all": true
-              }
-            ],
-            "default_analyzer": ""
-          },
-          "type": {
-            "enabled": true,
-            "dynamic": true,
-            "fields": [
-              {
-                "type": "text",
-                "analyzer": "keyword",
-                "store": true,
-                "index": true,
-                "include_term_vectors": true,
-                "include_in_all": true
-              }
-            ],
-            "default_analyzer": ""
+            ]
           }
         },
-        "default_analyzer": ""
-      }
-    },
-    "default_mapping": {
-      "enabled": true,
-      "dynamic": true,
-      "default_analyzer": ""
-    },
-    "type_field": "type",
-    "default_type": "document",
-    "default_analyzer": "standard",
-    "default_datetime_parser": "dateTimeOptional",
-    "default_field": "_all",
-    "store_dynamic": true,
-    "index_dynamic": true,
-    "analysis": {}
-  }
-}
-```
-
-
-## Close the index to the Indigo gRPC Server via the Indigo REST Server
-
-The close index API closes an existing opened index.
-
-```sh
-$ curl -s -X POST "http://localhost:2289/api/example/_close"
-```
-
-The result of the above command is:
-
-```json
-{
-  "index_name": "example"
-}
-```
-
-
-## Delete the index to the Indigo gRPC Server via the Indigo REST Server
-
-The delete index API deletes an existing closed index.
-
-```sh
-$ curl -s -X DELETE "http://localhost:2289/api/example"
-```
-
-The result of the above command is:
-
-```json
-{
-  "index_name": "example"
-}
-```
-
-
-## List the index to the Indigo gRPC Server via the Indigo REST Server
-
-The list index API lists opened indices.
-
-```sh
-$ curl -s -X GET "http://localhost:2289/api/_list"
-```
-
-The result of the above command is:
-
-```json
-{
-  "indices": [
-    "example"
-  ]
-}
-```
-
-
-## Put the document to the Indigo gRPC Server via the Indigo REST Server
-
-The put document API adds or updates a JSON formatted document in a specified index.
-
-```sh
-$ curl -s -X PUT -H "Content-Type: application/json" --data-binary @example/document_1.json "http://localhost:2289/api/example/1"
-```
-
-The result of the above command is:
-
-```json
-{
-  "success": true
-}
-```
-
-
-## Get the document to the Indigo gRPC Server via the Indigo REST Server
-
-The get document API retrieves a JSON formatted document on its id from a specified index.
-
-```sh
-$ curl -s -X GET "http://localhost:2289/api/example/1"
-```
-
-The result of the above command is:
-
-```json
-{
-  "id": "1",
-  "fields": {
-    "category": "Library",
-    "description": "Bleve is a full-text search and indexing library for Go.",
-    "name": "Bleve",
-    "popularity": 3,
-    "release": "2014-04-18T00:00:00Z",
-    "type": "document"
-  }
-}
-```
-
-
-## Delete the document from the Indigo gRPC Server via the Indigo REST Server
-
-The delete document API deletes a document on its id from a specified index.
-
-```sh
-$ curl -s -X DELETE "http://localhost:2289/api/example/1"
-```
-
-The result of the above command is:
-
-```json
-{
-  "success": true
-}
-```
-
-
-## Index the documents in bulk to the Indigo gRPC Server via the Indigo REST Server
-
-The bulk API makes it possible to perform many put/delete operations in a single command execution. This can greatly increase the indexing speed.
-
-```sh
-$ curl -s -X POST -H "Content-Type: application/json" --data-binary @example/bulk_put.json "http://localhost:2289/api/example/_bulk"
-```
-
-The result of the above command is:
-
-```text
-{
-  "put_count": 7
-}
-```
-
-
-## Search the documents from the Indigo gRPC Server via the Indigo REST Server
-
-The search API can be executed with a search request, which includes the Query, within its file.
-
-```sh
-$ curl -s -X POST -H "Content-Type: application/json" --data-binary @example/simple_query.json "http://localhost:2289/api/example/_search"
-```
-
-The result of the above command is:
-
-```json
-{
-  "search_result": {
-    "facets": {},
-    "hits": [
+        "score": 0.12163776688600772,
+        "sort": [
+          "_score"
+        ]
+      },
       {
         "fields": {
           "category": "Library",
@@ -987,25 +682,29 @@ The result of the above command is:
           "release": "2000-03-30T00:00:00Z",
           "type": "document"
         },
-        "id": "2",
-        "index": "data/example",
-        "score": 0.28598991738818746,
-        "sort": [
-          "_score"
-        ]
-      },
-      {
-        "fields": {
-          "category": "Server",
-          "description": "Solr is an open source enterprise search platform, written in Java, from the Apache Lucene project.",
-          "name": "Solr",
-          "popularity": 5,
-          "release": "2006-12-22T00:00:00Z",
-          "type": "document"
+        "fragments": {
+          "description": [
+            "Apache Lucene is a high-performance, full-featured text search engine library written entirely in Java."
+          ],
+          "name": [
+            "\u003cmark\u003eLucene\u003c/mark\u003e"
+          ]
         },
-        "id": "5",
-        "index": "data/example",
-        "score": 0.2842565476963312,
+        "id": "2",
+        "index": "/var/indigo/data/index",
+        "locations": {
+          "name": {
+            "lucen": [
+              {
+                "array_positions": null,
+                "end": 6,
+                "pos": 1,
+                "start": 0
+              }
+            ]
+          }
+        },
+        "score": 0.12163776688600772,
         "sort": [
           "_score"
         ]
@@ -1013,31 +712,35 @@ The result of the above command is:
       {
         "fields": {
           "category": "Library",
-          "description": "Whoosh is a fast, featureful full-text indexing and searching library implemented in pure Python. ",
+          "description": "Whoosh is a fast, featureful full-text indexing and searching library implemented in pure Python.",
           "name": "Whoosh",
           "popularity": 3,
           "release": "2008-02-20T00:00:00Z",
           "type": "document"
         },
-        "id": "3",
-        "index": "data/example",
-        "score": 0.2484309575477134,
-        "sort": [
-          "_score"
-        ]
-      },
-      {
-        "fields": {
-          "category": "Server",
-          "description": "Indigo is a full-text search and indexing server written in Go, built on top of Bleve.",
-          "name": "Indigo",
-          "popularity": 1,
-          "release": "2017-01-13T00:00:00Z",
-          "type": "document"
+        "fragments": {
+          "description": [
+            "Whoosh is a fast, featureful full-text indexing and searching library implemented in pure Python."
+          ],
+          "name": [
+            "\u003cmark\u003eWhoosh\u003c/mark\u003e"
+          ]
         },
-        "id": "7",
-        "index": "data/example",
-        "score": 0.24526800905441196,
+        "id": "3",
+        "index": "/var/indigo/data/index",
+        "locations": {
+          "name": {
+            "whoosh": [
+              {
+                "array_positions": null,
+                "end": 6,
+                "pos": 1,
+                "start": 0
+              }
+            ]
+          }
+        },
+        "score": 0.12163776688600772,
         "sort": [
           "_score"
         ]
@@ -1051,9 +754,65 @@ The result of the above command is:
           "release": "2005-10-01T00:00:00Z",
           "type": "document"
         },
+        "fragments": {
+          "description": [
+            "Ferret is a super fast, highly configurable search library written in Ruby."
+          ],
+          "name": [
+            "\u003cmark\u003eFerret\u003c/mark\u003e"
+          ]
+        },
         "id": "4",
-        "index": "data/example",
-        "score": 0.2057485301587168,
+        "index": "/var/indigo/data/index",
+        "locations": {
+          "name": {
+            "ferret": [
+              {
+                "array_positions": null,
+                "end": 6,
+                "pos": 1,
+                "start": 0
+              }
+            ]
+          }
+        },
+        "score": 0.12163776688600772,
+        "sort": [
+          "_score"
+        ]
+      },
+      {
+        "fields": {
+          "category": "Server",
+          "description": "Solr is an open source enterprise search platform, written in Java, from the Apache Lucene project.",
+          "name": "Solr",
+          "popularity": 5,
+          "release": "2006-12-22T00:00:00Z",
+          "type": "document"
+        },
+        "fragments": {
+          "description": [
+            "Solr is an open source enterprise search platform, written in Java, from the Apache Lucene project."
+          ],
+          "name": [
+            "\u003cmark\u003eSolr\u003c/mark\u003e"
+          ]
+        },
+        "id": "5",
+        "index": "/var/indigo/data/index",
+        "locations": {
+          "name": {
+            "solr": [
+              {
+                "array_positions": null,
+                "end": 4,
+                "pos": 1,
+                "start": 0
+              }
+            ]
+          }
+        },
+        "score": 0.12163776688600772,
         "sort": [
           "_score"
         ]
@@ -1067,47 +826,143 @@ The result of the above command is:
           "release": "2010-02-08T00:00:00Z",
           "type": "document"
         },
+        "fragments": {
+          "description": [
+            "Elasticsearch is a search engine based on Lucene, written in Java."
+          ],
+          "name": [
+            "\u003cmark\u003eElasticsearch\u003c/mark\u003e"
+          ]
+        },
         "id": "6",
-        "index": "data/example",
-        "score": 0.11396329383474207,
+        "index": "/var/indigo/data/index",
+        "locations": {
+          "name": {
+            "elasticsearch": [
+              {
+                "array_positions": null,
+                "end": 13,
+                "pos": 1,
+                "start": 0
+              }
+            ]
+          }
+        },
+        "score": 0.12163776688600772,
         "sort": [
           "_score"
         ]
       },
       {
         "fields": {
-          "category": "Library",
-          "description": "Bleve is a full-text search and indexing library for Go.",
-          "name": "Bleve",
-          "popularity": 3,
-          "release": "2014-04-18T00:00:00Z",
+          "category": "Server",
+          "description": "Indigo is a full-text search and indexing server written in Go, built on top of Bleve.",
+          "name": "Indigo",
+          "popularity": 1,
+          "release": "2017-01-13T00:00:00Z",
           "type": "document"
         },
-        "id": "1",
-        "index": "data/example",
-        "score": 0.0853843602235094,
+        "fragments": {
+          "description": [
+            "Indigo is a full-text search and indexing server written in Go, built on top of Bleve."
+          ],
+          "name": [
+            "\u003cmark\u003eIndigo\u003c/mark\u003e"
+          ]
+        },
+        "id": "7",
+        "index": "/var/indigo/data/index",
+        "locations": {
+          "name": {
+            "indigo": [
+              {
+                "array_positions": null,
+                "end": 6,
+                "pos": 1,
+                "start": 0
+              }
+            ]
+          }
+        },
+        "score": 0.12163776688600772,
         "sort": [
           "_score"
         ]
       }
     ],
-    "max_score": 0.28598991738818746,
+    "max_score": 0.12163776688600772,
     "request": {
       "explain": false,
-      "facets": null,
+      "facets": {
+        "Category count": {
+          "field": "category",
+          "size": 10
+        },
+        "Popularity range": {
+          "field": "popularity",
+          "numeric_ranges": [
+            {
+              "max": 1,
+              "name": "less than 1"
+            },
+            {
+              "max": 2,
+              "min": 1,
+              "name": "more than or equal to 1 and less than 2"
+            },
+            {
+              "max": 3,
+              "min": 2,
+              "name": "more than or equal to 2 and less than 3"
+            },
+            {
+              "max": 4,
+              "min": 3,
+              "name": "more than or equal to 3 and less than 4"
+            },
+            {
+              "max": 5,
+              "min": 4,
+              "name": "more than or equal to 4 and less than 5"
+            },
+            {
+              "min": 5,
+              "name": "more than or equal to 5"
+            }
+          ],
+          "size": 10
+        },
+        "Release date range": {
+          "date_ranges": [
+            {
+              "end": "2010-12-31T23:59:59Z",
+              "name": "2001 - 2010",
+              "start": "2001-01-01T00:00:00Z"
+            },
+            {
+              "end": "2020-12-31T23:59:59Z",
+              "name": "2011 - 2020",
+              "start": "2011-01-01T00:00:00Z"
+            }
+          ],
+          "field": "release",
+          "size": 10
+        }
+      },
       "fields": [
-        "name",
-        "description",
-        "category",
-        "popularity",
-        "release",
-        "type"
+        "*"
       ],
       "from": 0,
-      "highlight": null,
+      "highlight": {
+        "fields": [
+          "name",
+          "description"
+        ],
+        "style": "html"
+      },
       "includeLocations": false,
       "query": {
-        "query": "description:*"
+        "query": "name:*"
       },
       "size": 10,
       "sort": [
@@ -1119,11 +974,22 @@ The result of the above command is:
       "successful": 1,
       "total": 1
     },
-    "took": 38819452,
+    "took": 4103742,
     "total_hits": 7
   }
 }
 ```
+
+See [type SearchResult](https://godoc.org/github.com/blevesearch/bleve#SearchResult) for more details.
+
+
+
+
+
+
+
+
+
 
 
 ## License

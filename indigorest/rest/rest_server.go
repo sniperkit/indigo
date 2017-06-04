@@ -17,19 +17,19 @@ type indigoRESTServer struct {
 	conn     *grpc.ClientConn
 }
 
-func NewIndigoRESTServer(port int, basePath, gRPCServer string) *indigoRESTServer {
+func NewIndigoRESTServer(port int, basePath, server string) *indigoRESTServer {
 	router := mux.NewRouter()
 	router.StrictSlash(true)
 
-	conn, err := grpc.Dial(gRPCServer, grpc.WithInsecure())
+	conn, err := grpc.Dial(server, grpc.WithInsecure())
 	if err == nil {
 		log.WithFields(log.Fields{
-			"grpc_server": gRPCServer,
+			"server": server,
 		}).Info("succeeded in creating connection")
 	} else {
 		log.WithFields(log.Fields{
-			"grpc_server": gRPCServer,
-			"err":         err,
+			"server": server,
+			"err":    err,
 		}).Error("failed to create connection")
 
 		return nil
@@ -40,17 +40,12 @@ func NewIndigoRESTServer(port int, basePath, gRPCServer string) *indigoRESTServe
 	/*
 	 * set handlers
 	 */
-	router.Handle(fmt.Sprintf("%s/_list", basePath), handler.NewListIndicesHandler(client)).Methods("GET")
-	router.Handle(fmt.Sprintf("%s/{index}", basePath), handler.NewCreateIndexHandler(client)).Methods("PUT")
-	router.Handle(fmt.Sprintf("%s/{index}", basePath), handler.NewGetIndexHandler(client)).Methods("GET")
-	router.Handle(fmt.Sprintf("%s/{index}", basePath), handler.NewDeleteIndexHandler(client)).Methods("DELETE")
-	router.Handle(fmt.Sprintf("%s/{index}/{id}", basePath), handler.NewPutDocumentHandler(client)).Methods("PUT")
-	router.Handle(fmt.Sprintf("%s/{index}/{id}", basePath), handler.NewGetDocumentHandler(client)).Methods("GET")
-	router.Handle(fmt.Sprintf("%s/{index}/{id}", basePath), handler.NewDeleteDocumentHandler(client)).Methods("DELETE")
-	router.Handle(fmt.Sprintf("%s/{index}/_open", basePath), handler.NewOpenIndexHandler(client)).Methods("POST")
-	router.Handle(fmt.Sprintf("%s/{index}/_close", basePath), handler.NewCloseIndexHandler(client)).Methods("POST")
-	router.Handle(fmt.Sprintf("%s/{index}/_bulk", basePath), handler.NewBulkHandler(client)).Methods("POST")
-	router.Handle(fmt.Sprintf("%s/{index}/_search", basePath), handler.NewSearchHandler(client)).Methods("POST")
+	router.Handle(fmt.Sprintf("%s/", basePath), handler.NewGetIndexHandler(client)).Methods("GET")
+	router.Handle(fmt.Sprintf("%s/{id}", basePath), handler.NewPutDocumentHandler(client)).Methods("PUT")
+	router.Handle(fmt.Sprintf("%s/{id}", basePath), handler.NewGetDocumentHandler(client)).Methods("GET")
+	router.Handle(fmt.Sprintf("%s/{id}", basePath), handler.NewDeleteDocumentHandler(client)).Methods("DELETE")
+	router.Handle(fmt.Sprintf("%s/_bulk", basePath), handler.NewBulkHandler(client)).Methods("POST")
+	router.Handle(fmt.Sprintf("%s/_search", basePath), handler.NewSearchHandler(client)).Methods("POST")
 
 	listener, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
 	if err == nil {

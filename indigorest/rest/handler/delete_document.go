@@ -26,12 +26,10 @@ func (h *DeleteDocumentHandler) ServeHTTP(w http.ResponseWriter, req *http.Reque
 	}).Info("")
 
 	vars := mux.Vars(req)
-	index := vars["index"]
 	id := vars["id"]
 
 	protoDeleteDocumentRequest := &proto.DeleteDocumentRequest{
-		Index: index,
-		Id:    id,
+		Id: id,
 	}
 
 	resp, err := h.client.DeleteDocument(context.Background(), protoDeleteDocumentRequest)

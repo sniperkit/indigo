@@ -13,7 +13,6 @@ import (
 
 type BulkCommandOptions struct {
 	gRPCServer string
-	index      string
 	batchSize  int32
 	resource   string
 }
@@ -39,10 +38,6 @@ var bulkCmd = &cobra.Command{
 }
 
 func runEBulkCmd(cmd *cobra.Command, args []string) error {
-	if bulkCmdOpts.index == "" {
-		return fmt.Errorf("required flag: --%s", cmd.Flag("index").Name)
-	}
-
 	var resourceBytes []byte = nil
 	if cmd.Flag("resource").Changed {
 		if bulkCmdOpts.resource == "-" {
@@ -73,7 +68,6 @@ func runEBulkCmd(cmd *cobra.Command, args []string) error {
 	}
 
 	protoBulkRequest := &proto.BulkRequest{
-		Index:        bulkCmdOpts.index,
 		BatchSize:    bulkResource.BatchSize,
 		BulkRequests: bulkRequestsBytes,
 	}
@@ -112,7 +106,6 @@ func runEBulkCmd(cmd *cobra.Command, args []string) error {
 
 func init() {
 	bulkCmd.Flags().StringVar(&bulkCmdOpts.gRPCServer, "grpc-server", DefaultServer, "Indigo gRPC Server to connect to")
-	bulkCmd.Flags().StringVar(&bulkCmdOpts.index, "index", DefaultIndex, "index name")
 	bulkCmd.Flags().Int32Var(&bulkCmdOpts.batchSize, "batch-size", DefaultBatchSize, "batch size of bulk request")
 	bulkCmd.Flags().StringVar(&bulkCmdOpts.resource, "resource", DefaultResource, "resource file")
 

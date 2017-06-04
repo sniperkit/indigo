@@ -1,7 +1,0 @@
-{
-  "runtime_config": {
-    "create_if_missing": true,
-    "error_if_exists": true,
-    "path": "/var/indigo/data/example/store"
-  }
-}

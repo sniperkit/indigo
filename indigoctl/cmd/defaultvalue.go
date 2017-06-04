@@ -5,14 +5,8 @@ const (
 	DefaultVersionFlag      bool   = false
 	DefaultResource         string = ""
 	DefaultServer           string = "localhost:1289"
-	DefaultIndex            string = ""
 	DefaultBatchSize        int32  = 1000
-	DefaultIndexMapping     string = ""
-	DefaultIndexType        string = "upside_down"
-	DefaultKvstore          string = "boltdb"
-	DefaultKvconfig         string = ""
 	DefaultId               string = ""
-	DefaultRuntimeConfig    string = ""
 	DefaultDocFields        string = ""
 	DefaultQuery            string = ""
 	DefaultSize             int    = 10

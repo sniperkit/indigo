@@ -12,7 +12,6 @@ import (
 )
 
 type PutDocumentCommandOptions struct {
-	index    string
 	id       string
 	fields   string
 	resource string
@@ -21,6 +20,7 @@ type PutDocumentCommandOptions struct {
 var putDocumentCmdOpts PutDocumentCommandOptions
 
 type PutDocumentResource struct {
+	Id     string      `json:"id,omitempty"`
 	Fields interface{} `json:"fields,omitempty"`
 }
 
@@ -32,14 +32,6 @@ var putDocumentCmd = &cobra.Command{
 }
 
 func runEPutDocumentCmd(cmd *cobra.Command, args []string) error {
-	if putDocumentCmdOpts.index == "" {
-		return fmt.Errorf("required flag: --%s", cmd.Flag("index").Name)
-	}
-
-	if putDocumentCmdOpts.id == "" {
-		return fmt.Errorf("required flag: --%s", cmd.Flag("id").Name)
-	}
-
 	var resourceBytes []byte = nil
 	if cmd.Flag("resource").Changed {
 		if putDocumentCmdOpts.resource == "-" {
@@ -70,9 +62,12 @@ func runEPutDocumentCmd(cmd *cobra.Command, args []string) error {
 	}
 
 	protoPutDocumentRequest := &proto.PutDocumentRequest{
-		Index:  putDocumentCmdOpts.index,
-		Id:     putDocumentCmdOpts.id,
+		Id:     putDocumentResource.Id,
 		Fields: fieldsBytes,
+	}
+
+	if cmd.Flag("id").Changed {
+		protoPutDocumentRequest.Id = putDocumentCmdOpts.id
 	}
 
 	if cmd.Flag("fields").Changed {
@@ -108,7 +103,6 @@ func runEPutDocumentCmd(cmd *cobra.Command, args []string) error {
 }
 
 func init() {
-	putDocumentCmd.Flags().StringVar(&putDocumentCmdOpts.index, "index", DefaultIndex, "index name")
 	putDocumentCmd.Flags().StringVar(&putDocumentCmdOpts.id, "id", DefaultId, "document id")
 	putDocumentCmd.Flags().StringVar(&putDocumentCmdOpts.resource, "resource", DefaultResource, "resource file")
 	putDocumentCmd.Flags().StringVar(&putDocumentCmdOpts.fields, "fields", DefaultDocFields, "document fields")

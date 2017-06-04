@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"github.com/blevesearch/bleve"
 	"github.com/blevesearch/bleve/mapping"
-	"github.com/gorilla/mux"
 	"github.com/mosuka/indigo/proto"
 	log "github.com/sirupsen/logrus"
 	"golang.org/x/net/context"
@@ -27,12 +26,7 @@ func (h *GetIndexHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		"req": req,
 	}).Info("")
 
-	vars := mux.Vars(req)
-	index := vars["index"]
-
-	protoGetIndexRequest := &proto.GetIndexRequest{
-		Index: index,
-	}
+	protoGetIndexRequest := &proto.GetIndexRequest{}
 
 	resp, err := h.client.GetIndex(context.Background(), protoGetIndexRequest)
 	if err != nil {

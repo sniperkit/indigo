@@ -1,20 +1,14 @@
 {
   "query": {
-    "query": "description:search"
+    "query": "name:*"
   },
   "size": 10,
   "from": 0,
   "fields": [
-    "name",
-    "description",
-    "category",
-    "popularity",
-    "release",
-    "type"
+    "*"
   ],
   "sort": [
-    "-_score",
-    "name"
+    "-_score"
   ],
   "facets": {
     "Category count": {

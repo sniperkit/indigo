@@ -1,12 +1,15 @@
 package cmd
 
 import (
+	"encoding/json"
 	"fmt"
+	"github.com/blevesearch/bleve/mapping"
 	"github.com/mosuka/indigo/indigo/grpc"
 	"github.com/mosuka/indigo/version"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"io/ioutil"
 	"os"
 	"os/signal"
 	"syscall"
@@ -109,8 +112,49 @@ func persistentPreRunEStartCmd(cmd *cobra.Command, args []string) error {
 }
 
 func runEStartCmd(cmd *cobra.Command, args []string) error {
-	server := grpc.NewIndigoGRPCServer(viper.GetInt("port"), viper.GetString("data_dir"))
-	server.Start(viper.GetBool("open_existing_index"))
+
+	// IndexMapping
+	indexMapping := mapping.NewIndexMapping()
+	if cmd.Flag("index-mapping").Changed {
+		file, err := os.Open(viper.GetString("index_mapping"))
+		if err != nil {
+			return err
+		}
+		defer file.Close()
+
+		resourceBytes, err := ioutil.ReadAll(file)
+		if err != nil {
+			return err
+		}
+
+		err = json.Unmarshal(resourceBytes, indexMapping)
+		if err != nil {
+			return err
+		}
+	}
+
+	// Kvconfig
+	kvconfig := make(map[string]interface{})
+	if cmd.Flag("kvconfig").Changed {
+		file, err := os.Open(viper.GetString("kvconfig"))
+		if err != nil {
+			return err
+		}
+		defer file.Close()
+
+		resourceBytes, err := ioutil.ReadAll(file)
+		if err != nil {
+			return err
+		}
+
+		err = json.Unmarshal(resourceBytes, kvconfig)
+		if err != nil {
+			return err
+		}
+	}
+
+	server := grpc.NewIndigoGRPCServer(viper.GetInt("port"), viper.GetString("path"), indexMapping, viper.GetString("index_type"), viper.GetString("kvstore"), kvconfig)
+	server.Start(viper.GetBool("delete_index_at_startup"))
 
 	signalChan := make(chan os.Signal, 1)
 	signal.Notify(signalChan,
@@ -125,7 +169,7 @@ func runEStartCmd(cmd *cobra.Command, args []string) error {
 			"signal": sig,
 		}).Info("trap signal")
 
-		server.Stop()
+		server.Stop(viper.GetBool("delete_index_at_shutdown"))
 
 		return nil
 	}
@@ -142,19 +186,29 @@ func persistentPostRunEStartCmd(cmd *cobra.Command, args []string) error {
 }
 
 func init() {
-	StartCmd.Flags().String("log-format", DefaultLogFormat, "log format of Indigo Server")
-	StartCmd.Flags().String("log-output", DefaultLogOutput, "log output destination of Indigo Server")
-	StartCmd.Flags().String("log-level", DefaultLogLevel, "log level of log output by Indigo Server")
-	StartCmd.Flags().Int("port", DefaultPort, "port number to be used when Indigo gRPC Server starts up")
-	StartCmd.Flags().String("data-dir", DefaultDataDir, "path of the directory where Indigo gRPC Server stores the data")
-	StartCmd.Flags().Bool("open-existing-index", DefaultOpenExistingIndex, "flag to open indices when started to Indigo gRPC Server")
+	StartCmd.Flags().String("log-format", DefaultLogFormat, "log format")
+	StartCmd.Flags().String("log-output", DefaultLogOutput, "log output path")
+	StartCmd.Flags().String("log-level", DefaultLogLevel, "log level")
+	StartCmd.Flags().Int("port", DefaultPort, "port number")
+	StartCmd.Flags().String("path", DefaultPath, "index directory path")
+	StartCmd.Flags().String("index-mapping", DefaultIndexMapping, "index mapping path")
+	StartCmd.Flags().String("index-type", DefaultIndexType, "index type")
+	StartCmd.Flags().String("kvstore", DefaultKvstore, "kvstore")
+	StartCmd.Flags().String("kvconfig", DefaultKvconfig, "kvconfig path")
+	StartCmd.Flags().Bool("delete-index-at-startup", DefaultDeleteIndexAtStartup, "delete index at startup")
+	StartCmd.Flags().Bool("delete-index-at-shutdown", DefaultDeleteIndexAtShutdown, "delete index at shutdown")
 
 	viper.BindPFlag("log_format", StartCmd.Flags().Lookup("log-format"))
 	viper.BindPFlag("log_output", StartCmd.Flags().Lookup("log-output"))
 	viper.BindPFlag("log_level", StartCmd.Flags().Lookup("log-level"))
 	viper.BindPFlag("port", StartCmd.Flags().Lookup("port"))
-	viper.BindPFlag("data_dir", StartCmd.Flags().Lookup("data-dir"))
-	viper.BindPFlag("open_existing_index", StartCmd.Flags().Lookup("open-existing-index"))
+	viper.BindPFlag("path", StartCmd.Flags().Lookup("path"))
+	viper.BindPFlag("index_mapping", StartCmd.Flags().Lookup("index-mapping"))
+	viper.BindPFlag("index_type", StartCmd.Flags().Lookup("index-type"))
+	viper.BindPFlag("kvstore", StartCmd.Flags().Lookup("kvstore"))
+	viper.BindPFlag("kvconfig", StartCmd.Flags().Lookup("kvconfig"))
+	viper.BindPFlag("delete_index_at_startup", StartCmd.Flags().Lookup("delete-index-at-startup"))
+	viper.BindPFlag("delete_index_at_shutdown", StartCmd.Flags().Lookup("delete-index-at-shutdown"))
 
 	RootCmd.AddCommand(StartCmd)
 }
