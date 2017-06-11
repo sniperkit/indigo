@@ -12,15 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package main
+package dependency
 
 import (
-	"github.com/mosuka/indigo/indigorest/cmd"
-	"os"
+	_ "github.com/blevesearch/bleve/config"
 )
-
-func main() {
-	if err := cmd.RootCmd.Execute(); err != nil {
-		os.Exit(1)
-	}
-}
