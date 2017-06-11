@@ -3,8 +3,6 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/blevesearch/bleve"
-	"github.com/blevesearch/bleve/mapping"
 	"github.com/mosuka/indigo/proto"
 	"github.com/spf13/cobra"
 	"golang.org/x/net/context"
@@ -12,15 +10,17 @@ import (
 )
 
 type GetIndexResponse struct {
-	DocumentCount uint64                    `json:"document_count"`
-	IndexStats    map[string]interface{}    `json:"index_stats"`
-	IndexMapping  *mapping.IndexMappingImpl `json:"index_mapping"`
+	Path         string      `json:"path"`
+	IndexMapping interface{} `json:"index_mapping"`
+	IndexType    string      `json:"index_type"`
+	Kvstore      string      `json:"kvstore"`
+	Kvconfig     interface{} `json:"kvconfig"`
 }
 
 var getIndexCmd = &cobra.Command{
 	Use:   "index",
-	Short: "gets the index information from the Indigo gRPC Server",
-	Long:  `The get index command gets the index information from the Indigo gRPC Server.`,
+	Short: "gets the index mapping from the Indigo Server",
+	Long:  `The get index command gets the index information from the Indigo Server.`,
 	RunE:  runEGetIndexCmd,
 }
 
@@ -39,20 +39,22 @@ func runEGetIndexCmd(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	indexStats := make(map[string]interface{})
-	if err := json.Unmarshal(resp.IndexStats, &indexStats); err != nil {
+	indexMapping, err := proto.UnmarshalAny(resp.IndexMapping)
+	if err != nil {
 		return err
 	}
 
-	indexMapping := bleve.NewIndexMapping()
-	if err := json.Unmarshal(resp.IndexMapping, &indexMapping); err != nil {
+	kvconfig, err := proto.UnmarshalAny(resp.Kvconfig)
+	if err != nil {
 		return err
 	}
 
 	r := GetIndexResponse{
-		DocumentCount: resp.DocumentCount,
-		IndexStats:    indexStats,
-		IndexMapping:  indexMapping,
+		Path:         resp.Path,
+		IndexMapping: indexMapping,
+		IndexType:    resp.IndexType,
+		Kvstore:      resp.Kvstore,
+		Kvconfig:     kvconfig,
 	}
 
 	switch rootCmdOpts.outputFormat {

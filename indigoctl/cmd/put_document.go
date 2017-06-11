@@ -20,8 +20,8 @@ type PutDocumentCommandOptions struct {
 var putDocumentCmdOpts PutDocumentCommandOptions
 
 type PutDocumentResource struct {
-	Id     string      `json:"id,omitempty"`
-	Fields interface{} `json:"fields,omitempty"`
+	Id     string                 `json:"id,omitempty"`
+	Fields map[string]interface{} `json:"fields,omitempty"`
 }
 
 var putDocumentCmd = &cobra.Command{
@@ -32,8 +32,9 @@ var putDocumentCmd = &cobra.Command{
 }
 
 func runEPutDocumentCmd(cmd *cobra.Command, args []string) error {
-	var resourceBytes []byte = nil
+	putDocumentResource := PutDocumentResource{}
 	if cmd.Flag("resource").Changed {
+		var resourceBytes []byte = nil
 		if putDocumentCmdOpts.resource == "-" {
 			resourceBytes, _ = ioutil.ReadAll(os.Stdin)
 		} else {
@@ -48,22 +49,20 @@ func runEPutDocumentCmd(cmd *cobra.Command, args []string) error {
 				return err
 			}
 		}
+		err := json.Unmarshal(resourceBytes, &putDocumentResource)
+		if err != nil {
+			return err
+		}
 	}
 
-	putDocumentResource := PutDocumentResource{}
-	err := json.Unmarshal(resourceBytes, &putDocumentResource)
-	if err != nil {
-		return err
-	}
-
-	fieldsBytes, err := json.Marshal(putDocumentResource.Fields)
+	fieldsAny, err := proto.MarshalAny(putDocumentResource.Fields)
 	if err != nil {
 		return err
 	}
 
 	protoPutDocumentRequest := &proto.PutDocumentRequest{
 		Id:     putDocumentResource.Id,
-		Fields: fieldsBytes,
+		Fields: &fieldsAny,
 	}
 
 	if cmd.Flag("id").Changed {
@@ -71,7 +70,16 @@ func runEPutDocumentCmd(cmd *cobra.Command, args []string) error {
 	}
 
 	if cmd.Flag("fields").Changed {
-		protoPutDocumentRequest.Fields = []byte(putDocumentCmdOpts.fields)
+		var fields map[string]interface{}
+		err := json.Unmarshal([]byte(putDocumentCmdOpts.fields), &fields)
+		if err != nil {
+			return err
+		}
+		fieldsAny, err := proto.MarshalAny(fields)
+		if err != nil {
+			return err
+		}
+		protoPutDocumentRequest.Fields = &fieldsAny
 	}
 
 	conn, err := grpc.Dial(putCmdOpts.gRPCServer, grpc.WithInsecure())

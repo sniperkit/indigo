@@ -1,13 +1,11 @@
 package service
 
 import (
-	"encoding/json"
 	"github.com/blevesearch/bleve"
 	"github.com/blevesearch/bleve/document"
 	"github.com/blevesearch/bleve/mapping"
 	_ "github.com/mosuka/indigo/dependency"
 	"github.com/mosuka/indigo/proto"
-	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"golang.org/x/net/context"
 	"os"
@@ -126,37 +124,21 @@ func (igs *IndigoGRPCService) CloseIndex(deleteIndex bool) error {
 }
 
 func (igs *IndigoGRPCService) GetIndex(ctx context.Context, req *proto.GetIndexRequest) (*proto.GetIndexResponse, error) {
-	documentCount, err := igs.Index.DocCount()
-
-	indexStats, err := igs.Index.Stats().MarshalJSON()
-	if err == nil {
-		log.WithFields(log.Fields{}).Info("succeeded in creating index stats")
-	} else {
-		log.WithFields(log.Fields{
-			"err": err,
-		}).Error("failed to create index stats")
-	}
-
-	indexMapping, err := json.Marshal(igs.Index.Mapping())
-	if err == nil {
-		log.WithFields(log.Fields{}).Info("succeeded in creating index mapping")
-	} else {
-		log.WithFields(log.Fields{
-			"err": err,
-		}).Error("failed to create index mapping")
-	}
+	indexMapping, err := proto.MarshalAny(igs.IndexMapping)
+	kvconfig, err := proto.MarshalAny(igs.Kvconfig)
 
 	return &proto.GetIndexResponse{
-		DocumentCount: documentCount,
-		IndexStats:    indexStats,
-		IndexMapping:  indexMapping,
+		Path:         igs.Path,
+		IndexMapping: &indexMapping,
+		IndexType:    igs.IndexType,
+		Kvstore:      igs.Kvstore,
+		Kvconfig:     &kvconfig,
 	}, err
 }
 
 func (igs *IndigoGRPCService) PutDocument(ctx context.Context, req *proto.PutDocumentRequest) (*proto.PutDocumentResponse, error) {
 	putCount := int32(0)
-	var fields interface{}
-	err := json.Unmarshal(req.Fields, &fields)
+	fields, err := proto.UnmarshalAny(req.Fields)
 	if err == nil {
 		log.WithFields(log.Fields{
 			"id": req.Id,
@@ -243,12 +225,8 @@ func (igs *IndigoGRPCService) GetDocument(ctx context.Context, req *proto.GetDoc
 		return &proto.GetDocumentResponse{}, err
 	}
 
-	bytesFields, err := json.Marshal(fields)
-	if err == nil {
-		log.WithFields(log.Fields{
-			"id": req.Id,
-		}).Debug("succeeded in creating document")
-	} else {
+	fieldsAny, err := proto.MarshalAny(fields)
+	if err != nil {
 		log.WithFields(log.Fields{
 			"id":  req.Id,
 			"err": err,
@@ -257,7 +235,7 @@ func (igs *IndigoGRPCService) GetDocument(ctx context.Context, req *proto.GetDoc
 
 	return &proto.GetDocumentResponse{
 		Id:     req.Id,
-		Fields: bytesFields,
+		Fields: &fieldsAny,
 	}, err
 }
 
@@ -282,29 +260,6 @@ func (igs *IndigoGRPCService) DeleteDocument(ctx context.Context, req *proto.Del
 }
 
 func (igs *IndigoGRPCService) Bulk(ctx context.Context, req *proto.BulkRequest) (*proto.BulkResponse, error) {
-	var bulkRequest interface{}
-	if req.BulkRequests != nil {
-		err := json.Unmarshal(req.BulkRequests, &bulkRequest)
-		if err != nil {
-			log.WithFields(log.Fields{
-				"err": err,
-			}).Error("failed to index documents in bulk")
-
-			return &proto.BulkResponse{}, err
-		}
-	}
-
-	_, ok := bulkRequest.([]interface{})
-	if !ok {
-		err := errors.New("unexpected bulk request format")
-
-		log.WithFields(log.Fields{
-			"err": err,
-		}).Error("failed to index documents in bulk")
-
-		return &proto.BulkResponse{}, err
-	}
-
 	var (
 		batchCount    int32
 		putCount      int32
@@ -314,53 +269,20 @@ func (igs *IndigoGRPCService) Bulk(ctx context.Context, req *proto.BulkRequest) 
 
 	batch := igs.Index.NewBatch()
 
-	for num, request := range bulkRequest.([]interface{}) {
-		request, ok := request.(map[string]interface{})
-		if !ok {
-			log.WithFields(log.Fields{
-				"num":     num,
-				"request": request,
-			}).Warn("unexpected request format")
-
-			continue
-		}
-
-		var method string
-		if _, ok := request["method"]; !ok {
-			log.WithFields(log.Fields{
-				"num":     num,
-				"request": request,
-			}).Warn("method does not exist in request")
-
-			continue
-		}
-		method = request["method"].(string)
-
-		var id string
-		if _, ok := request["id"]; !ok {
-			log.WithFields(log.Fields{
-				"num":     num,
-				"request": request,
-			}).Warn("id does not exist in request")
-
-			continue
-		}
-		id = request["id"].(string)
-
-		switch method {
+	for num, request := range req.Requests {
+		switch request.Method {
 		case "put":
-			var fields interface{}
-			if _, ok := request["fields"]; !ok {
+			fields, err := proto.UnmarshalAny(request.Document.Fields)
+			if err != nil {
 				log.WithFields(log.Fields{
 					"num":     num,
 					"request": request,
-				}).Warn("fields does not exist in request")
+				}).Warn("unexpected fields in request")
 
 				continue
 			}
-			fields = request["fields"]
 
-			err := batch.Index(id, fields)
+			err = batch.Index(request.Document.Id, fields)
 			if err == nil {
 				log.WithFields(log.Fields{
 					"num":     num,
@@ -379,7 +301,7 @@ func (igs *IndigoGRPCService) Bulk(ctx context.Context, req *proto.BulkRequest) 
 				putErrorCount++
 			}
 		case "delete":
-			batch.Delete(id)
+			batch.Delete(request.Document.Id)
 
 			log.WithFields(log.Fields{
 				"num":     num,
@@ -434,17 +356,15 @@ func (igs *IndigoGRPCService) Bulk(ctx context.Context, req *proto.BulkRequest) 
 }
 
 func (igs *IndigoGRPCService) Search(ctx context.Context, req *proto.SearchRequest) (*proto.SearchResponse, error) {
-	searchRequest := bleve.NewSearchRequest(nil)
-	err := searchRequest.UnmarshalJSON(req.SearchRequest)
+	searchRequest, err := proto.UnmarshalAny(req.SearchRequest)
 	if err != nil {
 		log.WithFields(log.Fields{
 			"err": err,
-		}).Error("failed to search documents")
-
+		}).Error("failed to create search request")
 		return &proto.SearchResponse{}, err
 	}
 
-	searchResult, err := igs.Index.Search(searchRequest)
+	searchResult, err := igs.Index.Search(searchRequest.(*bleve.SearchRequest))
 	if err == nil {
 		log.WithFields(log.Fields{}).Info("succeeded in searching documents")
 	} else {
@@ -455,15 +375,14 @@ func (igs *IndigoGRPCService) Search(ctx context.Context, req *proto.SearchReque
 		return &proto.SearchResponse{}, err
 	}
 
-	bytesSearchResult, err := json.Marshal(&searchResult)
-	if err == nil {
-		log.WithFields(log.Fields{}).Debug("succeeded in creating search result")
-	} else {
+	searchResultAny, err := proto.MarshalAny(searchResult)
+	if err != nil {
 		log.WithFields(log.Fields{
 			"err": err,
 		}).Error("failed to create search result")
 	}
+
 	return &proto.SearchResponse{
-		SearchResult: bytesSearchResult,
+		SearchResult: &searchResultAny,
 	}, err
 }

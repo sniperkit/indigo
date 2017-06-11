@@ -3,6 +3,7 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/mosuka/indigo/bulk"
 	"github.com/mosuka/indigo/proto"
 	"github.com/spf13/cobra"
 	"golang.org/x/net/context"
@@ -19,17 +20,6 @@ type BulkCommandOptions struct {
 
 var bulkCmdOpts BulkCommandOptions
 
-type BulkRequest struct {
-	Method string      `json:"method,omitempty"`
-	Id     string      `json:"id,omitempty"`
-	Fields interface{} `json:"fields,omitempty"`
-}
-
-type BulkResource struct {
-	BatchSize    int32         `json:"batch_size,omitempty"`
-	BulkRequests []BulkRequest `json:"bulk_requests,omitempty"`
-}
-
 var bulkCmd = &cobra.Command{
 	Use:   "bulk",
 	Short: "indexes the documents in bulk to the Indigo gRPC Server",
@@ -38,6 +28,7 @@ var bulkCmd = &cobra.Command{
 }
 
 func runEBulkCmd(cmd *cobra.Command, args []string) error {
+	bulkResource := bulk.Resource{}
 	var resourceBytes []byte = nil
 	if cmd.Flag("resource").Changed {
 		if bulkCmdOpts.resource == "-" {
@@ -54,22 +45,32 @@ func runEBulkCmd(cmd *cobra.Command, args []string) error {
 				return err
 			}
 		}
+		err := json.Unmarshal(resourceBytes, &bulkResource)
+		if err != nil {
+			return err
+		}
 	}
 
-	bulkResource := BulkResource{}
-	err := json.Unmarshal(resourceBytes, &bulkResource)
-	if err != nil {
-		return err
-	}
-
-	bulkRequestsBytes, err := json.Marshal(bulkResource.BulkRequests)
-	if err != nil {
-		return err
+	var b []*proto.BulkRequest_Request
+	for _, request := range bulkResource.Requests {
+		f, err := proto.MarshalAny(request.Document.Fields)
+		if err != nil {
+			return nil
+		}
+		d := proto.BulkRequest_Document{
+			Id:     request.Document.Id,
+			Fields: &f,
+		}
+		r := proto.BulkRequest_Request{
+			Method:   request.Method,
+			Document: &d,
+		}
+		b = append(b, &r)
 	}
 
 	protoBulkRequest := &proto.BulkRequest{
-		BatchSize:    bulkResource.BatchSize,
-		BulkRequests: bulkRequestsBytes,
+		BatchSize: bulkResource.BatchSize,
+		Requests:  b,
 	}
 
 	if cmd.Flag("batch-size").Changed {

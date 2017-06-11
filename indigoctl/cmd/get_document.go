@@ -48,8 +48,8 @@ func runEGetDocumentCmd(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	var fields interface{} = nil
-	if err := json.Unmarshal(resp.Fields, &fields); err != nil {
+	fields, err := proto.UnmarshalAny(resp.Fields)
+	if err != nil {
 		return err
 	}
 

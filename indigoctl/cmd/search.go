@@ -31,7 +31,8 @@ type SearchCommandOptions struct {
 var searchCmdOpts SearchCommandOptions
 
 type SearchResponse struct {
-	SearchResult map[string]interface{} `json:"search_result"`
+	//SearchResult map[string]interface{} `json:"search_result"`
+	SearchResult *bleve.SearchResult `json:"search_result"`
 }
 
 var searchCmd = &cobra.Command{
@@ -120,13 +121,13 @@ func runESearchCmd(cmd *cobra.Command, args []string) error {
 		searchRequest.IncludeLocations = searchCmdOpts.includeLocations
 	}
 
-	searchRequestBytes, err := json.Marshal(searchRequest)
+	searchRequestAny, err := proto.MarshalAny(searchRequest)
 	if err != nil {
 		return err
 	}
 
-	protoSearchRequest := &proto.SearchRequest{
-		SearchRequest: searchRequestBytes,
+	protoPutDocumentRequest := &proto.SearchRequest{
+		SearchRequest: &searchRequestAny,
 	}
 
 	conn, err := grpc.Dial(searchCmdOpts.gRPCServer, grpc.WithInsecure())
@@ -137,18 +138,15 @@ func runESearchCmd(cmd *cobra.Command, args []string) error {
 
 	client := proto.NewIndigoClient(conn)
 
-	resp, err := client.Search(context.Background(), protoSearchRequest)
+	resp, err := client.Search(context.Background(), protoPutDocumentRequest)
 	if err != nil {
 		return err
 	}
 
-	searchResult := make(map[string]interface{})
-	if err := json.Unmarshal(resp.SearchResult, &searchResult); err != nil {
-		return err
-	}
+	searchResult, err := proto.UnmarshalAny(resp.SearchResult)
 
 	r := SearchResponse{
-		SearchResult: searchResult,
+		SearchResult: searchResult.(*bleve.SearchResult),
 	}
 
 	switch rootCmdOpts.outputFormat {

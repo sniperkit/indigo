@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-//import "google/protobuf/any.proto";
+import "google/protobuf/any.proto";
 
 package proto;
 
@@ -17,15 +17,16 @@ message GetIndexRequest {
 }
 
 message GetIndexResponse {
-    uint64 document_count = 2;
-    bytes index_stats = 3;
-    bytes index_mapping = 4;
-    //    google.protobuf.Any runtime_config = 2;
+    string path = 1;
+    google.protobuf.Any index_mapping = 2;
+    string index_type = 3;
+    string kvstore = 4;
+    google.protobuf.Any kvconfig = 5;
 }
 
 message PutDocumentRequest {
     string id = 1;
-    bytes fields = 2;
+    google.protobuf.Any fields = 2;
 }
 
 message PutDocumentResponse {
@@ -38,7 +39,7 @@ message GetDocumentRequest {
 
 message GetDocumentResponse {
     string id = 1;
-    bytes fields = 2;
+    google.protobuf.Any fields = 2;
 }
 
 message DeleteDocumentRequest {
@@ -50,8 +51,16 @@ message DeleteDocumentResponse {
 }
 
 message BulkRequest {
-    bytes bulk_requests = 1;
-    int32 batch_size = 2;
+    message Document {
+        string id = 1;
+        google.protobuf.Any fields = 2;
+    }
+    message Request {
+        string method = 1;
+        Document document = 2;
+    }
+    int32 batch_size = 1;
+    repeated Request requests = 2;
 }
 
 message BulkResponse {
@@ -62,9 +71,9 @@ message BulkResponse {
 }
 
 message SearchRequest {
-    bytes search_request = 1;
+    google.protobuf.Any search_request = 1;
 }
 
 message SearchResponse {
-    bytes search_result = 1;
+    google.protobuf.Any search_result = 1;
 }

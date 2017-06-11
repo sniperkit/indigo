@@ -112,7 +112,6 @@ func persistentPreRunEStartCmd(cmd *cobra.Command, args []string) error {
 }
 
 func runEStartCmd(cmd *cobra.Command, args []string) error {
-
 	// IndexMapping
 	indexMapping := mapping.NewIndexMapping()
 	if cmd.Flag("index-mapping").Changed {
@@ -147,7 +146,7 @@ func runEStartCmd(cmd *cobra.Command, args []string) error {
 			return err
 		}
 
-		err = json.Unmarshal(resourceBytes, kvconfig)
+		err = json.Unmarshal(resourceBytes, &kvconfig)
 		if err != nil {
 			return err
 		}

@@ -14,14 +14,14 @@ protoc:
 build:
 	cd ${CURDIR}/indigo; go build ${LDFLAGS}
 	cd ${CURDIR}/indigoctl; go build ${LDFLAGS}
-	cd ${CURDIR}/indigorest; go build ${LDFLAGS}
+#	cd ${CURDIR}/indigorest; go build ${LDFLAGS}
 
 install:
 	cd ${CURDIR}/indigo; go install ${LDFLAGS}
 	cd ${CURDIR}/indigoctl; go install ${LDFLAGS}
-	cd ${CURDIR}/indigorest; go install ${LDFLAGS}
+#	cd ${CURDIR}/indigorest; go install ${LDFLAGS}
 
 clean:
 	cd ${CURDIR}/indigo; go clean
 	cd ${CURDIR}/indigoctl; go clean
-	cd ${CURDIR}/indigorest; go clean
+#	cd ${CURDIR}/indigorest; go clean
