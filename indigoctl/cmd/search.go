@@ -45,7 +45,6 @@ type SearchCommandOptions struct {
 var searchCmdOpts SearchCommandOptions
 
 type SearchResponse struct {
-	//SearchResult map[string]interface{} `json:"search_result"`
 	SearchResult *bleve.SearchResult `json:"search_result"`
 }
 
