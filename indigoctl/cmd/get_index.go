@@ -17,19 +17,21 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/blevesearch/bleve/mapping"
 	"github.com/mosuka/indigo/proto"
+	"github.com/mosuka/indigo/resource"
 	"github.com/spf13/cobra"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 )
 
-type GetIndexResponse struct {
-	Path         string      `json:"path"`
-	IndexMapping interface{} `json:"index_mapping"`
-	IndexType    string      `json:"index_type"`
-	Kvstore      string      `json:"kvstore"`
-	Kvconfig     interface{} `json:"kvconfig"`
-}
+//type GetIndexResponse struct {
+//	Path         string                    `json:"path"`
+//	IndexMapping *mapping.IndexMappingImpl `json:"index_mapping"`
+//	IndexType    string                    `json:"index_type"`
+//	Kvstore      string                    `json:"kvstore"`
+//	Kvconfig     interface{}               `json:"kvconfig"`
+//}
 
 var getIndexCmd = &cobra.Command{
 	Use:   "index",
@@ -63,9 +65,9 @@ func runEGetIndexCmd(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	r := GetIndexResponse{
+	r := resource.GetIndexResponse{
 		Path:         resp.Path,
-		IndexMapping: indexMapping,
+		IndexMapping: indexMapping.(*mapping.IndexMappingImpl),
 		IndexType:    resp.IndexType,
 		Kvstore:      resp.Kvstore,
 		Kvconfig:     kvconfig,

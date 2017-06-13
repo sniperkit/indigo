@@ -1,4 +1,4 @@
-//  Copyright (c) 2015 Minoru Osuka
+//  Copyright (c) 2017 Minoru Osuka
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ import (
 	"encoding/json"
 	"github.com/gorilla/mux"
 	"github.com/mosuka/indigo/proto"
+	"github.com/mosuka/indigo/resource"
 	log "github.com/sirupsen/logrus"
 	"golang.org/x/net/context"
 	"io/ioutil"
@@ -35,9 +36,9 @@ func NewPutDocumentHandler(client proto.IndigoClient) *PutDocumentHandler {
 	}
 }
 
-type PutDocumentResource struct {
-	Fields interface{} `json:"fields,omitempty"`
-}
+//type PutDocumentResource struct {
+//	Fields interface{} `json:"fields,omitempty"`
+//}
 
 func (h *PutDocumentHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	log.WithFields(log.Fields{
@@ -57,7 +58,7 @@ func (h *PutDocumentHandler) ServeHTTP(w http.ResponseWriter, req *http.Request)
 		return
 	}
 
-	putDocumentResource := PutDocumentResource{}
+	putDocumentResource := resource.PutDocumentResource{}
 	err = json.Unmarshal(resourceBytes, &putDocumentResource)
 	if err != nil {
 		log.WithFields(log.Fields{
@@ -68,7 +69,7 @@ func (h *PutDocumentHandler) ServeHTTP(w http.ResponseWriter, req *http.Request)
 		return
 	}
 
-	fieldsBytes, err := json.Marshal(putDocumentResource.Fields)
+	fieldsAny, err := proto.MarshalAny(putDocumentResource.Fields)
 	if err != nil {
 		log.WithFields(log.Fields{
 			"err": err,
@@ -80,7 +81,7 @@ func (h *PutDocumentHandler) ServeHTTP(w http.ResponseWriter, req *http.Request)
 
 	protoPutDocumentRequest := &proto.PutDocumentRequest{
 		Id:     id,
-		Fields: fieldsBytes,
+		Fields: &fieldsAny,
 	}
 
 	resp, err := h.client.PutDocument(context.Background(), protoPutDocumentRequest)

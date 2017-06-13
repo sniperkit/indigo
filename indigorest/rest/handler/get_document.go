@@ -1,4 +1,4 @@
-//  Copyright (c) 2015 Minoru Osuka
+//  Copyright (c) 2017 Minoru Osuka
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ import (
 	"encoding/json"
 	"github.com/gorilla/mux"
 	"github.com/mosuka/indigo/proto"
+	"github.com/mosuka/indigo/resource"
 	log "github.com/sirupsen/logrus"
 	"golang.org/x/net/context"
 	"net/http"
@@ -56,19 +57,19 @@ func (h *GetDocumentHandler) ServeHTTP(w http.ResponseWriter, req *http.Request)
 		return
 	}
 
-	fields := make(map[string]interface{})
-	if err := json.Unmarshal(resp.Fields, &fields); err != nil {
-		log.Printf("error: %s\n", err.Error())
+	fields, err := proto.UnmarshalAny(resp.Fields)
+	if err != nil {
+		log.WithFields(log.Fields{
+			"req": req,
+		}).Error("failed to create fields")
+
 		Error(w, err.Error(), http.StatusServiceUnavailable)
 		return
 	}
 
-	r := struct {
-		ID     string                 `json:"id"`
-		Fields map[string]interface{} `json:"fields"`
-	}{
-		ID:     resp.Id,
-		Fields: fields,
+	r := resource.GetDocumentResponse{
+		Id:     resp.Id,
+		Fields: fields.(*map[string]interface{}),
 	}
 
 	output, err := json.MarshalIndent(r, "", "  ")

@@ -1,4 +1,4 @@
-//  Copyright (c) 2015 Minoru Osuka
+//  Copyright (c) 2017 Minoru Osuka
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/mosuka/indigo/proto"
+	"github.com/mosuka/indigo/resource"
 	"github.com/spf13/cobra"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
@@ -33,10 +34,10 @@ type PutDocumentCommandOptions struct {
 
 var putDocumentCmdOpts PutDocumentCommandOptions
 
-type PutDocumentResource struct {
-	Id     string                 `json:"id,omitempty"`
-	Fields map[string]interface{} `json:"fields,omitempty"`
-}
+//type PutDocumentResource struct {
+//	Id     string                 `json:"id,omitempty"`
+//	Fields map[string]interface{} `json:"fields,omitempty"`
+//}
 
 var putDocumentCmd = &cobra.Command{
 	Use:   "document",
@@ -46,7 +47,7 @@ var putDocumentCmd = &cobra.Command{
 }
 
 func runEPutDocumentCmd(cmd *cobra.Command, args []string) error {
-	putDocumentResource := PutDocumentResource{}
+	putDocumentResource := resource.PutDocumentResource{}
 	if cmd.Flag("resource").Changed {
 		var resourceBytes []byte = nil
 		if putDocumentCmdOpts.resource == "-" {

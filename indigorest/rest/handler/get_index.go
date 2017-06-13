@@ -1,4 +1,4 @@
-//  Copyright (c) 2015 Minoru Osuka
+//  Copyright (c) 2017 Minoru Osuka
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,9 +17,9 @@ package handler
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/blevesearch/bleve"
 	"github.com/blevesearch/bleve/mapping"
 	"github.com/mosuka/indigo/proto"
+	"github.com/mosuka/indigo/resource"
 	log "github.com/sirupsen/logrus"
 	"golang.org/x/net/context"
 	"net/http"
@@ -52,18 +52,8 @@ func (h *GetIndexHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	indexStats := make(map[string]interface{})
-	if err := json.Unmarshal(resp.IndexStats, &indexStats); err != nil {
-		log.WithFields(log.Fields{
-			"err": err,
-		}).Error("failed to create index stats")
-
-		Error(w, err.Error(), http.StatusServiceUnavailable)
-		return
-	}
-
-	indexMapping := bleve.NewIndexMapping()
-	if err := json.Unmarshal(resp.IndexMapping, &indexMapping); err != nil {
+	indexMapping, err := proto.UnmarshalAny(resp.IndexMapping)
+	if err != nil {
 		log.WithFields(log.Fields{
 			"err": err,
 		}).Error("failed to create index mapping")
@@ -72,14 +62,22 @@ func (h *GetIndexHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	r := struct {
-		DocumentCount uint64                    `json:"document_count"`
-		IndexStats    map[string]interface{}    `json:"index_stats"`
-		IndexMapping  *mapping.IndexMappingImpl `json:"index_mapping"`
-	}{
-		DocumentCount: resp.DocumentCount,
-		IndexStats:    indexStats,
-		IndexMapping:  indexMapping,
+	kvconfig, err := proto.UnmarshalAny(resp.Kvconfig)
+	if err != nil {
+		log.WithFields(log.Fields{
+			"err": err,
+		}).Error("failed to create kvconfig")
+
+		Error(w, err.Error(), http.StatusServiceUnavailable)
+		return
+	}
+
+	r := resource.GetIndexResponse{
+		Path:         resp.Path,
+		IndexMapping: indexMapping.(*mapping.IndexMappingImpl),
+		IndexType:    resp.IndexType,
+		Kvstore:      resp.Kvstore,
+		Kvconfig:     kvconfig,
 	}
 
 	output, err := json.MarshalIndent(r, "", "  ")

@@ -1,4 +1,4 @@
-//  Copyright (c) 2015 Minoru Osuka
+//  Copyright (c) 2017 Minoru Osuka
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"github.com/mosuka/indigo/proto"
+	"github.com/mosuka/indigo/resource"
 	log "github.com/sirupsen/logrus"
 	"golang.org/x/net/context"
 	"io/ioutil"
@@ -35,17 +36,6 @@ func NewBulkHandler(client proto.IndigoClient) *BulkHandler {
 	}
 }
 
-type BulkRequest struct {
-	Method string      `json:"method,omitempty"`
-	Id     string      `json:"id,omitempty"`
-	Fields interface{} `json:"fields,omitempty"`
-}
-
-type BulkResource struct {
-	BatchSize    int32         `json:"batch_size,omitempty"`
-	BulkRequests []BulkRequest `json:"bulk_requests,omitempty"`
-}
-
 func (h *BulkHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	log.WithFields(log.Fields{
 		"req": req,
@@ -61,7 +51,7 @@ func (h *BulkHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	bulkResource := BulkResource{}
+	bulkResource := resource.BulkResource{}
 	err = json.Unmarshal(resourceBytes, &bulkResource)
 	if err != nil {
 		log.WithFields(log.Fields{
@@ -72,19 +62,31 @@ func (h *BulkHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	bulkRequestsBytes, err := json.Marshal(bulkResource.BulkRequests)
-	if err != nil {
-		log.WithFields(log.Fields{
-			"err": err,
-		}).Error("failed to create bulk requests")
+	var b []*proto.BulkRequest_Request
+	for _, request := range bulkResource.Requests {
+		f, err := proto.MarshalAny(request.Document.Fields)
+		if err != nil {
+			log.WithFields(log.Fields{
+				"err": err,
+			}).Error("failed to create fields")
 
-		Error(w, err.Error(), http.StatusBadRequest)
-		return
+			Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		d := proto.BulkRequest_Document{
+			Id:     request.Document.Id,
+			Fields: &f,
+		}
+		r := proto.BulkRequest_Request{
+			Method:   request.Method,
+			Document: &d,
+		}
+		b = append(b, &r)
 	}
 
 	protoBulkRequest := &proto.BulkRequest{
-		BatchSize:    bulkResource.BatchSize,
-		BulkRequests: bulkRequestsBytes,
+		BatchSize: bulkResource.BatchSize,
+		Requests:  b,
 	}
 
 	if req.URL.Query().Get("batchSize") != "" {

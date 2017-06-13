@@ -1,4 +1,4 @@
-//  Copyright (c) 2015 Minoru Osuka
+//  Copyright (c) 2017 Minoru Osuka
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/mosuka/indigo/proto"
+	"github.com/mosuka/indigo/resource"
 	"github.com/spf13/cobra"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
@@ -34,11 +35,6 @@ var getDocumentCmd = &cobra.Command{
 	Short: "gets the document from the Indigo gRPC Server",
 	Long:  `The get document command gets the document from the Indigo gRPC Server.`,
 	RunE:  runEGetDocumentCmd,
-}
-
-type GetDocumentResponse struct {
-	Id     string      `json:"id"`
-	Fields interface{} `json:"fields"`
 }
 
 func runEGetDocumentCmd(cmd *cobra.Command, args []string) error {
@@ -67,9 +63,9 @@ func runEGetDocumentCmd(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	r := GetDocumentResponse{
+	r := resource.GetDocumentResponse{
 		Id:     resp.Id,
-		Fields: fields,
+		Fields: fields.(*map[string]interface{}),
 	}
 
 	switch rootCmdOpts.outputFormat {

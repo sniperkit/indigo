@@ -1,4 +1,4 @@
-//  Copyright (c) 2015 Minoru Osuka
+//  Copyright (c) 2017 Minoru Osuka
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,8 +17,8 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/mosuka/indigo/bulk"
 	"github.com/mosuka/indigo/proto"
+	"github.com/mosuka/indigo/resource"
 	"github.com/spf13/cobra"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
@@ -42,7 +42,7 @@ var bulkCmd = &cobra.Command{
 }
 
 func runEBulkCmd(cmd *cobra.Command, args []string) error {
-	bulkResource := bulk.Resource{}
+	bulkResource := resource.BulkResource{}
 	var resourceBytes []byte = nil
 	if cmd.Flag("resource").Changed {
 		if bulkCmdOpts.resource == "-" {

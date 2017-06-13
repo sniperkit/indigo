@@ -1,4 +1,4 @@
-//  Copyright (c) 2015 Minoru Osuka
+//  Copyright (c) 2017 Minoru Osuka
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ import (
 	"github.com/blevesearch/bleve"
 	"github.com/blevesearch/bleve/mapping"
 	"github.com/golang/protobuf/ptypes/any"
-	"github.com/mosuka/indigo/bulk"
+	"github.com/mosuka/indigo/resource"
 	"reflect"
 )
 
@@ -31,7 +31,7 @@ func init() {
 	typeRegistry["mapping.IndexMappingImpl"] = reflect.TypeOf(mapping.IndexMappingImpl{})
 	typeRegistry["bleve.IndexStat"] = reflect.TypeOf(bleve.IndexStat{})
 	typeRegistry["interface {}"] = reflect.TypeOf((map[string]interface{})(nil))
-	typeRegistry["bulk.Request"] = reflect.TypeOf(bulk.Resource{})
+	typeRegistry["resource.BulkResource"] = reflect.TypeOf(resource.BulkResource{})
 	typeRegistry["bleve.SearchRequest"] = reflect.TypeOf(bleve.SearchRequest{})
 	typeRegistry["bleve.SearchResult"] = reflect.TypeOf(bleve.SearchResult{})
 }

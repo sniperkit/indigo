@@ -1,4 +1,4 @@
-//  Copyright (c) 2015 Minoru Osuka
+//  Copyright (c) 2017 Minoru Osuka
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"github.com/blevesearch/bleve"
 	"github.com/mosuka/indigo/proto"
+	"github.com/mosuka/indigo/resource"
 	"github.com/spf13/cobra"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
@@ -44,9 +45,9 @@ type SearchCommandOptions struct {
 
 var searchCmdOpts SearchCommandOptions
 
-type SearchResponse struct {
-	SearchResult *bleve.SearchResult `json:"search_result"`
-}
+//type SearchResponse struct {
+//	SearchResult *bleve.SearchResult `json:"search_result"`
+//}
 
 var searchCmd = &cobra.Command{
 	Use:   "search",
@@ -158,7 +159,7 @@ func runESearchCmd(cmd *cobra.Command, args []string) error {
 
 	searchResult, err := proto.UnmarshalAny(resp.SearchResult)
 
-	r := SearchResponse{
+	r := resource.SearchResponse{
 		SearchResult: searchResult.(*bleve.SearchResult),
 	}
 
