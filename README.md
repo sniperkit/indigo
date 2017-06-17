@@ -52,17 +52,7 @@ delete_index_at_shutdown: false
 | delete_index_at_shutdown | INDIGO_DELETE_INDEX_AT_SHUTDOWN | --delete-index-at-shutdown | delete index at shutdown. Default is `false` |
 
 
-
-## Start Indigo Server
-
-The `start` command starts Indigo gRPC Server. You can display a help message by specifying `-h` or `--help` option.
-
-```sh
-$ indigo start
-```
-
-
-### Index Mapping
+## Index Mapping
 
 You can specify the index mapping describes how to your data model should be indexed. it contains all of the details about which fields your documents can contain, and how those fields should be dealt with when adding documents to the index, or when querying those fields. The example is following:
 
@@ -182,34 +172,28 @@ You can specify the index mapping describes how to your data model should be ind
 See [Introduction to Index Mappings](http://www.blevesearch.com/docs/Index-Mapping/) and [type IndexMappingImpl](https://godoc.org/github.com/blevesearch/bleve/mapping#IndexMappingImpl) for more details.  
 
 
+## Start Indigo
+
+The `start` command starts Indigo gRPC Server. You can display a help message by specifying `-h` or `--help` option.
+
+```sh
+$ indigo start --index-mapping example/index_mapping.json
+```
+
+
 ## Get the index information from the Indigo Server
 
 The `get index` command retrieves an index information about existing opened index. You can display a help message by specifying the `- h` or` --help` option.
 
 ```sh
-$ indigoctl get index
+$ indigoctl get index --include-index-mapping --include-index-type --include-kvstore --include-kvconfig
 ```
 
 The result of the above `get index` command is:
 
 ```json
 {
-  "document_count": 0,
-  "index_stats": {
-    "index": {
-      "analysis_time": 0,
-      "batches": 0,
-      "deletes": 0,
-      "errors": 0,
-      "index_time": 0,
-      "num_plain_text_bytes_indexed": 0,
-      "term_searchers_finished": 0,
-      "term_searchers_started": 0,
-      "updates": 0
-    },
-    "search_time": 0,
-    "searches": 0
-  },
+  "path": "/var/indigo/data/index",
   "index_mapping": {
     "types": {
       "document": {
@@ -319,15 +303,16 @@ The result of the above `get index` command is:
     "store_dynamic": true,
     "index_dynamic": true,
     "analysis": {}
-  }
+  },
+  "index_type": "upside_down",
+  "kvstore": "boltdb",
+  "kvconfig": {}
 }
 ```
 
+## Put document format
 
-## Put the document to the Indigo Server
-
-The `put document` command adds or updates a JSON formatted document in a specified index. You can display a help message by specifying the `- h` or` --help` option.  
-The document example is following:
+**TODO**
 
 ```json
 {
@@ -342,6 +327,12 @@ The document example is following:
   }
 }
 ```
+
+
+## Put the document to the Indigo Server
+
+The `put document` command adds or updates a JSON formatted document in a specified index. You can display a help message by specifying the `- h` or` --help` option.  
+The document example is following:
 
 ```sh
 $ indigoctl put document --resource ../example/document_1.json
@@ -398,59 +389,78 @@ The result of the above `delete document` command is:
 ```
 
 
+## Bulk document format
+
+```json
+{
+  "batch_size": 1000,
+  "bulk_requests": [
+    {
+      "method": "put",
+      "document": {
+        "id": "1",
+        "fields": {
+          "name": "Bleve",
+          "description": "Bleve is a full-text search and indexing library for Go.",
+          "category": "Library",
+          "popularity": 3,
+          "release": "2014-04-18T00:00:00Z",
+          "type": "document"
+        }
+      }
+    },
+    {
+      "method": "delete",
+      "document": {
+        "id": "2"
+      }
+    },
+    {
+      "method": "delete",
+      "document": {
+        "id": "3"
+      }
+    },
+    {
+      "method": "delete",
+      "document": {
+        "id": "4"
+      }
+    },
+    {
+      "method": "delete",
+      "document": {
+        "id": "5"
+      }
+    },
+    {
+      "method": "delete",
+      "document": {
+        "id": "6"
+      }
+    },
+    {
+      "method": "put",
+      "document": {
+        "id": "7",
+        "fields": {
+          "name": "Indigo",
+          "description": "Indigo is a full-text search and indexing server written in Go, built on top of Bleve.",
+          "category": "Server",
+          "popularity": 1,
+          "release": "2017-01-13T00:00:00Z",
+          "type": "document"
+        }
+      }
+    }
+  ]
+}
+```
+
 ## Index the documents in bulk to the Indigo Server
 
 The `bulk` command makes it possible to perform many put/delete operations in a single command execution. This can greatly increase the indexing speed. You can display a help message by specifying the `- h` or` --help` option.
 The bulk example is following:
-
-```json
-[
-  {
-    "method" : "put",
-    "id": "1",
-    "fields": {
-      "name": "Bleve",
-      "description": "Bleve is a full-text search and indexing library for Go.",
-      "category": "Library",
-      "popularity": 3.0,
-      "release": "2014-04-18T00:00:00Z",
-      "type": "document"
-    }
-  },
-  {
-    "method" : "delete",
-    "id": "2"
-  },
-  {
-    "method" : "delete",
-    "id": "3"
-  },
-  {
-    "method" : "delete",
-    "id": "4"
-  },
-  {
-    "method" : "delete",
-    "id": "5"
-  },
-  {
-    "method" : "delete",
-    "id": "6"
-  },
-  {
-    "method" : "put",
-    "id": "7",
-    "fields": {
-      "name": "Indigo",
-      "description": "Indigo is a full-text search and indexing server written in Go, built on top of Bleve.",
-      "category": "Server",
-      "popularity": 1.0,
-      "release": "2017-01-13T00:00:00Z",
-      "type": "document"
-    }
-  }
-]
-```
 
 ```sh
 $ indigoctl bulk --resource ../example/bulk_put.json
@@ -464,10 +474,7 @@ The result of the above `bulk` command is:
 }
 ```
 
-
-## Search the documents from the Indigo Server
-
-The `search` command can be executed with a search request, which includes the Query, within its file. Here is an example:
+## Search request format
 
 ```json
 {
@@ -550,6 +557,10 @@ The `search` command can be executed with a search request, which includes the Q
 
 See [Queries](http://www.blevesearch.com/docs/Query/), [Query String Query](http://www.blevesearch.com/docs/Query-String-Query/) and [type SearchRequest](https://godoc.org/github.com/blevesearch/bleve#SearchRequest) for more details.
 
+
+## Search the documents from the Indigo Server
+
+The `search` command can be executed with a search request, which includes the Query, within its file. Here is an example:
 You can display a help message by specifying the `- h` or` --help` option.
 
 ```sh
@@ -981,15 +992,6 @@ The result of the above `search` command is:
 ```
 
 See [type SearchResult](https://godoc.org/github.com/blevesearch/bleve#SearchResult) for more details.
-
-
-
-
-
-
-
-
-
 
 
 ## License

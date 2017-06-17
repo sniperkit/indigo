@@ -35,16 +35,16 @@ type BulkResource struct {
 }
 
 type GetDocumentResponse struct {
-	Id     string                  `json:"id"`
-	Fields *map[string]interface{} `json:"fields"`
+	Id     string                  `json:"id,omitempty"`
+	Fields *map[string]interface{} `json:"fields,omitempty"`
 }
 
 type GetIndexResponse struct {
-	Path         string                    `json:"path"`
-	IndexMapping *mapping.IndexMappingImpl `json:"index_mapping"`
-	IndexType    string                    `json:"index_type"`
-	Kvstore      string                    `json:"kvstore"`
-	Kvconfig     interface{}               `json:"kvconfig"`
+	Path         string                    `json:"path,omitempty"`
+	IndexMapping *mapping.IndexMappingImpl `json:"index_mapping,omitempty"`
+	IndexType    string                    `json:"index_type,omitempty"`
+	Kvstore      string                    `json:"kvstore,omitempty"`
+	Kvconfig     interface{}               `json:"kvconfig,omitempty"`
 }
 
 type PutDocumentResource struct {
@@ -53,5 +53,5 @@ type PutDocumentResource struct {
 }
 
 type SearchResponse struct {
-	SearchResult *bleve.SearchResult `json:"search_result"`
+	SearchResult *bleve.SearchResult `json:"search_result,omitempty"`
 }

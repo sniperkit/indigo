@@ -25,13 +25,14 @@ import (
 	"google.golang.org/grpc"
 )
 
-//type GetIndexResponse struct {
-//	Path         string                    `json:"path"`
-//	IndexMapping *mapping.IndexMappingImpl `json:"index_mapping"`
-//	IndexType    string                    `json:"index_type"`
-//	Kvstore      string                    `json:"kvstore"`
-//	Kvconfig     interface{}               `json:"kvconfig"`
-//}
+type GetIndexCommandOptions struct {
+	includeIndexMapping bool
+	includeIndexType    bool
+	includeKvstore      bool
+	includeKvconfig     bool
+}
+
+var getIndexCmdOpts GetIndexCommandOptions
 
 var getIndexCmd = &cobra.Command{
 	Use:   "index",
@@ -41,7 +42,12 @@ var getIndexCmd = &cobra.Command{
 }
 
 func runEGetIndexCmd(cmd *cobra.Command, args []string) error {
-	protoGetIndexRequest := &proto.GetIndexRequest{}
+	protoGetIndexRequest := &proto.GetIndexRequest{
+		IncludeIndexMapping: getIndexCmdOpts.includeIndexMapping,
+		IncludeIndexType:    getIndexCmdOpts.includeIndexType,
+		IncludeKvstore:      getIndexCmdOpts.includeKvstore,
+		IncludeKvconfig:     getIndexCmdOpts.includeKvconfig,
+	}
 
 	conn, err := grpc.Dial(getCmdOpts.gRPCServer, grpc.WithInsecure())
 	if err != nil {
@@ -55,23 +61,35 @@ func runEGetIndexCmd(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	indexMapping, err := proto.UnmarshalAny(resp.IndexMapping)
-	if err != nil {
-		return err
-	}
-
-	kvconfig, err := proto.UnmarshalAny(resp.Kvconfig)
-	if err != nil {
-		return err
-	}
-
 	r := resource.GetIndexResponse{
-		Path:         resp.Path,
-		IndexMapping: indexMapping.(*mapping.IndexMappingImpl),
-		IndexType:    resp.IndexType,
-		Kvstore:      resp.Kvstore,
-		Kvconfig:     kvconfig,
+		Path:      resp.Path,
+		IndexType: resp.IndexType,
+		Kvstore:   resp.Kvstore,
 	}
+
+	if resp.IndexMapping != nil {
+		indexMapping, err := proto.UnmarshalAny(resp.IndexMapping)
+		if err != nil {
+			return err
+		}
+		r.IndexMapping = indexMapping.(*mapping.IndexMappingImpl)
+	}
+
+	if resp.Kvconfig != nil {
+		kvconfig, err := proto.UnmarshalAny(resp.Kvconfig)
+		if err != nil {
+			return err
+		}
+		r.Kvconfig = kvconfig
+	}
+
+	//r := resource.GetIndexResponse{
+	//	Path:         resp.Path,
+	//	IndexMapping: indexMapping.(*mapping.IndexMappingImpl),
+	//	IndexType:    resp.IndexType,
+	//	Kvstore:      resp.Kvstore,
+	//	Kvconfig:     kvconfig,
+	//}
 
 	switch rootCmdOpts.outputFormat {
 	case "text":
@@ -90,5 +108,10 @@ func runEGetIndexCmd(cmd *cobra.Command, args []string) error {
 }
 
 func init() {
+	getIndexCmd.Flags().BoolVar(&getIndexCmdOpts.includeIndexMapping, "include-index-mapping", DefaultIncludeIndexMapping, "include index mapping")
+	getIndexCmd.Flags().BoolVar(&getIndexCmdOpts.includeIndexType, "include-index-type", DefaultIncludeIndexType, "include index type")
+	getIndexCmd.Flags().BoolVar(&getIndexCmdOpts.includeKvstore, "include-kvstore", DefaultIncludeKvstore, "include kvstore")
+	getIndexCmd.Flags().BoolVar(&getIndexCmdOpts.includeKvconfig, "include-kvconfig", DefaultIncludeKvconfig, "include kvconfig")
+
 	getCmd.AddCommand(getIndexCmd)
 }

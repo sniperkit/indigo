@@ -28,6 +28,10 @@ service Indigo {
 }
 
 message GetIndexRequest {
+    bool include_index_mapping = 1;
+    bool include_index_type = 2;
+    bool include_kvstore = 3;
+    bool include_kvconfig = 4;
 }
 
 message GetIndexResponse {

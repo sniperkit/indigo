@@ -138,16 +138,35 @@ func (igs *IndigoGRPCService) CloseIndex(deleteIndex bool) error {
 }
 
 func (igs *IndigoGRPCService) GetIndex(ctx context.Context, req *proto.GetIndexRequest) (*proto.GetIndexResponse, error) {
-	indexMapping, err := proto.MarshalAny(igs.IndexMapping)
-	kvconfig, err := proto.MarshalAny(igs.Kvconfig)
+	protoGetIndexResponse := &proto.GetIndexResponse{
+		Path: igs.Path,
+	}
 
-	return &proto.GetIndexResponse{
-		Path:         igs.Path,
-		IndexMapping: &indexMapping,
-		IndexType:    igs.IndexType,
-		Kvstore:      igs.Kvstore,
-		Kvconfig:     &kvconfig,
-	}, err
+	if req.IncludeIndexMapping {
+		indexMapping, err := proto.MarshalAny(igs.IndexMapping)
+		if err != nil {
+			return protoGetIndexResponse, err
+		}
+		protoGetIndexResponse.IndexMapping = &indexMapping
+	}
+
+	if req.IncludeIndexType {
+		protoGetIndexResponse.IndexType = igs.IndexType
+	}
+
+	if req.IncludeKvstore {
+		protoGetIndexResponse.Kvstore = igs.Kvstore
+	}
+
+	if req.IncludeKvconfig {
+		kvconfig, err := proto.MarshalAny(igs.Kvconfig)
+		if err != nil {
+			return protoGetIndexResponse, err
+		}
+		protoGetIndexResponse.Kvconfig = &kvconfig
+	}
+
+	return protoGetIndexResponse, nil
 }
 
 func (igs *IndigoGRPCService) PutDocument(ctx context.Context, req *proto.PutDocumentRequest) (*proto.PutDocumentResponse, error) {
