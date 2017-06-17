@@ -237,8 +237,7 @@ func init() {
 	cobra.OnInitialize(LoadConfig)
 
 	RootCmd.PersistentFlags().BoolVar(&rootCmdOpts.versionFlag, "version", false, "show version number")
-	RootCmd.PersistentFlags().String("config", DefaultConfig, "configuration file path")
-
+	RootCmd.PersistentFlags().String("config", DefaultConfig, "config file path")
 	RootCmd.Flags().String("log-format", DefaultLogFormat, "log format")
 	RootCmd.Flags().String("log-output", DefaultLogOutput, "log output path")
 	RootCmd.Flags().String("log-level", DefaultLogLevel, "log level")

@@ -42,6 +42,22 @@ func (h *GetIndexHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 
 	protoGetIndexRequest := &proto.GetIndexRequest{}
 
+	if req.URL.Query().Get("includeIndexMapping") == "true" {
+		protoGetIndexRequest.IncludeIndexMapping = true
+	}
+
+	if req.URL.Query().Get("includeIndexType") == "true" {
+		protoGetIndexRequest.IncludeIndexType = true
+	}
+
+	if req.URL.Query().Get("includeKvstore") == "true" {
+		protoGetIndexRequest.IncludeKvstore = true
+	}
+
+	if req.URL.Query().Get("includeKvconfig") == "true" {
+		protoGetIndexRequest.IncludeKvconfig = true
+	}
+
 	resp, err := h.client.GetIndex(context.Background(), protoGetIndexRequest)
 	if err != nil {
 		log.WithFields(log.Fields{
@@ -52,32 +68,36 @@ func (h *GetIndexHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	indexMapping, err := proto.UnmarshalAny(resp.IndexMapping)
-	if err != nil {
-		log.WithFields(log.Fields{
-			"err": err,
-		}).Error("failed to create index mapping")
-
-		Error(w, err.Error(), http.StatusServiceUnavailable)
-		return
-	}
-
-	kvconfig, err := proto.UnmarshalAny(resp.Kvconfig)
-	if err != nil {
-		log.WithFields(log.Fields{
-			"err": err,
-		}).Error("failed to create kvconfig")
-
-		Error(w, err.Error(), http.StatusServiceUnavailable)
-		return
-	}
-
 	r := resource.GetIndexResponse{
-		Path:         resp.Path,
-		IndexMapping: indexMapping.(*mapping.IndexMappingImpl),
-		IndexType:    resp.IndexType,
-		Kvstore:      resp.Kvstore,
-		Kvconfig:     kvconfig,
+		Path:      resp.Path,
+		IndexType: resp.IndexType,
+		Kvstore:   resp.Kvstore,
+	}
+
+	if req.URL.Query().Get("includeIndexMapping") == "true" {
+		indexMapping, err := proto.UnmarshalAny(resp.IndexMapping)
+		if err != nil {
+			log.WithFields(log.Fields{
+				"err": err,
+			}).Error("failed to create index mapping")
+
+			Error(w, err.Error(), http.StatusServiceUnavailable)
+			return
+		}
+		r.IndexMapping = indexMapping.(*mapping.IndexMappingImpl)
+	}
+
+	if req.URL.Query().Get("includeKvconfig") == "true" {
+		kvconfig, err := proto.UnmarshalAny(resp.Kvconfig)
+		if err != nil {
+			log.WithFields(log.Fields{
+				"err": err,
+			}).Error("failed to create kvconfig")
+
+			Error(w, err.Error(), http.StatusServiceUnavailable)
+			return
+		}
+		r.Kvconfig = kvconfig
 	}
 
 	output, err := json.MarshalIndent(r, "", "  ")

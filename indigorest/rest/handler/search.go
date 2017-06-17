@@ -150,9 +150,9 @@ func (h *SearchHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		searchRequest.Highlight = highlightRequest
 	}
 
-	if req.URL.Query().Get("highlight-style") != "" || req.URL.Query().Get("highlight-field") != "" {
-		highlightRequest := bleve.NewHighlightWithStyle(req.URL.Query().Get("highlight-style"))
-		highlightRequest.Fields = strings.Split(req.URL.Query().Get("highlight-field"), ",")
+	if req.URL.Query().Get("highlightStyle") != "" || req.URL.Query().Get("highlightField") != "" {
+		highlightRequest := bleve.NewHighlightWithStyle(req.URL.Query().Get("highlightStyle"))
+		highlightRequest.Fields = strings.Split(req.URL.Query().Get("highlightField"), ",")
 		searchRequest.Highlight = highlightRequest
 	}
 
