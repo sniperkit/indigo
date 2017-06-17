@@ -16,7 +16,7 @@ VERSION=0.1.0
 
 LDFLAGS=-ldflags "-X \"github.com/mosuka/indigo/version.Version=${VERSION}\""
 
-vendor:
+vendoring:
 	gvt restore
 
 protoc:
