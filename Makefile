@@ -26,14 +26,14 @@ protoc:
 #	cd ${CURDIR}; go test
 
 build:
-	cd ${CURDIR}/indigo; go build ${LDFLAGS}
-	cd ${CURDIR}/indigoctl; go build ${LDFLAGS}
-	cd ${CURDIR}/indigorest; go build ${LDFLAGS}
+	cd ${CURDIR}/indigo; go build -tags=lang ${LDFLAGS}
+	cd ${CURDIR}/indigoctl; go build -tags=lang ${LDFLAGS}
+	cd ${CURDIR}/indigorest; go build -tags=lang ${LDFLAGS}
 
 install:
-	cd ${CURDIR}/indigo; go install ${LDFLAGS}
-	cd ${CURDIR}/indigoctl; go install ${LDFLAGS}
-	cd ${CURDIR}/indigorest; go install ${LDFLAGS}
+	cd ${CURDIR}/indigo; go install -tags=lang ${LDFLAGS}
+	cd ${CURDIR}/indigoctl; go install -tags=lang ${LDFLAGS}
+	cd ${CURDIR}/indigorest; go install -tags=lang ${LDFLAGS}
 
 clean:
 	cd ${CURDIR}/indigo; go clean
