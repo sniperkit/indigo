@@ -175,9 +175,9 @@ You can specify the index mapping describes how to your data model should be ind
 See [Introduction to Index Mappings](http://www.blevesearch.com/docs/Index-Mapping/) and [type IndexMappingImpl](https://godoc.org/github.com/blevesearch/bleve/mapping#IndexMappingImpl) for more details.  
 
 
-### Start Indigo
+### Start Indigo Server
 
-The `start` command starts Indigo gRPC Server. You can display a help message by specifying `-h` or `--help` option.
+The `indigo` command starts Indigo Server. You can display a help message by specifying `-h` or `--help` option.
 
 ```sh
 $ indigo --index-mapping example/index_mapping.json
@@ -1023,6 +1023,15 @@ server: "localhost:1289"
 | port       | INDIGOREST_PORT       | --port       | port number. default is `1289` |
 | base_uri   | INDIGOREST_BASE_URI   | --base-uri   | index directory path. Default is `/var/indigo/data/index` |
 | server     | INDIGOREST_SERVER     | --server     | index mapping path. Default is `""` |
+
+
+### Start Indigo REST Server
+
+The `indigorest` command starts Indigo REST Server. You can display a help message by specifying `-h` or `--help` option.
+
+```sh
+$ indigorest
+```
 
 ### Get the index information from the Indigo Server via the Indigo REST Server
 
