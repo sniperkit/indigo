@@ -19,7 +19,7 @@ import (
 	"encoding/json"
 	"github.com/blevesearch/bleve/mapping"
 	"github.com/mosuka/indigo/proto"
-	"github.com/mosuka/indigo/resource"
+	"github.com/mosuka/indigo/util"
 	log "github.com/sirupsen/logrus"
 	"golang.org/x/net/context"
 	"net/http"
@@ -68,14 +68,14 @@ func (h *GetIndexHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	r := resource.GetIndexResponse{
+	r := util.GetIndexResponse{
 		Path:      resp.Path,
 		IndexType: resp.IndexType,
 		Kvstore:   resp.Kvstore,
 	}
 
 	if req.URL.Query().Get("includeIndexMapping") == "true" {
-		indexMapping, err := proto.UnmarshalAny(resp.IndexMapping)
+		indexMapping, err := util.UnmarshalAny(resp.IndexMapping)
 		if err != nil {
 			log.WithFields(log.Fields{
 				"err": err,
@@ -88,7 +88,7 @@ func (h *GetIndexHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	}
 
 	if req.URL.Query().Get("includeKvconfig") == "true" {
-		kvconfig, err := proto.UnmarshalAny(resp.Kvconfig)
+		kvconfig, err := util.UnmarshalAny(resp.Kvconfig)
 		if err != nil {
 			log.WithFields(log.Fields{
 				"err": err,

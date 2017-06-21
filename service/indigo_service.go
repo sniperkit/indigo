@@ -20,6 +20,7 @@ import (
 	"github.com/blevesearch/bleve/mapping"
 	_ "github.com/mosuka/indigo/dependency"
 	"github.com/mosuka/indigo/proto"
+	"github.com/mosuka/indigo/util"
 	log "github.com/sirupsen/logrus"
 	"golang.org/x/net/context"
 	"os"
@@ -143,7 +144,7 @@ func (igs *IndigoGRPCService) GetIndex(ctx context.Context, req *proto.GetIndexR
 	}
 
 	if req.IncludeIndexMapping {
-		indexMapping, err := proto.MarshalAny(igs.IndexMapping)
+		indexMapping, err := util.MarshalAny(igs.IndexMapping)
 		if err != nil {
 			return protoGetIndexResponse, err
 		}
@@ -159,7 +160,7 @@ func (igs *IndigoGRPCService) GetIndex(ctx context.Context, req *proto.GetIndexR
 	}
 
 	if req.IncludeKvconfig {
-		kvconfig, err := proto.MarshalAny(igs.Kvconfig)
+		kvconfig, err := util.MarshalAny(igs.Kvconfig)
 		if err != nil {
 			return protoGetIndexResponse, err
 		}
@@ -171,7 +172,7 @@ func (igs *IndigoGRPCService) GetIndex(ctx context.Context, req *proto.GetIndexR
 
 func (igs *IndigoGRPCService) PutDocument(ctx context.Context, req *proto.PutDocumentRequest) (*proto.PutDocumentResponse, error) {
 	putCount := int32(0)
-	fields, err := proto.UnmarshalAny(req.Fields)
+	fields, err := util.UnmarshalAny(req.Fields)
 	if err == nil {
 		log.WithFields(log.Fields{
 			"id": req.Id,
@@ -258,7 +259,7 @@ func (igs *IndigoGRPCService) GetDocument(ctx context.Context, req *proto.GetDoc
 		return &proto.GetDocumentResponse{}, err
 	}
 
-	fieldsAny, err := proto.MarshalAny(fields)
+	fieldsAny, err := util.MarshalAny(fields)
 	if err != nil {
 		log.WithFields(log.Fields{
 			"id":  req.Id,
@@ -305,7 +306,7 @@ func (igs *IndigoGRPCService) Bulk(ctx context.Context, req *proto.BulkRequest) 
 	for num, request := range req.Requests {
 		switch request.Method {
 		case "put":
-			fields, err := proto.UnmarshalAny(request.Document.Fields)
+			fields, err := util.UnmarshalAny(request.Document.Fields)
 			if err != nil {
 				log.WithFields(log.Fields{
 					"num":     num,
@@ -389,7 +390,7 @@ func (igs *IndigoGRPCService) Bulk(ctx context.Context, req *proto.BulkRequest) 
 }
 
 func (igs *IndigoGRPCService) Search(ctx context.Context, req *proto.SearchRequest) (*proto.SearchResponse, error) {
-	searchRequest, err := proto.UnmarshalAny(req.SearchRequest)
+	searchRequest, err := util.UnmarshalAny(req.SearchRequest)
 	if err != nil {
 		log.WithFields(log.Fields{
 			"err": err,
@@ -408,7 +409,7 @@ func (igs *IndigoGRPCService) Search(ctx context.Context, req *proto.SearchReque
 		return &proto.SearchResponse{}, err
 	}
 
-	searchResultAny, err := proto.MarshalAny(searchResult)
+	searchResultAny, err := util.MarshalAny(searchResult)
 	if err != nil {
 		log.WithFields(log.Fields{
 			"err": err,

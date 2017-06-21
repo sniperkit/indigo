@@ -19,7 +19,7 @@ import (
 	"fmt"
 	"github.com/blevesearch/bleve"
 	"github.com/mosuka/indigo/proto"
-	"github.com/mosuka/indigo/resource"
+	"github.com/mosuka/indigo/util"
 	"github.com/spf13/cobra"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
@@ -44,10 +44,6 @@ type SearchCommandOptions struct {
 }
 
 var searchCmdOpts SearchCommandOptions
-
-//type SearchResponse struct {
-//	SearchResult *bleve.SearchResult `json:"search_result"`
-//}
 
 var searchCmd = &cobra.Command{
 	Use:   "search",
@@ -135,7 +131,7 @@ func runESearchCmd(cmd *cobra.Command, args []string) error {
 		searchRequest.IncludeLocations = searchCmdOpts.includeLocations
 	}
 
-	searchRequestAny, err := proto.MarshalAny(searchRequest)
+	searchRequestAny, err := util.MarshalAny(searchRequest)
 	if err != nil {
 		return err
 	}
@@ -157,9 +153,9 @@ func runESearchCmd(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	searchResult, err := proto.UnmarshalAny(resp.SearchResult)
+	searchResult, err := util.UnmarshalAny(resp.SearchResult)
 
-	r := resource.SearchResponse{
+	r := util.SearchResponse{
 		SearchResult: searchResult.(*bleve.SearchResult),
 	}
 

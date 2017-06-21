@@ -19,7 +19,7 @@ import (
 	"encoding/json"
 	"github.com/blevesearch/bleve"
 	"github.com/mosuka/indigo/proto"
-	"github.com/mosuka/indigo/resource"
+	"github.com/mosuka/indigo/util"
 	log "github.com/sirupsen/logrus"
 	"golang.org/x/net/context"
 	"io/ioutil"
@@ -164,21 +164,7 @@ func (h *SearchHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		}
 	}
 
-	//searchRequestBytes, err := json.Marshal(searchRequest)
-	//if err != nil {
-	//	log.WithFields(log.Fields{
-	//		"err": err,
-	//	}).Error("failed to create search request")
-	//
-	//	Error(w, err.Error(), http.StatusBadRequest)
-	//	return
-	//}
-
-	//protoSearchRequest := &proto.SearchRequest{
-	//	SearchRequest: searchRequestBytes,
-	//}
-
-	searchRequestAny, err := proto.MarshalAny(searchRequest)
+	searchRequestAny, err := util.MarshalAny(searchRequest)
 	if err != nil {
 		log.WithFields(log.Fields{
 			"err": err,
@@ -202,27 +188,11 @@ func (h *SearchHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	searchResult, err := proto.UnmarshalAny(resp.SearchResult)
+	searchResult, err := util.UnmarshalAny(resp.SearchResult)
 
-	r := resource.SearchResponse{
+	r := util.SearchResponse{
 		SearchResult: searchResult.(*bleve.SearchResult),
 	}
-
-	//searchResult := make(map[string]interface{})
-	//if err := json.Unmarshal(resp.SearchResult, &searchResult); err != nil {
-	//	log.WithFields(log.Fields{
-	//		"req": req,
-	//	}).Error("failed to create search result")
-	//
-	//	Error(w, err.Error(), http.StatusServiceUnavailable)
-	//	return
-	//}
-	//
-	//r := struct {
-	//	SearchResult map[string]interface{} `json:"search_result"`
-	//}{
-	//	SearchResult: searchResult,
-	//}
 
 	output, err := json.MarshalIndent(r, "", "  ")
 	if err != nil {

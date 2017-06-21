@@ -19,7 +19,7 @@ import (
 	"fmt"
 	"github.com/blevesearch/bleve/mapping"
 	"github.com/mosuka/indigo/proto"
-	"github.com/mosuka/indigo/resource"
+	"github.com/mosuka/indigo/util"
 	"github.com/spf13/cobra"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
@@ -61,14 +61,14 @@ func runEGetIndexCmd(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	r := resource.GetIndexResponse{
+	r := util.GetIndexResponse{
 		Path:      resp.Path,
 		IndexType: resp.IndexType,
 		Kvstore:   resp.Kvstore,
 	}
 
 	if resp.IndexMapping != nil {
-		indexMapping, err := proto.UnmarshalAny(resp.IndexMapping)
+		indexMapping, err := util.UnmarshalAny(resp.IndexMapping)
 		if err != nil {
 			return err
 		}
@@ -76,7 +76,7 @@ func runEGetIndexCmd(cmd *cobra.Command, args []string) error {
 	}
 
 	if resp.Kvconfig != nil {
-		kvconfig, err := proto.UnmarshalAny(resp.Kvconfig)
+		kvconfig, err := util.UnmarshalAny(resp.Kvconfig)
 		if err != nil {
 			return err
 		}

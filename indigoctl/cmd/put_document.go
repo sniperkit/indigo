@@ -18,7 +18,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/mosuka/indigo/proto"
-	"github.com/mosuka/indigo/resource"
+	"github.com/mosuka/indigo/util"
 	"github.com/spf13/cobra"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
@@ -34,11 +34,6 @@ type PutDocumentCommandOptions struct {
 
 var putDocumentCmdOpts PutDocumentCommandOptions
 
-//type PutDocumentResource struct {
-//	Id     string                 `json:"id,omitempty"`
-//	Fields map[string]interface{} `json:"fields,omitempty"`
-//}
-
 var putDocumentCmd = &cobra.Command{
 	Use:   "document",
 	Short: "puts the document to the Indigo gRPC Server",
@@ -47,7 +42,7 @@ var putDocumentCmd = &cobra.Command{
 }
 
 func runEPutDocumentCmd(cmd *cobra.Command, args []string) error {
-	putDocumentResource := resource.PutDocumentResource{}
+	putDocumentResource := util.PutDocumentResource{}
 	if cmd.Flag("resource").Changed {
 		var resourceBytes []byte = nil
 		if putDocumentCmdOpts.resource == "-" {
@@ -70,7 +65,7 @@ func runEPutDocumentCmd(cmd *cobra.Command, args []string) error {
 		}
 	}
 
-	fieldsAny, err := proto.MarshalAny(putDocumentResource.Fields)
+	fieldsAny, err := util.MarshalAny(putDocumentResource.Fields)
 	if err != nil {
 		return err
 	}
@@ -90,7 +85,7 @@ func runEPutDocumentCmd(cmd *cobra.Command, args []string) error {
 		if err != nil {
 			return err
 		}
-		fieldsAny, err := proto.MarshalAny(fields)
+		fieldsAny, err := util.MarshalAny(fields)
 		if err != nil {
 			return err
 		}

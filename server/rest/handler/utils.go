@@ -21,7 +21,6 @@ import (
 )
 
 func Error(w http.ResponseWriter, error string, code int) {
-
 	msg := struct {
 		error string `json:"error"`
 	}{

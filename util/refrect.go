@@ -12,14 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package proto
+package util
 
 import (
 	"encoding/json"
 	"github.com/blevesearch/bleve"
 	"github.com/blevesearch/bleve/mapping"
 	"github.com/golang/protobuf/ptypes/any"
-	"github.com/mosuka/indigo/resource"
 	"reflect"
 )
 
@@ -31,7 +30,7 @@ func init() {
 	typeRegistry["mapping.IndexMappingImpl"] = reflect.TypeOf(mapping.IndexMappingImpl{})
 	typeRegistry["bleve.IndexStat"] = reflect.TypeOf(bleve.IndexStat{})
 	typeRegistry["interface {}"] = reflect.TypeOf((map[string]interface{})(nil))
-	typeRegistry["resource.BulkResource"] = reflect.TypeOf(resource.BulkResource{})
+	typeRegistry["util.BulkResource"] = reflect.TypeOf(BulkResource{})
 	typeRegistry["bleve.SearchRequest"] = reflect.TypeOf(bleve.SearchRequest{})
 	typeRegistry["bleve.SearchResult"] = reflect.TypeOf(bleve.SearchResult{})
 }

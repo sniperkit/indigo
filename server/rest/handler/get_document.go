@@ -19,7 +19,7 @@ import (
 	"encoding/json"
 	"github.com/gorilla/mux"
 	"github.com/mosuka/indigo/proto"
-	"github.com/mosuka/indigo/resource"
+	"github.com/mosuka/indigo/util"
 	log "github.com/sirupsen/logrus"
 	"golang.org/x/net/context"
 	"net/http"
@@ -57,7 +57,7 @@ func (h *GetDocumentHandler) ServeHTTP(w http.ResponseWriter, req *http.Request)
 		return
 	}
 
-	fields, err := proto.UnmarshalAny(resp.Fields)
+	fields, err := util.UnmarshalAny(resp.Fields)
 	if err != nil {
 		log.WithFields(log.Fields{
 			"req": req,
@@ -67,7 +67,7 @@ func (h *GetDocumentHandler) ServeHTTP(w http.ResponseWriter, req *http.Request)
 		return
 	}
 
-	r := resource.GetDocumentResponse{
+	r := util.GetDocumentResponse{
 		Id:     resp.Id,
 		Fields: fields.(*map[string]interface{}),
 	}

@@ -12,12 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package resource
-
-import (
-	"github.com/blevesearch/bleve"
-	"github.com/blevesearch/bleve/mapping"
-)
+package util
 
 type Document struct {
 	Id     string                 `json:"id,omitempty"`
@@ -34,24 +29,7 @@ type BulkResource struct {
 	Requests  []UpdateRequest `json:"requests,omitempty"`
 }
 
-type GetDocumentResponse struct {
-	Id     string                  `json:"id,omitempty"`
-	Fields *map[string]interface{} `json:"fields,omitempty"`
-}
-
-type GetIndexResponse struct {
-	Path         string                    `json:"path,omitempty"`
-	IndexMapping *mapping.IndexMappingImpl `json:"index_mapping,omitempty"`
-	IndexType    string                    `json:"index_type,omitempty"`
-	Kvstore      string                    `json:"kvstore,omitempty"`
-	Kvconfig     interface{}               `json:"kvconfig,omitempty"`
-}
-
 type PutDocumentResource struct {
 	Id     string                 `json:"id,omitempty"`
 	Fields map[string]interface{} `json:"fields,omitempty"`
-}
-
-type SearchResponse struct {
-	SearchResult *bleve.SearchResult `json:"search_result,omitempty"`
 }

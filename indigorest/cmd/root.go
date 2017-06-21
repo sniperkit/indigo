@@ -16,7 +16,7 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/mosuka/indigo/indigorest/rest"
+	"github.com/mosuka/indigo/server/rest"
 	"github.com/mosuka/indigo/version"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"

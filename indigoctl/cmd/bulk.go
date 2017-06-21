@@ -18,7 +18,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/mosuka/indigo/proto"
-	"github.com/mosuka/indigo/resource"
+	"github.com/mosuka/indigo/util"
 	"github.com/spf13/cobra"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
@@ -42,7 +42,7 @@ var bulkCmd = &cobra.Command{
 }
 
 func runEBulkCmd(cmd *cobra.Command, args []string) error {
-	bulkResource := resource.BulkResource{}
+	bulkResource := util.BulkResource{}
 	var resourceBytes []byte = nil
 	if cmd.Flag("resource").Changed {
 		if bulkCmdOpts.resource == "-" {
@@ -67,7 +67,7 @@ func runEBulkCmd(cmd *cobra.Command, args []string) error {
 
 	var b []*proto.BulkRequest_Request
 	for _, request := range bulkResource.Requests {
-		f, err := proto.MarshalAny(request.Document.Fields)
+		f, err := util.MarshalAny(request.Document.Fields)
 		if err != nil {
 			return nil
 		}

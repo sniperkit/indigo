@@ -18,7 +18,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/blevesearch/bleve/mapping"
-	"github.com/mosuka/indigo/indigo/grpc"
+	"github.com/mosuka/indigo/server/grpc"
 	"github.com/mosuka/indigo/version"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
