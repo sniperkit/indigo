@@ -32,9 +32,6 @@ _testmain.go
 
 # Indigo
 *.log
+bin
 vendor/*
 !/vendor/manifest
-/data
-/indigo/indigo
-/indigoctl/indigoctl
-/indigorest/indigorest

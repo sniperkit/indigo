@@ -12,30 +12,35 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-VERSION=0.1.0
+VERSION = 0.1.0
 
-LDFLAGS=-ldflags "-X \"github.com/mosuka/indigo/version.Version=${VERSION}\""
+LDFLAGS = -ldflags "-X \"github.com/mosuka/indigo/version.Version=${VERSION}\""
+
+GO := GO15VENDOREXPERIMENT=1 go
+PACKAGES = $(shell $(GO) list ./... | grep -v '/vendor/')
+PROTOBUFS = $(shell find . -name '*.proto' | sort --unique | grep -v /vendor/)
+TARGET_PACKAGES = $(shell find . -name 'main.go' -print0 | xargs -0 -n1 dirname | sort --unique | grep -v /vendor/)
 
 vendoring:
+	@echo ">> vendoring dependencies"
 	gvt restore
 
 protoc:
-	cd ${CURDIR}; protoc --go_out=plugins=grpc:. ./proto/indigo_service.proto
+	@echo ">> generating proto3 code"
+	@for proto_file in $(PROTOBUFS); do echo $$proto_file; protoc --go_out=plugins=grpc:. $$proto_file; done
 
-#test:
-#	cd ${CURDIR}; go test
+format:
+	@echo ">> formatting code"
+	@$(GO) fmt $(PACKAGES)
+
+test:
+	@echo ">> running all tests"
+	@$(GO) test $(PACKAGES)
 
 build:
-	cd ${CURDIR}/indigo; go build -tags=lang ${LDFLAGS}
-	cd ${CURDIR}/indigoctl; go build -tags=lang ${LDFLAGS}
-	cd ${CURDIR}/indigorest; go build -tags=lang ${LDFLAGS}
+	@echo ">> building binaries"
+	@for target_pkg in $(TARGET_PACKAGES); do echo $$target_pkg; $(GO) build -tags=lang ${LDFLAGS} -o ./bin/$$target_pkg $$target_pkg; done
 
 install:
-	cd ${CURDIR}/indigo; go install -tags=lang ${LDFLAGS}
-	cd ${CURDIR}/indigoctl; go install -tags=lang ${LDFLAGS}
-	cd ${CURDIR}/indigorest; go install -tags=lang ${LDFLAGS}
-
-clean:
-	cd ${CURDIR}/indigo; go clean
-	cd ${CURDIR}/indigoctl; go clean
-	cd ${CURDIR}/indigorest; go clean
+	@echo ">> installing binaries"
+	@for target_pkg in $(TARGET_PACKAGES); do echo $$target_pkg; $(GO) install -tags=lang ${LDFLAGS} $$target_pkg; done
