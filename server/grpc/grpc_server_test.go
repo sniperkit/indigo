@@ -1,69 +1,50 @@
 package grpc
 
 import (
-	"encoding/json"
-	"github.com/blevesearch/bleve/mapping"
-	"github.com/spf13/viper"
+	"github.com/mosuka/indigo/test"
 	"io/ioutil"
 	"os"
 	"testing"
+	"time"
 )
 
-func loadIndexMapping(path string) *mapping.IndexMappingImpl {
-	indexMapping := mapping.NewIndexMapping()
+func TestIndigoGRPCServer(t *testing.T) {
+	dir, _ := os.Getwd()
 
-	file, err := os.Open(path)
-	if err != nil {
-		return nil
-	}
-	defer file.Close()
-
-	resourceBytes, err := ioutil.ReadAll(file)
-	if err != nil {
-		return nil
-	}
-
-	err = json.Unmarshal(resourceBytes, indexMapping)
-	if err != nil {
-		return nil
-	}
-
-	return indexMapping
-}
-
-func loadKvconfig(path string) map[string]interface{} {
-	kvconfig := make(map[string]interface{})
-
-	file, err := os.Open(viper.GetString("kvconfig"))
-	if err != nil {
-		return nil
-	}
-	defer file.Close()
-
-	resourceBytes, err := ioutil.ReadAll(file)
-	if err != nil {
-		return nil
-	}
-
-	err = json.Unmarshal(resourceBytes, &kvconfig)
-	if err != nil {
-		return nil
-	}
-
-	return kvconfig
-}
-
-func TestNewIndigoGRPCServer(t *testing.T) {
-	port := 12890
-	path := "/tmp/hoge"
-	indexMapping := loadIndexMapping("../../example/index_mapping.json")
+	port := 0
+	path, _ := ioutil.TempDir("/tmp", "indigo")
+	indexMappingPath := dir + "/../../example/index_mapping.json"
 	indexType := "upside_down"
 	kvstore := "boltdb"
-	kvconfig := loadKvconfig("../../example/kvconfig.json")
+	kvconfigPath := dir + "/../../example/kvconfig.json"
+
+	indexMapping, err := test.LoadIndexMapping(indexMappingPath)
+	if err != nil {
+		t.Errorf("could not load IndexMapping %v", indexMappingPath)
+	}
+	kvconfig, err := test.LoadKvconfig(kvconfigPath)
+	if err != nil {
+		t.Errorf("could not load kvconfig %v", kvconfigPath)
+	}
+	kvconfig["path"] = path + "/store"
 
 	server := NewIndigoGRPCServer(port, path, indexMapping, indexType, kvstore, kvconfig)
 
 	if server == nil {
 		t.Fatalf("unexpected error.  expected not nil, actual %v", server)
 	}
+
+	err = server.Start(true)
+	if err != nil {
+		t.Fatalf("unexpected error. %v", err)
+	}
+
+	time.Sleep(10 * time.Second)
+
+	err = server.Stop(false)
+	if err != nil {
+		t.Fatalf("unexpected error. %v", err)
+	}
+
+	os.RemoveAll(path)
 }

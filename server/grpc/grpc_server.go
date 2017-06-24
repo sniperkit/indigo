@@ -1,4 +1,4 @@
-//  Copyright (c) 2015 Minoru Osuka
+//  Copyright (c) 2017 Minoru Osuka
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -65,7 +65,7 @@ func (igs *indigoGRPCServer) Start(deleteIndex bool) error {
 
 	log.WithFields(log.Fields{
 		"addr": igs.listener.Addr().String(),
-	}).Info("The Indigo gRPC Server started")
+	}).Info("The Indigo Server started")
 
 	return nil
 }
@@ -76,7 +76,7 @@ func (igs *indigoGRPCServer) Stop(deleteIndex bool) error {
 
 	log.WithFields(log.Fields{
 		"addr": igs.listener.Addr().String(),
-	}).Info("The Indigo gRPC Server stopped")
+	}).Info("The Indigo Server stopped")
 
 	return nil
 }

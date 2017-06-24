@@ -20,6 +20,7 @@ GO := GO15VENDOREXPERIMENT=1 go
 PACKAGES = $(shell $(GO) list ./... | grep -v '/vendor/')
 PROTOBUFS = $(shell find . -name '*.proto' | sort --unique | grep -v /vendor/)
 TARGET_PACKAGES = $(shell find . -name 'main.go' -print0 | xargs -0 -n1 dirname | sort --unique | grep -v /vendor/)
+BUILD_TAGS = "-tags=lang"
 
 vendoring:
 	@echo ">> vendoring dependencies"
@@ -39,8 +40,8 @@ test:
 
 build:
 	@echo ">> building binaries"
-	@for target_pkg in $(TARGET_PACKAGES); do echo $$target_pkg; $(GO) build -tags=lang ${LDFLAGS} -o ./bin/$$target_pkg $$target_pkg; done
+	@for target_pkg in $(TARGET_PACKAGES); do echo $$target_pkg; $(GO) build ${BUILD_TAGS} ${LDFLAGS} -o ./bin/$$target_pkg $$target_pkg; done
 
 install:
 	@echo ">> installing binaries"
-	@for target_pkg in $(TARGET_PACKAGES); do echo $$target_pkg; $(GO) install -tags=lang ${LDFLAGS} $$target_pkg; done
+	@for target_pkg in $(TARGET_PACKAGES); do echo $$target_pkg; $(GO) install ${BUILD_TAGS} ${LDFLAGS} $$target_pkg; done
