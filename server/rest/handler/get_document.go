@@ -15,7 +15,6 @@
 package handler
 
 import (
-	"bytes"
 	"encoding/json"
 	"github.com/gorilla/mux"
 	"github.com/mosuka/indigo/proto"
@@ -41,13 +40,32 @@ func (h *GetDocumentHandler) ServeHTTP(w http.ResponseWriter, req *http.Request)
 	}).Info("")
 
 	vars := mux.Vars(req)
-	id := vars["id"]
 
-	protoGetDocumentRequest := &proto.GetDocumentRequest{
-		Id: id,
+	// create request
+	var getDocumentRequest *util.GetDocumentRequest
+	getDocumentRequest, err := util.NewGetDocumentRequest(vars["id"])
+	if err != nil {
+		log.WithFields(log.Fields{
+			"req": req,
+		}).Error("failed to create get document request")
+
+		Error(w, err.Error(), http.StatusServiceUnavailable)
+		return
 	}
 
-	resp, err := h.client.GetDocument(context.Background(), protoGetDocumentRequest)
+	// create proto message
+	protoReq, err := getDocumentRequest.MarshalProto()
+	if err != nil {
+		log.WithFields(log.Fields{
+			"req": req,
+		}).Error("failed to create proto message")
+
+		Error(w, err.Error(), http.StatusServiceUnavailable)
+		return
+	}
+
+	// request
+	resp, err := h.client.GetDocument(context.Background(), protoReq)
 	if err != nil {
 		log.WithFields(log.Fields{
 			"req": req,
@@ -57,22 +75,19 @@ func (h *GetDocumentHandler) ServeHTTP(w http.ResponseWriter, req *http.Request)
 		return
 	}
 
-	fields, err := util.UnmarshalAny(resp.Fields)
+	// create response
+	getDocumentResponse, err := util.NewGetDocumentRespone(resp)
 	if err != nil {
 		log.WithFields(log.Fields{
 			"req": req,
-		}).Error("failed to create fields")
+		}).Error("failed to create get document request")
 
 		Error(w, err.Error(), http.StatusServiceUnavailable)
 		return
 	}
 
-	r := util.GetDocumentResponse{
-		Id:     resp.Id,
-		Fields: fields.(*map[string]interface{}),
-	}
-
-	output, err := json.MarshalIndent(r, "", "  ")
+	// request
+	output, err := json.MarshalIndent(getDocumentResponse, "", "  ")
 	if err != nil {
 		log.WithFields(log.Fields{
 			"err": err,
@@ -82,12 +97,9 @@ func (h *GetDocumentHandler) ServeHTTP(w http.ResponseWriter, req *http.Request)
 		return
 	}
 
-	buf := new(bytes.Buffer)
-	buf.ReadFrom(bytes.NewReader(output))
-
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(http.StatusOK)
-	w.Write(buf.Bytes())
+	w.Write(output)
 
 	return
 }

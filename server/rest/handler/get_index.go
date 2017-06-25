@@ -15,9 +15,7 @@
 package handler
 
 import (
-	"bytes"
 	"encoding/json"
-	"github.com/blevesearch/bleve/mapping"
 	"github.com/mosuka/indigo/proto"
 	"github.com/mosuka/indigo/util"
 	log "github.com/sirupsen/logrus"
@@ -40,25 +38,49 @@ func (h *GetIndexHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		"req": req,
 	}).Info("")
 
-	protoGetIndexRequest := &proto.GetIndexRequest{}
+	// create request
+	getIndexRequest, err := util.NewGetIndexRequest(
+		false,
+		false,
+		false,
+		false,
+	)
+	if err != nil {
+		log.WithFields(log.Fields{
+			"err": err,
+		}).Error("failed to create get index request")
 
+		Error(w, err.Error(), http.StatusServiceUnavailable)
+		return
+	}
+
+	// overwrite request
 	if req.URL.Query().Get("includeIndexMapping") == "true" {
-		protoGetIndexRequest.IncludeIndexMapping = true
+		getIndexRequest.IncludeIndexMapping = true
 	}
-
 	if req.URL.Query().Get("includeIndexType") == "true" {
-		protoGetIndexRequest.IncludeIndexType = true
+		getIndexRequest.IncludeIndexType = true
 	}
-
 	if req.URL.Query().Get("includeKvstore") == "true" {
-		protoGetIndexRequest.IncludeKvstore = true
+		getIndexRequest.IncludeKvstore = true
 	}
-
 	if req.URL.Query().Get("includeKvconfig") == "true" {
-		protoGetIndexRequest.IncludeKvconfig = true
+		getIndexRequest.IncludeKvconfig = true
 	}
 
-	resp, err := h.client.GetIndex(context.Background(), protoGetIndexRequest)
+	// create proto message
+	protoReq, err := getIndexRequest.MarshalProto()
+	if err != nil {
+		log.WithFields(log.Fields{
+			"err": err,
+		}).Error("failed to create proto message")
+
+		Error(w, err.Error(), http.StatusServiceUnavailable)
+		return
+	}
+
+	// request
+	resp, err := h.client.GetIndex(context.Background(), protoReq)
 	if err != nil {
 		log.WithFields(log.Fields{
 			"err": err,
@@ -68,39 +90,19 @@ func (h *GetIndexHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	r := util.GetIndexResponse{
-		Path:      resp.Path,
-		IndexType: resp.IndexType,
-		Kvstore:   resp.Kvstore,
+	// create response
+	getIndexResponse, err := util.NewGetIndexRespone(resp)
+	if err != nil {
+		log.WithFields(log.Fields{
+			"err": err,
+		}).Error("failed to create get index response")
+
+		Error(w, err.Error(), http.StatusServiceUnavailable)
+		return
 	}
 
-	if req.URL.Query().Get("includeIndexMapping") == "true" {
-		indexMapping, err := util.UnmarshalAny(resp.IndexMapping)
-		if err != nil {
-			log.WithFields(log.Fields{
-				"err": err,
-			}).Error("failed to create index mapping")
-
-			Error(w, err.Error(), http.StatusServiceUnavailable)
-			return
-		}
-		r.IndexMapping = indexMapping.(*mapping.IndexMappingImpl)
-	}
-
-	if req.URL.Query().Get("includeKvconfig") == "true" {
-		kvconfig, err := util.UnmarshalAny(resp.Kvconfig)
-		if err != nil {
-			log.WithFields(log.Fields{
-				"err": err,
-			}).Error("failed to create kvconfig")
-
-			Error(w, err.Error(), http.StatusServiceUnavailable)
-			return
-		}
-		r.Kvconfig = kvconfig
-	}
-
-	output, err := json.MarshalIndent(r, "", "  ")
+	// output response
+	output, err := json.MarshalIndent(getIndexResponse, "", "  ")
 	if err != nil {
 		log.WithFields(log.Fields{
 			"err": err,
@@ -110,12 +112,9 @@ func (h *GetIndexHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	buf := new(bytes.Buffer)
-	buf.ReadFrom(bytes.NewReader(output))
-
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(http.StatusOK)
-	w.Write(buf.Bytes())
+	w.Write(output)
 
 	return
 }

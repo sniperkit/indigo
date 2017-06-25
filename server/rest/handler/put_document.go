@@ -15,14 +15,12 @@
 package handler
 
 import (
-	"bytes"
 	"encoding/json"
 	"github.com/gorilla/mux"
 	"github.com/mosuka/indigo/proto"
 	"github.com/mosuka/indigo/util"
 	log "github.com/sirupsen/logrus"
 	"golang.org/x/net/context"
-	"io/ioutil"
 	"net/http"
 )
 
@@ -42,45 +40,34 @@ func (h *PutDocumentHandler) ServeHTTP(w http.ResponseWriter, req *http.Request)
 	}).Info("")
 
 	vars := mux.Vars(req)
-	id := vars["id"]
 
-	resourceBytes, err := ioutil.ReadAll(req.Body)
+	// create request
+	putDocumentRequest, err := util.NewPutDocumentRequest(req.Body)
 	if err != nil {
 		log.WithFields(log.Fields{
 			"err": err,
-		}).Error("failed to read request body")
+		}).Error("failed to create put document request")
 
 		Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	putDocumentResource := util.PutDocumentResource{}
-	err = json.Unmarshal(resourceBytes, &putDocumentResource)
+	// overwrite request
+	putDocumentRequest.Document.Id = vars["id"]
+
+	// create proto message
+	protoReq, err := putDocumentRequest.MarshalProto()
 	if err != nil {
 		log.WithFields(log.Fields{
 			"err": err,
-		}).Error("failed to create put document resource")
+		}).Error("failed to create proto message")
 
 		Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	fieldsAny, err := util.MarshalAny(putDocumentResource.Fields)
-	if err != nil {
-		log.WithFields(log.Fields{
-			"err": err,
-		}).Error("failed to create fields")
-
-		Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-
-	protoPutDocumentRequest := &proto.PutDocumentRequest{
-		Id:     id,
-		Fields: &fieldsAny,
-	}
-
-	resp, err := h.client.PutDocument(context.Background(), protoPutDocumentRequest)
+	// request
+	resp, err := h.client.PutDocument(context.Background(), protoReq)
 	if err != nil {
 		log.WithFields(log.Fields{
 			"req": req,
@@ -90,7 +77,19 @@ func (h *PutDocumentHandler) ServeHTTP(w http.ResponseWriter, req *http.Request)
 		return
 	}
 
-	output, err := json.MarshalIndent(resp, "", "  ")
+	// create response
+	putDocumentResponse, err := util.NewPutDocumentResponse(resp)
+	if err != nil {
+		log.WithFields(log.Fields{
+			"req": req,
+		}).Error("failed to create put document response")
+
+		Error(w, err.Error(), http.StatusServiceUnavailable)
+		return
+	}
+
+	// output response
+	output, err := json.MarshalIndent(putDocumentResponse, "", "  ")
 	if err != nil {
 		log.WithFields(log.Fields{
 			"req": req,
@@ -100,12 +99,9 @@ func (h *PutDocumentHandler) ServeHTTP(w http.ResponseWriter, req *http.Request)
 		return
 	}
 
-	buf := new(bytes.Buffer)
-	buf.ReadFrom(bytes.NewReader(output))
-
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(http.StatusOK)
-	w.Write(buf.Bytes())
+	w.Write(output)
 
 	return
 }

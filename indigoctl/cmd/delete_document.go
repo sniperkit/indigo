@@ -18,7 +18,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/mosuka/indigo/client"
-	"github.com/mosuka/indigo/proto"
+	"github.com/mosuka/indigo/util"
 	"github.com/spf13/cobra"
 	"golang.org/x/net/context"
 )
@@ -41,32 +41,49 @@ func runEDeleteDocumentCmd(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("required flag: --%s", cmd.Flag("id").Name)
 	}
 
-	protoDeleteDocumentRequest := &proto.DeleteDocumentRequest{
-		Id: deleteDocumentCmdOpts.id,
+	// create request
+	deleteDocumentRequest, err := util.NewDeleteDocumentRequest(deleteDocumentCmdOpts.id)
+	if err != nil {
+		return err
 	}
 
+	// create proto message
+	req, err := deleteDocumentRequest.MarshalProto()
+	if err != nil {
+		return err
+	}
+
+	// create client
 	icw, err := client.NewIndigoClientWrapper(deleteCmdOpts.gRPCServer)
 	if err != nil {
 		return err
 	}
 	defer icw.Conn.Close()
 
-	resp, err := icw.Client.DeleteDocument(context.Background(), protoDeleteDocumentRequest)
+	// request
+	resp, err := icw.Client.DeleteDocument(context.Background(), req)
 	if err != nil {
 		return err
 	}
 
+	// create response
+	deleteDocumentResponse, err := util.NewDeleteDocumentResponse(resp)
+	if err != nil {
+		return err
+	}
+
+	// output response
 	switch rootCmdOpts.outputFormat {
 	case "text":
-		fmt.Printf("%s\n", resp.String())
+		fmt.Printf("%v\n", deleteDocumentResponse)
 	case "json":
-		output, err := json.MarshalIndent(resp, "", "  ")
+		output, err := json.MarshalIndent(deleteDocumentResponse, "", "  ")
 		if err != nil {
 			return err
 		}
 		fmt.Printf("%s\n", output)
 	default:
-		fmt.Printf("%s\n", resp.String())
+		fmt.Printf("%v\n", deleteDocumentResponse)
 	}
 
 	return nil

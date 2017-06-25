@@ -27,6 +27,16 @@ service Indigo {
     rpc Search(SearchRequest) returns (SearchResponse) {}
 }
 
+message Document {
+    string id = 1;
+    google.protobuf.Any fields = 2;
+}
+
+message UpdateRequest {
+    string method = 1;
+    Document document = 2;
+}
+
 message GetIndexRequest {
     bool include_index_mapping = 1;
     bool include_index_type = 2;
@@ -43,8 +53,7 @@ message GetIndexResponse {
 }
 
 message PutDocumentRequest {
-    string id = 1;
-    google.protobuf.Any fields = 2;
+    Document document = 1;
 }
 
 message PutDocumentResponse {
@@ -56,8 +65,7 @@ message GetDocumentRequest {
 }
 
 message GetDocumentResponse {
-    string id = 1;
-    google.protobuf.Any fields = 2;
+    Document document = 1;
 }
 
 message DeleteDocumentRequest {
@@ -69,23 +77,14 @@ message DeleteDocumentResponse {
 }
 
 message BulkRequest {
-    message Document {
-        string id = 1;
-        google.protobuf.Any fields = 2;
-    }
-    message Request {
-        string method = 1;
-        Document document = 2;
-    }
     int32 batch_size = 1;
-    repeated Request requests = 2;
+    repeated UpdateRequest requests = 2;
 }
 
 message BulkResponse {
-    string message = 1;
-    int32 put_count = 2;
-    int32 put_error_count = 3;
-    int32 delete_count = 4;
+    int32 put_count = 1;
+    int32 put_error_count = 2;
+    int32 delete_count = 3;
 }
 
 message SearchRequest {

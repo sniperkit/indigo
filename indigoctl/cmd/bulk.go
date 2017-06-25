@@ -18,11 +18,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/mosuka/indigo/client"
-	"github.com/mosuka/indigo/proto"
 	"github.com/mosuka/indigo/util"
 	"github.com/spf13/cobra"
 	"golang.org/x/net/context"
-	"io/ioutil"
 	"os"
 )
 
@@ -42,11 +40,12 @@ var bulkCmd = &cobra.Command{
 }
 
 func runEBulkCmd(cmd *cobra.Command, args []string) error {
-	bulkResource := util.BulkResource{}
-	var resourceBytes []byte = nil
+	// create request
+	var bulkRequest *util.BulkRequest
+	var err error
 	if cmd.Flag("resource").Changed {
 		if bulkCmdOpts.resource == "-" {
-			resourceBytes, _ = ioutil.ReadAll(os.Stdin)
+			bulkRequest, err = util.NewBulkRequest(os.Stdin)
 		} else {
 			file, err := os.Open(bulkCmdOpts.resource)
 			if err != nil {
@@ -54,65 +53,55 @@ func runEBulkCmd(cmd *cobra.Command, args []string) error {
 			}
 			defer file.Close()
 
-			resourceBytes, err = ioutil.ReadAll(file)
+			bulkRequest, err = util.NewBulkRequest(file)
 			if err != nil {
 				return err
 			}
 		}
-		err := json.Unmarshal(resourceBytes, &bulkResource)
-		if err != nil {
-			return err
-		}
 	}
 
-	var b []*proto.BulkRequest_Request
-	for _, request := range bulkResource.Requests {
-		f, err := util.MarshalAny(request.Document.Fields)
-		if err != nil {
-			return nil
-		}
-		d := proto.BulkRequest_Document{
-			Id:     request.Document.Id,
-			Fields: &f,
-		}
-		r := proto.BulkRequest_Request{
-			Method:   request.Method,
-			Document: &d,
-		}
-		b = append(b, &r)
-	}
-
-	protoBulkRequest := &proto.BulkRequest{
-		BatchSize: bulkResource.BatchSize,
-		Requests:  b,
-	}
-
+	// overwrite request
 	if cmd.Flag("batch-size").Changed {
-		protoBulkRequest.BatchSize = bulkCmdOpts.batchSize
+		bulkRequest.BatchSize = bulkCmdOpts.batchSize
 	}
 
+	// create proto message
+	req, err := bulkRequest.MarshalProto()
+	if err != nil {
+		return err
+	}
+
+	// create client
 	icw, err := client.NewIndigoClientWrapper(bulkCmdOpts.gRPCServer)
 	if err != nil {
 		return err
 	}
 	defer icw.Conn.Close()
 
-	resp, err := icw.Client.Bulk(context.Background(), protoBulkRequest)
+	// request
+	resp, err := icw.Client.Bulk(context.Background(), req)
 	if err != nil {
 		return err
 	}
 
+	// create response
+	bulkResponse, err := util.NewBulkResponse(resp)
+	if err != nil {
+		return err
+	}
+
+	// output request
 	switch rootCmdOpts.outputFormat {
 	case "text":
-		fmt.Printf("%s\n", resp.String())
+		fmt.Printf("%v\n", bulkResponse)
 	case "json":
-		output, err := json.MarshalIndent(resp, "", "  ")
+		output, err := json.MarshalIndent(bulkResponse, "", "  ")
 		if err != nil {
 			return err
 		}
 		fmt.Printf("%s\n", output)
 	default:
-		fmt.Printf("%s\n", resp.String())
+		fmt.Printf("%v\n", bulkResponse)
 	}
 
 	return nil

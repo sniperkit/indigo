@@ -30,7 +30,7 @@ func init() {
 	typeRegistry["mapping.IndexMappingImpl"] = reflect.TypeOf(mapping.IndexMappingImpl{})
 	typeRegistry["bleve.IndexStat"] = reflect.TypeOf(bleve.IndexStat{})
 	typeRegistry["interface {}"] = reflect.TypeOf((map[string]interface{})(nil))
-	typeRegistry["util.BulkResource"] = reflect.TypeOf(BulkResource{})
+	typeRegistry["util.BulkRequest"] = reflect.TypeOf(BulkRequest{})
 	typeRegistry["bleve.SearchRequest"] = reflect.TypeOf(bleve.SearchRequest{})
 	typeRegistry["bleve.SearchResult"] = reflect.TypeOf(bleve.SearchResult{})
 }

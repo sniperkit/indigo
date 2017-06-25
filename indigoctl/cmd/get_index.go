@@ -17,9 +17,7 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/blevesearch/bleve/mapping"
 	"github.com/mosuka/indigo/client"
-	"github.com/mosuka/indigo/proto"
 	"github.com/mosuka/indigo/util"
 	"github.com/spf13/cobra"
 	"golang.org/x/net/context"
@@ -42,57 +40,53 @@ var getIndexCmd = &cobra.Command{
 }
 
 func runEGetIndexCmd(cmd *cobra.Command, args []string) error {
-	protoGetIndexRequest := &proto.GetIndexRequest{
-		IncludeIndexMapping: getIndexCmdOpts.includeIndexMapping,
-		IncludeIndexType:    getIndexCmdOpts.includeIndexType,
-		IncludeKvstore:      getIndexCmdOpts.includeKvstore,
-		IncludeKvconfig:     getIndexCmdOpts.includeKvconfig,
+	// create request
+	getIndexRequest, err := util.NewGetIndexRequest(
+		getIndexCmdOpts.includeIndexMapping,
+		getIndexCmdOpts.includeIndexType,
+		getIndexCmdOpts.includeKvstore,
+		getIndexCmdOpts.includeKvconfig)
+	if err != nil {
+		return err
 	}
 
+	// create proto message
+	req, err := getIndexRequest.MarshalProto()
+	if err != nil {
+		return err
+	}
+
+	// create client
 	icw, err := client.NewIndigoClientWrapper(getCmdOpts.gRPCServer)
 	if err != nil {
 		return err
 	}
 	defer icw.Conn.Close()
 
-	resp, err := icw.Client.GetIndex(context.Background(), protoGetIndexRequest)
+	// request
+	resp, err := icw.Client.GetIndex(context.Background(), req)
 	if err != nil {
 		return err
 	}
 
-	r := util.GetIndexResponse{
-		Path:      resp.Path,
-		IndexType: resp.IndexType,
-		Kvstore:   resp.Kvstore,
+	// create response
+	getIndexResponse, err := util.NewGetIndexRespone(resp)
+	if err != nil {
+		return err
 	}
 
-	if resp.IndexMapping != nil {
-		indexMapping, err := util.UnmarshalAny(resp.IndexMapping)
-		if err != nil {
-			return err
-		}
-		r.IndexMapping = indexMapping.(*mapping.IndexMappingImpl)
-	}
-
-	if resp.Kvconfig != nil {
-		kvconfig, err := util.UnmarshalAny(resp.Kvconfig)
-		if err != nil {
-			return err
-		}
-		r.Kvconfig = kvconfig
-	}
-
+	// output response
 	switch rootCmdOpts.outputFormat {
 	case "text":
-		fmt.Printf("%s\n", r)
+		fmt.Printf("%v\n", getIndexResponse)
 	case "json":
-		output, err := json.MarshalIndent(r, "", "  ")
+		output, err := json.MarshalIndent(getIndexResponse, "", "  ")
 		if err != nil {
 			return err
 		}
 		fmt.Printf("%s\n", output)
 	default:
-		fmt.Printf("%s\n", resp.String())
+		fmt.Printf("%v\n", getIndexResponse)
 	}
 
 	return nil

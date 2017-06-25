@@ -15,14 +15,12 @@
 package handler
 
 import (
-	"bytes"
 	"encoding/json"
 	"github.com/blevesearch/bleve"
 	"github.com/mosuka/indigo/proto"
 	"github.com/mosuka/indigo/util"
 	log "github.com/sirupsen/logrus"
 	"golang.org/x/net/context"
-	"io/ioutil"
 	"net/http"
 	"strconv"
 	"strings"
@@ -47,33 +45,21 @@ func (h *SearchHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		"req": req,
 	}).Info("")
 
-	resourceBytes, err := ioutil.ReadAll(req.Body)
+	// create request
+	searchRequest, err := util.NewSearchRequest(req.Body)
 	if err != nil {
 		log.WithFields(log.Fields{
 			"err": err,
-		}).Error("failed to read request body")
+		}).Error("failed to create search request")
 
 		Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	searchRequest := bleve.NewSearchRequest(nil)
-	if len(resourceBytes) > 0 {
-		err := searchRequest.UnmarshalJSON(resourceBytes)
-		if err != nil {
-			log.WithFields(log.Fields{
-				"err": err,
-			}).Error("failed to create search request")
-
-			Error(w, err.Error(), http.StatusBadRequest)
-			return
-		}
-	}
-
+	// overwrite request
 	if req.URL.Query().Get("query") != "" {
-		searchRequest.Query = bleve.NewQueryStringQuery(req.URL.Query().Get("query"))
+		searchRequest.SearchRequest.Query = bleve.NewQueryStringQuery(req.URL.Query().Get("query"))
 	}
-
 	if req.URL.Query().Get("size") != "" {
 		i, err := strconv.Atoi(req.URL.Query().Get("size"))
 		if err != nil {
@@ -84,12 +70,11 @@ func (h *SearchHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 			Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
-		searchRequest.Size = i
+		searchRequest.SearchRequest.Size = i
 	}
-	if searchRequest.Size == 0 {
-		searchRequest.Size = DefaultSize
+	if searchRequest.SearchRequest.Size == 0 {
+		searchRequest.SearchRequest.Size = DefaultSize
 	}
-
 	if req.URL.Query().Get("from") != "" {
 		i, err := strconv.Atoi(req.URL.Query().Get("from"))
 		if err != nil {
@@ -100,28 +85,24 @@ func (h *SearchHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 			Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
-		searchRequest.From = i
+		searchRequest.SearchRequest.From = i
 	}
-	if searchRequest.From < 0 {
-		searchRequest.From = DefaultFrom
+	if searchRequest.SearchRequest.From < 0 {
+		searchRequest.SearchRequest.From = DefaultFrom
 	}
-
 	if req.URL.Query().Get("explain") != "" {
 		if req.URL.Query().Get("explain") == "true" {
-			searchRequest.Explain = true
+			searchRequest.SearchRequest.Explain = true
 		} else {
-			searchRequest.Explain = false
+			searchRequest.SearchRequest.Explain = false
 		}
 	}
-
 	if req.URL.Query().Get("fields") != "" {
-		searchRequest.Fields = strings.Split(req.URL.Query().Get("fields"), ",")
+		searchRequest.SearchRequest.Fields = strings.Split(req.URL.Query().Get("fields"), ",")
 	}
-
 	if req.URL.Query().Get("sort") != "" {
-		searchRequest.SortBy(strings.Split(req.URL.Query().Get("sort"), ","))
+		searchRequest.SearchRequest.SortBy(strings.Split(req.URL.Query().Get("sort"), ","))
 	}
-
 	if req.URL.Query().Get("facets") != "" {
 		facetRequest := bleve.FacetsRequest{}
 		err := json.Unmarshal([]byte(req.URL.Query().Get("facets")), &facetRequest)
@@ -133,9 +114,8 @@ func (h *SearchHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 			Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
-		searchRequest.Facets = facetRequest
+		searchRequest.SearchRequest.Facets = facetRequest
 	}
-
 	if req.URL.Query().Get("highlight") != "" {
 		highlightRequest := bleve.NewHighlight()
 		err := json.Unmarshal([]byte(req.URL.Query().Get("highlight")), highlightRequest)
@@ -147,38 +127,34 @@ func (h *SearchHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 			Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
-		searchRequest.Highlight = highlightRequest
+		searchRequest.SearchRequest.Highlight = highlightRequest
 	}
-
 	if req.URL.Query().Get("highlightStyle") != "" || req.URL.Query().Get("highlightField") != "" {
 		highlightRequest := bleve.NewHighlightWithStyle(req.URL.Query().Get("highlightStyle"))
 		highlightRequest.Fields = strings.Split(req.URL.Query().Get("highlightField"), ",")
-		searchRequest.Highlight = highlightRequest
+		searchRequest.SearchRequest.Highlight = highlightRequest
 	}
-
 	if req.URL.Query().Get("include-locations") != "" {
 		if req.URL.Query().Get("include-locations") == "true" {
-			searchRequest.IncludeLocations = true
+			searchRequest.SearchRequest.IncludeLocations = true
 		} else {
-			searchRequest.IncludeLocations = false
+			searchRequest.SearchRequest.IncludeLocations = false
 		}
 	}
 
-	searchRequestAny, err := util.MarshalAny(searchRequest)
+	// create proto message
+	protoReq, err := searchRequest.MarshalProto()
 	if err != nil {
 		log.WithFields(log.Fields{
 			"err": err,
-		}).Error("failed to create search request")
+		}).Error("failed to create proto message")
 
 		Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	protoSearchRequest := &proto.SearchRequest{
-		SearchRequest: &searchRequestAny,
-	}
-
-	resp, err := h.client.Search(context.Background(), protoSearchRequest)
+	// request
+	resp, err := h.client.Search(context.Background(), protoReq)
 	if err != nil {
 		log.WithFields(log.Fields{
 			"req": req,
@@ -188,13 +164,19 @@ func (h *SearchHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	searchResult, err := util.UnmarshalAny(resp.SearchResult)
+	// create response
+	searchResponse, err := util.NewSearchResonse(resp)
+	if err != nil {
+		log.WithFields(log.Fields{
+			"req": req,
+		}).Error("failed to create search response")
 
-	r := util.SearchResponse{
-		SearchResult: searchResult.(*bleve.SearchResult),
+		Error(w, err.Error(), http.StatusServiceUnavailable)
+		return
 	}
 
-	output, err := json.MarshalIndent(r, "", "  ")
+	// output response
+	output, err := json.MarshalIndent(searchResponse, "", "  ")
 	if err != nil {
 		log.WithFields(log.Fields{
 			"req": req,
@@ -204,12 +186,9 @@ func (h *SearchHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	buf := new(bytes.Buffer)
-	buf.ReadFrom(bytes.NewReader(output))
-
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(http.StatusOK)
-	w.Write(buf.Bytes())
+	w.Write(output)
 
 	return
 }

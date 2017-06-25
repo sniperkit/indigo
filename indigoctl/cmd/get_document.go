@@ -18,7 +18,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/mosuka/indigo/client"
-	"github.com/mosuka/indigo/proto"
 	"github.com/mosuka/indigo/util"
 	"github.com/spf13/cobra"
 	"golang.org/x/net/context"
@@ -42,42 +41,50 @@ func runEGetDocumentCmd(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("required flag: --%s", cmd.Flag("id").Name)
 	}
 
-	protoGetDocumentRequest := &proto.GetDocumentRequest{
-		Id: getDocumentCmdOpts.id,
+	// create request
+	var getDocumentRequest *util.GetDocumentRequest
+	getDocumentRequest, err := util.NewGetDocumentRequest(getDocumentCmdOpts.id)
+	if err != nil {
+		return err
 	}
 
+	// create proto message
+	req, err := getDocumentRequest.MarshalProto()
+	if err != nil {
+		return err
+	}
+
+	// create client
 	icw, err := client.NewIndigoClientWrapper(getCmdOpts.gRPCServer)
 	if err != nil {
 		return err
 	}
 	defer icw.Conn.Close()
 
-	resp, err := icw.Client.GetDocument(context.Background(), protoGetDocumentRequest)
+	// request
+	resp, err := icw.Client.GetDocument(context.Background(), req)
 	if err != nil {
 		return err
 	}
 
-	fields, err := util.UnmarshalAny(resp.Fields)
+	// create response
+	getDocumentResponse, err := util.NewGetDocumentRespone(resp)
 	if err != nil {
 		return err
 	}
 
-	r := util.GetDocumentResponse{
-		Id:     resp.Id,
-		Fields: fields.(*map[string]interface{}),
-	}
-
+	// output response
 	switch rootCmdOpts.outputFormat {
 	case "text":
-		fmt.Printf("%s\n", r)
+		fmt.Printf("%v\n", getDocumentResponse)
 	case "json":
-		output, err := json.MarshalIndent(r, "", "  ")
+		output, err := json.MarshalIndent(getDocumentResponse, "", "  ")
 		if err != nil {
 			return err
 		}
 		fmt.Printf("%s\n", output)
 	default:
-		fmt.Printf("%s\n", r)
+		fmt.Printf("%v\n", getDocumentResponse)
 	}
 
 	return nil

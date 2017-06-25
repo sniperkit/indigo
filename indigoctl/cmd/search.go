@@ -19,11 +19,9 @@ import (
 	"fmt"
 	"github.com/blevesearch/bleve"
 	"github.com/mosuka/indigo/client"
-	"github.com/mosuka/indigo/proto"
 	"github.com/mosuka/indigo/util"
 	"github.com/spf13/cobra"
 	"golang.org/x/net/context"
-	"io/ioutil"
 	"os"
 )
 
@@ -53,10 +51,15 @@ var searchCmd = &cobra.Command{
 }
 
 func runESearchCmd(cmd *cobra.Command, args []string) error {
-	var resourceBytes []byte = nil
+	// create request
+	var searchRequest *util.SearchRequest
+	var err error
 	if cmd.Flag("resource").Changed {
 		if searchCmdOpts.resource == "-" {
-			resourceBytes, _ = ioutil.ReadAll(os.Stdin)
+			searchRequest, err = util.NewSearchRequest(os.Stdin)
+			if err != nil {
+				return err
+			}
 		} else {
 			file, err := os.Open(searchCmdOpts.resource)
 			if err != nil {
@@ -64,110 +67,94 @@ func runESearchCmd(cmd *cobra.Command, args []string) error {
 			}
 			defer file.Close()
 
-			resourceBytes, err = ioutil.ReadAll(file)
+			searchRequest, err = util.NewSearchRequest(file)
 			if err != nil {
 				return err
 			}
 		}
 	}
 
-	searchRequest := bleve.NewSearchRequest(nil)
-	if len(resourceBytes) > 0 {
-		err := searchRequest.UnmarshalJSON(resourceBytes)
-		if err != nil {
-			return err
-		}
-	}
-
+	// overwrite request
 	if cmd.Flag("query").Changed {
-		searchRequest.Query = bleve.NewQueryStringQuery(searchCmdOpts.query)
+		searchRequest.SearchRequest.Query = bleve.NewQueryStringQuery(searchCmdOpts.query)
 	}
-
 	if cmd.Flag("size").Changed {
-		searchRequest.Size = searchCmdOpts.size
+		searchRequest.SearchRequest.Size = searchCmdOpts.size
 	}
-
 	if cmd.Flag("from").Changed {
-		searchRequest.From = searchCmdOpts.from
+		searchRequest.SearchRequest.From = searchCmdOpts.from
 	}
-
 	if cmd.Flag("explain").Changed {
-		searchRequest.Explain = searchCmdOpts.explain
+		searchRequest.SearchRequest.Explain = searchCmdOpts.explain
 	}
-
 	if cmd.Flag("field").Changed {
-		searchRequest.Fields = searchCmdOpts.fields
+		searchRequest.SearchRequest.Fields = searchCmdOpts.fields
 	}
-
 	if cmd.Flag("sort").Changed {
-		searchRequest.SortBy(searchCmdOpts.sorts)
+		searchRequest.SearchRequest.SortBy(searchCmdOpts.sorts)
 	}
-
 	if cmd.Flag("facets").Changed {
 		facetRequest := bleve.FacetsRequest{}
 		err := json.Unmarshal([]byte(searchCmdOpts.facets), &facetRequest)
 		if err != nil {
 			return err
 		}
-		searchRequest.Facets = facetRequest
+		searchRequest.SearchRequest.Facets = facetRequest
 	}
-
 	if cmd.Flag("highlight").Changed {
 		highlightRequest := bleve.NewHighlight()
 		err := json.Unmarshal([]byte(searchCmdOpts.highlight), highlightRequest)
 		if err != nil {
 			return err
 		}
-		searchRequest.Highlight = highlightRequest
+		searchRequest.SearchRequest.Highlight = highlightRequest
 	}
-
 	if cmd.Flag("highlight-style").Changed || cmd.Flag("highlight-field").Changed {
 		highlightRequest := bleve.NewHighlightWithStyle(searchCmdOpts.highlightStyle)
 		highlightRequest.Fields = searchCmdOpts.highlightFields
-		searchRequest.Highlight = highlightRequest
+		searchRequest.SearchRequest.Highlight = highlightRequest
 	}
-
 	if cmd.Flag("include-locations").Changed {
-		searchRequest.IncludeLocations = searchCmdOpts.includeLocations
+		searchRequest.SearchRequest.IncludeLocations = searchCmdOpts.includeLocations
 	}
 
-	searchRequestAny, err := util.MarshalAny(searchRequest)
+	// create proto message
+	req, err := searchRequest.MarshalProto()
 	if err != nil {
 		return err
 	}
 
-	protoPutDocumentRequest := &proto.SearchRequest{
-		SearchRequest: &searchRequestAny,
-	}
-
+	// create client
 	icw, err := client.NewIndigoClientWrapper(searchCmdOpts.gRPCServer)
 	if err != nil {
 		return err
 	}
 	defer icw.Conn.Close()
 
-	resp, err := icw.Client.Search(context.Background(), protoPutDocumentRequest)
+	// request
+	resp, err := icw.Client.Search(context.Background(), req)
 	if err != nil {
 		return err
 	}
 
-	searchResult, err := util.UnmarshalAny(resp.SearchResult)
-
-	r := util.SearchResponse{
-		SearchResult: searchResult.(*bleve.SearchResult),
+	// create response
+	searchResponse, err := util.NewSearchResonse(resp)
+	if err != nil {
+		return err
 	}
 
+	// output response
 	switch rootCmdOpts.outputFormat {
 	case "text":
-		fmt.Printf("%s\n", resp.String())
+		fmt.Printf("%v\n", searchResponse)
 	case "json":
-		output, err := json.MarshalIndent(r, "", "  ")
+		output, err := json.MarshalIndent(searchResponse, "", "  ")
 		if err != nil {
 			return err
 		}
 		fmt.Printf("%s\n", output)
 	default:
-		fmt.Printf("%s\n", resp.String())
+		fmt.Printf("%v\n", searchResponse)
 	}
 
 	return nil

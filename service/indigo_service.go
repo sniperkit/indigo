@@ -172,28 +172,28 @@ func (igs *IndigoGRPCService) GetIndex(ctx context.Context, req *proto.GetIndexR
 
 func (igs *IndigoGRPCService) PutDocument(ctx context.Context, req *proto.PutDocumentRequest) (*proto.PutDocumentResponse, error) {
 	putCount := int32(0)
-	fields, err := util.UnmarshalAny(req.Fields)
+	fields, err := util.UnmarshalAny(req.Document.Fields)
 	if err == nil {
 		log.WithFields(log.Fields{
-			"id": req.Id,
+			"id": req.Document.Id,
 		}).Debug("succeeded in creating document")
 
-		err = igs.Index.Index(req.Id, fields)
+		err = igs.Index.Index(req.Document.Id, fields)
 		if err == nil {
 			putCount = 1
 
 			log.WithFields(log.Fields{
-				"id": req.Id,
+				"id": req.Document.Id,
 			}).Info("succeeded in putting document")
 		} else {
 			log.WithFields(log.Fields{
-				"id":  req.Id,
+				"id":  req.Document.Id,
 				"err": err,
 			}).Error("failed to put document")
 		}
 	} else {
 		log.WithFields(log.Fields{
-			"id":  req.Id,
+			"id":  req.Document.Id,
 			"err": err,
 		}).Error("failed to put document")
 	}
@@ -267,9 +267,13 @@ func (igs *IndigoGRPCService) GetDocument(ctx context.Context, req *proto.GetDoc
 		}).Error("failed to get document")
 	}
 
-	return &proto.GetDocumentResponse{
+	document := proto.Document{
 		Id:     req.Id,
 		Fields: &fieldsAny,
+	}
+
+	return &proto.GetDocumentResponse{
+		Document: &document,
 	}, err
 }
 

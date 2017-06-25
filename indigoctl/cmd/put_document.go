@@ -18,11 +18,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/mosuka/indigo/client"
-	"github.com/mosuka/indigo/proto"
 	"github.com/mosuka/indigo/util"
 	"github.com/spf13/cobra"
 	"golang.org/x/net/context"
-	"io/ioutil"
 	"os"
 )
 
@@ -36,17 +34,18 @@ var putDocumentCmdOpts PutDocumentCommandOptions
 
 var putDocumentCmd = &cobra.Command{
 	Use:   "document",
-	Short: "puts the document to the Indigo gRPC Server",
-	Long:  `The index document command puts the document to the Indigo gRPC Server.`,
+	Short: "puts the document to the Indigo Server",
+	Long:  `The index document command puts the document to the Indigo Server.`,
 	RunE:  runEPutDocumentCmd,
 }
 
 func runEPutDocumentCmd(cmd *cobra.Command, args []string) error {
-	putDocumentResource := util.PutDocumentResource{}
+	// create request
+	var putDocumentRequest *util.PutDocumentRequest
+	var err error
 	if cmd.Flag("resource").Changed {
-		var resourceBytes []byte = nil
 		if putDocumentCmdOpts.resource == "-" {
-			resourceBytes, _ = ioutil.ReadAll(os.Stdin)
+			putDocumentRequest, err = util.NewPutDocumentRequest(os.Stdin)
 		} else {
 			file, err := os.Open(putDocumentCmdOpts.resource)
 			if err != nil {
@@ -54,66 +53,63 @@ func runEPutDocumentCmd(cmd *cobra.Command, args []string) error {
 			}
 			defer file.Close()
 
-			resourceBytes, err = ioutil.ReadAll(file)
+			putDocumentRequest, err = util.NewPutDocumentRequest(file)
 			if err != nil {
 				return err
 			}
 		}
-		err := json.Unmarshal(resourceBytes, &putDocumentResource)
-		if err != nil {
-			return err
-		}
 	}
 
-	fieldsAny, err := util.MarshalAny(putDocumentResource.Fields)
-	if err != nil {
-		return err
-	}
-
-	protoPutDocumentRequest := &proto.PutDocumentRequest{
-		Id:     putDocumentResource.Id,
-		Fields: &fieldsAny,
-	}
-
+	// overwrite request
 	if cmd.Flag("id").Changed {
-		protoPutDocumentRequest.Id = putDocumentCmdOpts.id
+		putDocumentRequest.Document.Id = putDocumentCmdOpts.id
 	}
-
 	if cmd.Flag("fields").Changed {
 		var fields map[string]interface{}
 		err := json.Unmarshal([]byte(putDocumentCmdOpts.fields), &fields)
 		if err != nil {
 			return err
 		}
-		fieldsAny, err := util.MarshalAny(fields)
-		if err != nil {
-			return err
-		}
-		protoPutDocumentRequest.Fields = &fieldsAny
+		putDocumentRequest.Document.Fields = fields
 	}
 
+	// create proto message
+	req, err := putDocumentRequest.MarshalProto()
+	if err != nil {
+		return err
+	}
+
+	// create client
 	icw, err := client.NewIndigoClientWrapper(putCmdOpts.gRPCServer)
 	if err != nil {
 		return err
 	}
 	defer icw.Conn.Close()
 
-	resp, err := icw.Client.PutDocument(context.Background(), protoPutDocumentRequest)
+	// request
+	resp, err := icw.Client.PutDocument(context.Background(), req)
 	if err != nil {
 		return err
 	}
 
+	// create response
+	putDocumentResponse, err := util.NewPutDocumentResponse(resp)
+	if err != nil {
+		return err
+	}
+
+	// output response
 	switch rootCmdOpts.outputFormat {
 	case "text":
-		fmt.Printf("%s\n", resp.String())
+		fmt.Printf("%v\n", putDocumentResponse)
 	case "json":
-		output, err := json.MarshalIndent(resp, "", "  ")
+		output, err := json.MarshalIndent(putDocumentResponse, "", "  ")
 		if err != nil {
 			return err
 		}
 		fmt.Printf("%s\n", output)
 	default:
-		fmt.Printf("%s\n", resp.String())
+		fmt.Printf("%v\n", putDocumentResponse)
 	}
 
 	return nil

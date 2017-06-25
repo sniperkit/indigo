@@ -15,10 +15,10 @@
 package handler
 
 import (
-	"bytes"
 	"encoding/json"
 	"github.com/gorilla/mux"
 	"github.com/mosuka/indigo/proto"
+	"github.com/mosuka/indigo/util"
 	log "github.com/sirupsen/logrus"
 	"golang.org/x/net/context"
 	"net/http"
@@ -40,13 +40,31 @@ func (h *DeleteDocumentHandler) ServeHTTP(w http.ResponseWriter, req *http.Reque
 	}).Info("")
 
 	vars := mux.Vars(req)
-	id := vars["id"]
 
-	protoDeleteDocumentRequest := &proto.DeleteDocumentRequest{
-		Id: id,
+	// create request
+	deleteDocumentRequest, err := util.NewDeleteDocumentRequest(vars["id"])
+	if err != nil {
+		log.WithFields(log.Fields{
+			"req": req,
+		}).Error("failed to create delete document request")
+
+		Error(w, err.Error(), http.StatusServiceUnavailable)
+		return
 	}
 
-	resp, err := h.client.DeleteDocument(context.Background(), protoDeleteDocumentRequest)
+	// create proto message
+	protoReq, err := deleteDocumentRequest.MarshalProto()
+	if err != nil {
+		log.WithFields(log.Fields{
+			"req": req,
+		}).Error("failed to create proto message")
+
+		Error(w, err.Error(), http.StatusServiceUnavailable)
+		return
+	}
+
+	// request
+	resp, err := h.client.DeleteDocument(context.Background(), protoReq)
 	if err != nil {
 		log.WithFields(log.Fields{
 			"req": req,
@@ -56,7 +74,19 @@ func (h *DeleteDocumentHandler) ServeHTTP(w http.ResponseWriter, req *http.Reque
 		return
 	}
 
-	output, err := json.MarshalIndent(resp, "", "  ")
+	// create response
+	deleteDocumentResponse, err := util.NewDeleteDocumentResponse(resp)
+	if err != nil {
+		log.WithFields(log.Fields{
+			"req": req,
+		}).Error("failed to create delete document response")
+
+		Error(w, err.Error(), http.StatusServiceUnavailable)
+		return
+	}
+
+	// output response
+	output, err := json.MarshalIndent(deleteDocumentResponse, "", "  ")
 	if err != nil {
 		log.WithFields(log.Fields{
 			"err": err,
@@ -65,13 +95,9 @@ func (h *DeleteDocumentHandler) ServeHTTP(w http.ResponseWriter, req *http.Reque
 		Error(w, err.Error(), http.StatusServiceUnavailable)
 		return
 	}
-
-	buf := new(bytes.Buffer)
-	buf.ReadFrom(bytes.NewReader(output))
-
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(http.StatusOK)
-	w.Write(buf.Bytes())
+	w.Write(output)
 
 	return
 }
