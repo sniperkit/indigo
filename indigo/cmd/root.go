@@ -15,15 +15,14 @@
 package cmd
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/blevesearch/bleve/mapping"
 	"github.com/mosuka/indigo/server/grpc"
+	"github.com/mosuka/indigo/util"
 	"github.com/mosuka/indigo/version"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"io/ioutil"
 	"os"
 	"os/signal"
 	"syscall"
@@ -141,12 +140,7 @@ func runERootCmd(cmd *cobra.Command, args []string) error {
 		}
 		defer file.Close()
 
-		resourceBytes, err := ioutil.ReadAll(file)
-		if err != nil {
-			return err
-		}
-
-		err = json.Unmarshal(resourceBytes, indexMapping)
+		indexMapping, err = util.LoadIndexMapping(file)
 		if err != nil {
 			return err
 		}
@@ -161,12 +155,7 @@ func runERootCmd(cmd *cobra.Command, args []string) error {
 		}
 		defer file.Close()
 
-		resourceBytes, err := ioutil.ReadAll(file)
-		if err != nil {
-			return err
-		}
-
-		err = json.Unmarshal(resourceBytes, &kvconfig)
+		kvconfig, err = util.LoadKvconfig(file)
 		if err != nil {
 			return err
 		}

@@ -1,4 +1,4 @@
-//  Copyright (c) 2015 Minoru Osuka
+//  Copyright (c) 2017 Minoru Osuka
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -82,14 +82,6 @@ func runEGetIndexCmd(cmd *cobra.Command, args []string) error {
 		}
 		r.Kvconfig = kvconfig
 	}
-
-	//r := resource.GetIndexResponse{
-	//	Path:         resp.Path,
-	//	IndexMapping: indexMapping.(*mapping.IndexMappingImpl),
-	//	IndexType:    resp.IndexType,
-	//	Kvstore:      resp.Kvstore,
-	//	Kvconfig:     kvconfig,
-	//}
 
 	switch rootCmdOpts.outputFormat {
 	case "text":
