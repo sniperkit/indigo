@@ -38,7 +38,7 @@ func TestIndigoGRPCServer(t *testing.T) {
 	}
 	defer indexMappingFile.Close()
 
-	indexMapping, err := util.LoadIndexMapping(indexMappingFile)
+	indexMapping, err := util.NewIndexMapping(indexMappingFile)
 	if err != nil {
 		t.Errorf("could not load IndexMapping: %v", err)
 	}
@@ -49,7 +49,7 @@ func TestIndigoGRPCServer(t *testing.T) {
 	}
 	defer kvconfigFile.Close()
 
-	kvconfig, err := util.LoadKvconfig(kvconfigFile)
+	kvconfig, err := util.NewKvconfig(kvconfigFile)
 	if err != nil {
 		t.Errorf("could not load kvconfig %v", err)
 	}

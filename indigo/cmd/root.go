@@ -140,7 +140,7 @@ func runERootCmd(cmd *cobra.Command, args []string) error {
 		}
 		defer file.Close()
 
-		indexMapping, err = util.LoadIndexMapping(file)
+		indexMapping, err = util.NewIndexMapping(file)
 		if err != nil {
 			return err
 		}
@@ -155,7 +155,7 @@ func runERootCmd(cmd *cobra.Command, args []string) error {
 		}
 		defer file.Close()
 
-		kvconfig, err = util.LoadKvconfig(file)
+		kvconfig, err = util.NewKvconfig(file)
 		if err != nil {
 			return err
 		}
