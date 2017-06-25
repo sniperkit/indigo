@@ -46,13 +46,13 @@ func runEGetDocumentCmd(cmd *cobra.Command, args []string) error {
 		Id: getDocumentCmdOpts.id,
 	}
 
-	client, err := client.NewIndigoGRPCClient(getCmdOpts.gRPCServer)
+	icw, err := client.NewIndigoClientWrapper(getCmdOpts.gRPCServer)
 	if err != nil {
 		return err
 	}
-	defer client.Close()
+	defer icw.Conn.Close()
 
-	resp, err := client.Client.GetDocument(context.Background(), protoGetDocumentRequest)
+	resp, err := icw.Client.GetDocument(context.Background(), protoGetDocumentRequest)
 	if err != nil {
 		return err
 	}

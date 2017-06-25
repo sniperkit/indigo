@@ -91,13 +91,13 @@ func runEBulkCmd(cmd *cobra.Command, args []string) error {
 		protoBulkRequest.BatchSize = bulkCmdOpts.batchSize
 	}
 
-	client, err := client.NewIndigoGRPCClient(bulkCmdOpts.gRPCServer)
+	icw, err := client.NewIndigoClientWrapper(bulkCmdOpts.gRPCServer)
 	if err != nil {
 		return err
 	}
-	defer client.Close()
+	defer icw.Conn.Close()
 
-	resp, err := client.Client.Bulk(context.Background(), protoBulkRequest)
+	resp, err := icw.Client.Bulk(context.Background(), protoBulkRequest)
 	if err != nil {
 		return err
 	}

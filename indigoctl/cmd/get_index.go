@@ -49,13 +49,13 @@ func runEGetIndexCmd(cmd *cobra.Command, args []string) error {
 		IncludeKvconfig:     getIndexCmdOpts.includeKvconfig,
 	}
 
-	client, err := client.NewIndigoGRPCClient(getCmdOpts.gRPCServer)
+	icw, err := client.NewIndigoClientWrapper(getCmdOpts.gRPCServer)
 	if err != nil {
 		return err
 	}
-	defer client.Close()
+	defer icw.Conn.Close()
 
-	resp, err := client.Client.GetIndex(context.Background(), protoGetIndexRequest)
+	resp, err := icw.Client.GetIndex(context.Background(), protoGetIndexRequest)
 	if err != nil {
 		return err
 	}

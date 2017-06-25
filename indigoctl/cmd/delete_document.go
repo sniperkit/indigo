@@ -45,13 +45,13 @@ func runEDeleteDocumentCmd(cmd *cobra.Command, args []string) error {
 		Id: deleteDocumentCmdOpts.id,
 	}
 
-	client, err := client.NewIndigoGRPCClient(deleteCmdOpts.gRPCServer)
+	icw, err := client.NewIndigoClientWrapper(deleteCmdOpts.gRPCServer)
 	if err != nil {
 		return err
 	}
-	defer client.Close()
+	defer icw.Conn.Close()
 
-	resp, err := client.Client.DeleteDocument(context.Background(), protoDeleteDocumentRequest)
+	resp, err := icw.Client.DeleteDocument(context.Background(), protoDeleteDocumentRequest)
 	if err != nil {
 		return err
 	}

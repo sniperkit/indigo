@@ -19,32 +19,21 @@ import (
 	"google.golang.org/grpc"
 )
 
-type indigoGRPCClient struct {
-	Server     string
-	Connection *grpc.ClientConn
-	Client     proto.IndigoClient
+type indigoClientWrapper struct {
+	Conn   *grpc.ClientConn
+	Client proto.IndigoClient
 }
 
-func NewIndigoGRPCClient(server string) (*indigoGRPCClient, error) {
+func NewIndigoClientWrapper(server string) (*indigoClientWrapper, error) {
 	conn, err := grpc.Dial(server, grpc.WithInsecure())
 	if err != nil {
-		return &indigoGRPCClient{}, err
+		return &indigoClientWrapper{}, err
 	}
 
 	ic := proto.NewIndigoClient(conn)
 
-	return &indigoGRPCClient{
-		Server:     server,
-		Connection: conn,
-		Client:     ic,
+	return &indigoClientWrapper{
+		Conn:   conn,
+		Client: ic,
 	}, nil
-}
-
-func (igc *indigoGRPCClient) Close() error {
-	err := igc.Connection.Close()
-	if err != nil {
-		return err
-	}
-
-	return nil
 }

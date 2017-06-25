@@ -140,13 +140,13 @@ func runESearchCmd(cmd *cobra.Command, args []string) error {
 		SearchRequest: &searchRequestAny,
 	}
 
-	client, err := client.NewIndigoGRPCClient(searchCmdOpts.gRPCServer)
+	icw, err := client.NewIndigoClientWrapper(searchCmdOpts.gRPCServer)
 	if err != nil {
 		return err
 	}
-	defer client.Close()
+	defer icw.Conn.Close()
 
-	resp, err := client.Client.Search(context.Background(), protoPutDocumentRequest)
+	resp, err := icw.Client.Search(context.Background(), protoPutDocumentRequest)
 	if err != nil {
 		return err
 	}

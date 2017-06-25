@@ -92,13 +92,13 @@ func runEPutDocumentCmd(cmd *cobra.Command, args []string) error {
 		protoPutDocumentRequest.Fields = &fieldsAny
 	}
 
-	client, err := client.NewIndigoGRPCClient(putCmdOpts.gRPCServer)
+	icw, err := client.NewIndigoClientWrapper(putCmdOpts.gRPCServer)
 	if err != nil {
 		return err
 	}
-	defer client.Close()
+	defer icw.Conn.Close()
 
-	resp, err := client.Client.PutDocument(context.Background(), protoPutDocumentRequest)
+	resp, err := icw.Client.PutDocument(context.Background(), protoPutDocumentRequest)
 	if err != nil {
 		return err
 	}
