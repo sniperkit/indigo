@@ -17,10 +17,10 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/mosuka/indigo/client"
 	"github.com/mosuka/indigo/proto"
 	"github.com/spf13/cobra"
 	"golang.org/x/net/context"
-	"google.golang.org/grpc"
 )
 
 type DeleteDocumentCommandOptions struct {
@@ -45,14 +45,13 @@ func runEDeleteDocumentCmd(cmd *cobra.Command, args []string) error {
 		Id: deleteDocumentCmdOpts.id,
 	}
 
-	conn, err := grpc.Dial(deleteCmdOpts.gRPCServer, grpc.WithInsecure())
+	client, err := client.NewIndigoGRPCClient(deleteCmdOpts.gRPCServer)
 	if err != nil {
 		return err
 	}
-	defer conn.Close()
+	defer client.Close()
 
-	client := proto.NewIndigoClient(conn)
-	resp, err := client.DeleteDocument(context.Background(), protoDeleteDocumentRequest)
+	resp, err := client.Client.DeleteDocument(context.Background(), protoDeleteDocumentRequest)
 	if err != nil {
 		return err
 	}

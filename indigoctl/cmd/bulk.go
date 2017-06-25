@@ -17,11 +17,11 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/mosuka/indigo/client"
 	"github.com/mosuka/indigo/proto"
 	"github.com/mosuka/indigo/util"
 	"github.com/spf13/cobra"
 	"golang.org/x/net/context"
-	"google.golang.org/grpc"
 	"io/ioutil"
 	"os"
 )
@@ -91,14 +91,13 @@ func runEBulkCmd(cmd *cobra.Command, args []string) error {
 		protoBulkRequest.BatchSize = bulkCmdOpts.batchSize
 	}
 
-	conn, err := grpc.Dial(bulkCmdOpts.gRPCServer, grpc.WithInsecure())
+	client, err := client.NewIndigoGRPCClient(bulkCmdOpts.gRPCServer)
 	if err != nil {
 		return err
 	}
-	defer conn.Close()
+	defer client.Close()
 
-	client := proto.NewIndigoClient(conn)
-	resp, err := client.Bulk(context.Background(), protoBulkRequest)
+	resp, err := client.Client.Bulk(context.Background(), protoBulkRequest)
 	if err != nil {
 		return err
 	}

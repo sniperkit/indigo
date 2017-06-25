@@ -18,11 +18,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/blevesearch/bleve/mapping"
+	"github.com/mosuka/indigo/client"
 	"github.com/mosuka/indigo/proto"
 	"github.com/mosuka/indigo/util"
 	"github.com/spf13/cobra"
 	"golang.org/x/net/context"
-	"google.golang.org/grpc"
 )
 
 type GetIndexCommandOptions struct {
@@ -49,14 +49,13 @@ func runEGetIndexCmd(cmd *cobra.Command, args []string) error {
 		IncludeKvconfig:     getIndexCmdOpts.includeKvconfig,
 	}
 
-	conn, err := grpc.Dial(getCmdOpts.gRPCServer, grpc.WithInsecure())
+	client, err := client.NewIndigoGRPCClient(getCmdOpts.gRPCServer)
 	if err != nil {
 		return err
 	}
-	defer conn.Close()
+	defer client.Close()
 
-	client := proto.NewIndigoClient(conn)
-	resp, err := client.GetIndex(context.Background(), protoGetIndexRequest)
+	resp, err := client.Client.GetIndex(context.Background(), protoGetIndexRequest)
 	if err != nil {
 		return err
 	}

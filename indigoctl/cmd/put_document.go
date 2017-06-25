@@ -17,11 +17,11 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/mosuka/indigo/client"
 	"github.com/mosuka/indigo/proto"
 	"github.com/mosuka/indigo/util"
 	"github.com/spf13/cobra"
 	"golang.org/x/net/context"
-	"google.golang.org/grpc"
 	"io/ioutil"
 	"os"
 )
@@ -92,14 +92,13 @@ func runEPutDocumentCmd(cmd *cobra.Command, args []string) error {
 		protoPutDocumentRequest.Fields = &fieldsAny
 	}
 
-	conn, err := grpc.Dial(putCmdOpts.gRPCServer, grpc.WithInsecure())
+	client, err := client.NewIndigoGRPCClient(putCmdOpts.gRPCServer)
 	if err != nil {
 		return err
 	}
-	defer conn.Close()
+	defer client.Close()
 
-	client := proto.NewIndigoClient(conn)
-	resp, err := client.PutDocument(context.Background(), protoPutDocumentRequest)
+	resp, err := client.Client.PutDocument(context.Background(), protoPutDocumentRequest)
 	if err != nil {
 		return err
 	}
