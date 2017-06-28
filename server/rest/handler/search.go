@@ -17,22 +17,23 @@ package handler
 import (
 	"encoding/json"
 	"github.com/blevesearch/bleve"
-	"github.com/mosuka/indigo/proto"
-	"github.com/mosuka/indigo/util"
+	"github.com/buger/jsonparser"
+	"github.com/mosuka/indigo/client"
 	log "github.com/sirupsen/logrus"
 	"golang.org/x/net/context"
+	"io/ioutil"
 	"net/http"
 	"strconv"
 	"strings"
 )
 
 type SearchHandler struct {
-	client proto.IndigoClient
+	client *client.IndigoClientWrapper
 }
 
-func NewSearchHandler(client proto.IndigoClient) *SearchHandler {
+func NewSearchHandler(c *client.IndigoClientWrapper) *SearchHandler {
 	return &SearchHandler{
-		client: client,
+		client: c,
 	}
 }
 
@@ -45,8 +46,29 @@ func (h *SearchHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		"req": req,
 	}).Info("")
 
-	// create request
-	searchRequest, err := util.NewSearchRequest(req.Body)
+	// read request
+	data, err := ioutil.ReadAll(req.Body)
+	if err != nil {
+		log.WithFields(log.Fields{
+			"err": err,
+		}).Error("failed to read request body")
+
+		Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	// get search_request
+	searchRequestBytes, _, _, err := jsonparser.Get(data, "search_request")
+	if err != nil {
+		log.WithFields(log.Fields{
+			"err": err,
+		}).Error("failed to read search request")
+
+		Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	var searchRequest *bleve.SearchRequest
+	err = json.Unmarshal(searchRequestBytes, &searchRequest)
 	if err != nil {
 		log.WithFields(log.Fields{
 			"err": err,
@@ -58,7 +80,7 @@ func (h *SearchHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 
 	// overwrite request
 	if req.URL.Query().Get("query") != "" {
-		searchRequest.SearchRequest.Query = bleve.NewQueryStringQuery(req.URL.Query().Get("query"))
+		searchRequest.Query = bleve.NewQueryStringQuery(req.URL.Query().Get("query"))
 	}
 	if req.URL.Query().Get("size") != "" {
 		i, err := strconv.Atoi(req.URL.Query().Get("size"))
@@ -70,10 +92,10 @@ func (h *SearchHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 			Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
-		searchRequest.SearchRequest.Size = i
+		searchRequest.Size = i
 	}
-	if searchRequest.SearchRequest.Size == 0 {
-		searchRequest.SearchRequest.Size = DefaultSize
+	if searchRequest.Size == 0 {
+		searchRequest.Size = DefaultSize
 	}
 	if req.URL.Query().Get("from") != "" {
 		i, err := strconv.Atoi(req.URL.Query().Get("from"))
@@ -85,23 +107,23 @@ func (h *SearchHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 			Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
-		searchRequest.SearchRequest.From = i
+		searchRequest.From = i
 	}
-	if searchRequest.SearchRequest.From < 0 {
-		searchRequest.SearchRequest.From = DefaultFrom
+	if searchRequest.From < 0 {
+		searchRequest.From = DefaultFrom
 	}
 	if req.URL.Query().Get("explain") != "" {
 		if req.URL.Query().Get("explain") == "true" {
-			searchRequest.SearchRequest.Explain = true
+			searchRequest.Explain = true
 		} else {
-			searchRequest.SearchRequest.Explain = false
+			searchRequest.Explain = false
 		}
 	}
 	if req.URL.Query().Get("fields") != "" {
-		searchRequest.SearchRequest.Fields = strings.Split(req.URL.Query().Get("fields"), ",")
+		searchRequest.Fields = strings.Split(req.URL.Query().Get("fields"), ",")
 	}
 	if req.URL.Query().Get("sort") != "" {
-		searchRequest.SearchRequest.SortBy(strings.Split(req.URL.Query().Get("sort"), ","))
+		searchRequest.SortBy(strings.Split(req.URL.Query().Get("sort"), ","))
 	}
 	if req.URL.Query().Get("facets") != "" {
 		facetRequest := bleve.FacetsRequest{}
@@ -114,7 +136,7 @@ func (h *SearchHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 			Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
-		searchRequest.SearchRequest.Facets = facetRequest
+		searchRequest.Facets = facetRequest
 	}
 	if req.URL.Query().Get("highlight") != "" {
 		highlightRequest := bleve.NewHighlight()
@@ -127,34 +149,23 @@ func (h *SearchHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 			Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
-		searchRequest.SearchRequest.Highlight = highlightRequest
+		searchRequest.Highlight = highlightRequest
 	}
 	if req.URL.Query().Get("highlightStyle") != "" || req.URL.Query().Get("highlightField") != "" {
 		highlightRequest := bleve.NewHighlightWithStyle(req.URL.Query().Get("highlightStyle"))
 		highlightRequest.Fields = strings.Split(req.URL.Query().Get("highlightField"), ",")
-		searchRequest.SearchRequest.Highlight = highlightRequest
+		searchRequest.Highlight = highlightRequest
 	}
 	if req.URL.Query().Get("include-locations") != "" {
 		if req.URL.Query().Get("include-locations") == "true" {
-			searchRequest.SearchRequest.IncludeLocations = true
+			searchRequest.IncludeLocations = true
 		} else {
-			searchRequest.SearchRequest.IncludeLocations = false
+			searchRequest.IncludeLocations = false
 		}
 	}
 
-	// create proto message
-	protoReq, err := searchRequest.MarshalProto()
-	if err != nil {
-		log.WithFields(log.Fields{
-			"err": err,
-		}).Error("failed to create proto message")
-
-		Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-
 	// request
-	resp, err := h.client.Search(context.Background(), protoReq)
+	resp, err := h.client.Search(context.Background(), searchRequest)
 	if err != nil {
 		log.WithFields(log.Fields{
 			"req": req,
@@ -164,19 +175,8 @@ func (h *SearchHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	// create response
-	searchResponse, err := util.NewSearchResonse(resp)
-	if err != nil {
-		log.WithFields(log.Fields{
-			"req": req,
-		}).Error("failed to create search response")
-
-		Error(w, err.Error(), http.StatusServiceUnavailable)
-		return
-	}
-
 	// output response
-	output, err := json.MarshalIndent(searchResponse, "", "  ")
+	output, err := json.MarshalIndent(resp, "", "  ")
 	if err != nil {
 		log.WithFields(log.Fields{
 			"req": req,

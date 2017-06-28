@@ -16,20 +16,19 @@ package handler
 
 import (
 	"encoding/json"
-	"github.com/mosuka/indigo/proto"
-	"github.com/mosuka/indigo/util"
+	"github.com/mosuka/indigo/client"
 	log "github.com/sirupsen/logrus"
 	"golang.org/x/net/context"
 	"net/http"
 )
 
 type GetIndexHandler struct {
-	client proto.IndigoClient
+	client *client.IndigoClientWrapper
 }
 
-func NewGetIndexHandler(client proto.IndigoClient) *GetIndexHandler {
+func NewGetIndexHandler(c *client.IndigoClientWrapper) *GetIndexHandler {
 	return &GetIndexHandler{
-		client: client,
+		client: c,
 	}
 }
 
@@ -38,49 +37,28 @@ func (h *GetIndexHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		"req": req,
 	}).Info("")
 
-	// create request
-	getIndexRequest, err := util.NewGetIndexRequest(
-		false,
-		false,
-		false,
-		false,
-	)
-	if err != nil {
-		log.WithFields(log.Fields{
-			"err": err,
-		}).Error("failed to create get index request")
-
-		Error(w, err.Error(), http.StatusServiceUnavailable)
-		return
-	}
-
-	// overwrite request
+	var includeIndexMapping bool
 	if req.URL.Query().Get("includeIndexMapping") == "true" {
-		getIndexRequest.IncludeIndexMapping = true
+		includeIndexMapping = true
 	}
+
+	var includeIndexType bool
 	if req.URL.Query().Get("includeIndexType") == "true" {
-		getIndexRequest.IncludeIndexType = true
+		includeIndexType = true
 	}
+
+	var includeKvstore bool
 	if req.URL.Query().Get("includeKvstore") == "true" {
-		getIndexRequest.IncludeKvstore = true
+		includeKvstore = true
 	}
+
+	var includeKvconfig bool
 	if req.URL.Query().Get("includeKvconfig") == "true" {
-		getIndexRequest.IncludeKvconfig = true
-	}
-
-	// create proto message
-	protoReq, err := getIndexRequest.MarshalProto()
-	if err != nil {
-		log.WithFields(log.Fields{
-			"err": err,
-		}).Error("failed to create proto message")
-
-		Error(w, err.Error(), http.StatusServiceUnavailable)
-		return
+		includeKvconfig = true
 	}
 
 	// request
-	resp, err := h.client.GetIndex(context.Background(), protoReq)
+	resp, err := h.client.GetIndex(context.Background(), includeIndexMapping, includeIndexType, includeKvstore, includeKvconfig)
 	if err != nil {
 		log.WithFields(log.Fields{
 			"err": err,
@@ -90,19 +68,8 @@ func (h *GetIndexHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	// create response
-	getIndexResponse, err := util.NewGetIndexRespone(resp)
-	if err != nil {
-		log.WithFields(log.Fields{
-			"err": err,
-		}).Error("failed to create get index response")
-
-		Error(w, err.Error(), http.StatusServiceUnavailable)
-		return
-	}
-
 	// output response
-	output, err := json.MarshalIndent(getIndexResponse, "", "  ")
+	output, err := json.MarshalIndent(resp, "", "  ")
 	if err != nil {
 		log.WithFields(log.Fields{
 			"err": err,

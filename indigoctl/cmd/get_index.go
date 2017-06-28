@@ -18,7 +18,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/mosuka/indigo/client"
-	"github.com/mosuka/indigo/util"
 	"github.com/spf13/cobra"
 	"golang.org/x/net/context"
 )
@@ -40,22 +39,6 @@ var getIndexCmd = &cobra.Command{
 }
 
 func runEGetIndexCmd(cmd *cobra.Command, args []string) error {
-	// create request
-	getIndexRequest, err := util.NewGetIndexRequest(
-		getIndexCmdOpts.includeIndexMapping,
-		getIndexCmdOpts.includeIndexType,
-		getIndexCmdOpts.includeKvstore,
-		getIndexCmdOpts.includeKvconfig)
-	if err != nil {
-		return err
-	}
-
-	// create proto message
-	req, err := getIndexRequest.MarshalProto()
-	if err != nil {
-		return err
-	}
-
 	// create client
 	icw, err := client.NewIndigoClientWrapper(getCmdOpts.gRPCServer)
 	if err != nil {
@@ -64,13 +47,11 @@ func runEGetIndexCmd(cmd *cobra.Command, args []string) error {
 	defer icw.Conn.Close()
 
 	// request
-	resp, err := icw.Client.GetIndex(context.Background(), req)
-	if err != nil {
-		return err
-	}
-
-	// create response
-	getIndexResponse, err := util.NewGetIndexRespone(resp)
+	resp, err := icw.GetIndex(context.Background(),
+		getIndexCmdOpts.includeIndexMapping,
+		getIndexCmdOpts.includeIndexType,
+		getIndexCmdOpts.includeKvstore,
+		getIndexCmdOpts.includeKvconfig)
 	if err != nil {
 		return err
 	}
@@ -78,15 +59,15 @@ func runEGetIndexCmd(cmd *cobra.Command, args []string) error {
 	// output response
 	switch rootCmdOpts.outputFormat {
 	case "text":
-		fmt.Printf("%v\n", getIndexResponse)
+		fmt.Printf("%v\n", resp)
 	case "json":
-		output, err := json.MarshalIndent(getIndexResponse, "", "  ")
+		output, err := json.MarshalIndent(resp, "", "  ")
 		if err != nil {
 			return err
 		}
 		fmt.Printf("%s\n", output)
 	default:
-		fmt.Printf("%v\n", getIndexResponse)
+		fmt.Printf("%v\n", resp)
 	}
 
 	return nil

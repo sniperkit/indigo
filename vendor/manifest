@@ -20,14 +20,6 @@
 			"notests": true
 		},
 		{
-			"importpath": "github.com/sirupsen/logrus",
-			"repository": "https://github.com/sirupsen/logrus",
-			"vcs": "git",
-			"revision": "10f801ebc38b33738c9d17d50860f484a0988ff5",
-			"branch": "master",
-			"notests": true
-		},
-		{
 			"importpath": "github.com/armon/consul-api",
 			"repository": "https://github.com/armon/consul-api",
 			"vcs": "git",
@@ -297,6 +289,14 @@
 			"repository": "https://github.com/boltdb/bolt",
 			"vcs": "git",
 			"revision": "a705895fdad108f053eae7ee011ed94a0541ee13",
+			"branch": "master",
+			"notests": true
+		},
+		{
+			"importpath": "github.com/buger/jsonparser",
+			"repository": "https://github.com/buger/jsonparser",
+			"vcs": "git",
+			"revision": "bb14bb6c38f6cf1706ef55278891d184b6a51b0e",
 			"branch": "master",
 			"notests": true
 		},
@@ -599,6 +599,33 @@
 			"notests": true
 		},
 		{
+			"importpath": "github.com/mailru/easyjson/buffer",
+			"repository": "https://github.com/mailru/easyjson",
+			"vcs": "git",
+			"revision": "2f5df55504ebc322e4d52d34df6a1f5b503bf26d",
+			"branch": "master",
+			"path": "buffer",
+			"notests": true
+		},
+		{
+			"importpath": "github.com/mailru/easyjson/jlexer",
+			"repository": "https://github.com/mailru/easyjson",
+			"vcs": "git",
+			"revision": "2f5df55504ebc322e4d52d34df6a1f5b503bf26d",
+			"branch": "master",
+			"path": "jlexer",
+			"notests": true
+		},
+		{
+			"importpath": "github.com/mailru/easyjson/jwriter",
+			"repository": "https://github.com/mailru/easyjson",
+			"vcs": "git",
+			"revision": "2f5df55504ebc322e4d52d34df6a1f5b503bf26d",
+			"branch": "master",
+			"path": "/jwriter",
+			"notests": true
+		},
+		{
 			"importpath": "github.com/mitchellh/mapstructure",
 			"repository": "https://github.com/mitchellh/mapstructure",
 			"vcs": "git",
@@ -660,6 +687,15 @@
 			"vcs": "git",
 			"revision": "e59687e8fa2ed36b4c997df28621fb8720ffc767",
 			"branch": "master",
+			"notests": true
+		},
+		{
+			"importpath": "github.com/pquerna/ffjson/fflib/v1",
+			"repository": "https://github.com/pquerna/ffjson",
+			"vcs": "git",
+			"revision": "0a1032732ea92f86ab22e27b9d55cd182f2f4a1b",
+			"branch": "master",
+			"path": "/fflib/v1",
 			"notests": true
 		},
 		{

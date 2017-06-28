@@ -180,7 +180,7 @@ See [Introduction to Index Mappings](http://www.blevesearch.com/docs/Index-Mappi
 The `indigo` command starts Indigo Server. You can display a help message by specifying `-h` or `--help` option.
 
 ```sh
-$ indigo --index-mapping example/index_mapping.json
+$ ./bin/indigo --index-mapping example/index_mapping.json
 ```
 
 
@@ -191,7 +191,7 @@ $ indigo --index-mapping example/index_mapping.json
 The `get index` command retrieves an index information about existing opened index. You can display a help message by specifying the `- h` or` --help` option.
 
 ```sh
-$ indigoctl get index --include-index-mapping --include-index-type --include-kvstore --include-kvconfig
+$ ./bin/indigoctl get index --include-index-mapping --include-index-type --include-kvstore --include-kvconfig
 ```
 
 The result of the above `get index` command is:

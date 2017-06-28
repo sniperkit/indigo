@@ -18,7 +18,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/mosuka/indigo/client"
-	"github.com/mosuka/indigo/util"
 	"github.com/spf13/cobra"
 	"golang.org/x/net/context"
 )
@@ -37,21 +36,9 @@ var getDocumentCmd = &cobra.Command{
 }
 
 func runEGetDocumentCmd(cmd *cobra.Command, args []string) error {
+	// check id
 	if getDocumentCmdOpts.id == "" {
 		return fmt.Errorf("required flag: --%s", cmd.Flag("id").Name)
-	}
-
-	// create request
-	var getDocumentRequest *util.GetDocumentRequest
-	getDocumentRequest, err := util.NewGetDocumentRequest(getDocumentCmdOpts.id)
-	if err != nil {
-		return err
-	}
-
-	// create proto message
-	req, err := getDocumentRequest.MarshalProto()
-	if err != nil {
-		return err
 	}
 
 	// create client
@@ -59,16 +46,10 @@ func runEGetDocumentCmd(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
-	defer icw.Conn.Close()
+	defer icw.Close()
 
 	// request
-	resp, err := icw.Client.GetDocument(context.Background(), req)
-	if err != nil {
-		return err
-	}
-
-	// create response
-	getDocumentResponse, err := util.NewGetDocumentRespone(resp)
+	resp, err := icw.GetDocument(context.Background(), getDocumentCmdOpts.id)
 	if err != nil {
 		return err
 	}
@@ -76,15 +57,15 @@ func runEGetDocumentCmd(cmd *cobra.Command, args []string) error {
 	// output response
 	switch rootCmdOpts.outputFormat {
 	case "text":
-		fmt.Printf("%v\n", getDocumentResponse)
+		fmt.Printf("%v\n", resp)
 	case "json":
-		output, err := json.MarshalIndent(getDocumentResponse, "", "  ")
+		output, err := json.MarshalIndent(resp, "", "  ")
 		if err != nil {
 			return err
 		}
 		fmt.Printf("%s\n", output)
 	default:
-		fmt.Printf("%v\n", getDocumentResponse)
+		fmt.Printf("%v\n", resp)
 	}
 
 	return nil

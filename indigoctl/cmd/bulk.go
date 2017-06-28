@@ -17,17 +17,18 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/buger/jsonparser"
 	"github.com/mosuka/indigo/client"
-	"github.com/mosuka/indigo/util"
 	"github.com/spf13/cobra"
 	"golang.org/x/net/context"
+	"io/ioutil"
 	"os"
 )
 
 type BulkCommandOptions struct {
 	gRPCServer string
 	batchSize  int32
-	resource   string
+	request    string
 }
 
 var bulkCmdOpts BulkCommandOptions
@@ -40,35 +41,45 @@ var bulkCmd = &cobra.Command{
 }
 
 func runEBulkCmd(cmd *cobra.Command, args []string) error {
-	// create request
-	var bulkRequest *util.BulkRequest
+	// read request
+	var data []byte
 	var err error
-	if cmd.Flag("resource").Changed {
-		if bulkCmdOpts.resource == "-" {
-			bulkRequest, err = util.NewBulkRequest(os.Stdin)
+	if cmd.Flag("request").Changed {
+		if bulkCmdOpts.request == "-" {
+			data, err = ioutil.ReadAll(os.Stdin)
 		} else {
-			file, err := os.Open(bulkCmdOpts.resource)
+			file, err := os.Open(bulkCmdOpts.request)
 			if err != nil {
 				return err
 			}
 			defer file.Close()
-
-			bulkRequest, err = util.NewBulkRequest(file)
+			data, err = ioutil.ReadAll(file)
 			if err != nil {
 				return err
 			}
 		}
 	}
 
-	// overwrite request
-	if cmd.Flag("batch-size").Changed {
-		bulkRequest.BatchSize = bulkCmdOpts.batchSize
-	}
-
-	// create proto message
-	req, err := bulkRequest.MarshalProto()
+	// get batch_size
+	batchSize, err := jsonparser.GetInt(data, "batch_size")
 	if err != nil {
 		return err
+	}
+
+	// get requests
+	requestsBytes, _, _, err := jsonparser.Get(data, "requests")
+	if err != nil {
+		return err
+	}
+	var requests []map[string]interface{}
+	err = json.Unmarshal(requestsBytes, &requests)
+	if err != nil {
+		return err
+	}
+
+	// overwrite batch size
+	if cmd.Flag("batch-size").Changed {
+		batchSize = int64(bulkCmdOpts.batchSize)
 	}
 
 	// create client
@@ -79,13 +90,7 @@ func runEBulkCmd(cmd *cobra.Command, args []string) error {
 	defer icw.Conn.Close()
 
 	// request
-	resp, err := icw.Client.Bulk(context.Background(), req)
-	if err != nil {
-		return err
-	}
-
-	// create response
-	bulkResponse, err := util.NewBulkResponse(resp)
+	resp, err := icw.Bulk(context.Background(), requests, int32(batchSize))
 	if err != nil {
 		return err
 	}
@@ -93,15 +98,15 @@ func runEBulkCmd(cmd *cobra.Command, args []string) error {
 	// output request
 	switch rootCmdOpts.outputFormat {
 	case "text":
-		fmt.Printf("%v\n", bulkResponse)
+		fmt.Printf("%v\n", resp)
 	case "json":
-		output, err := json.MarshalIndent(bulkResponse, "", "  ")
+		output, err := json.MarshalIndent(resp, "", "  ")
 		if err != nil {
 			return err
 		}
 		fmt.Printf("%s\n", output)
 	default:
-		fmt.Printf("%v\n", bulkResponse)
+		fmt.Printf("%v\n", resp)
 	}
 
 	return nil
@@ -110,7 +115,7 @@ func runEBulkCmd(cmd *cobra.Command, args []string) error {
 func init() {
 	bulkCmd.Flags().StringVar(&bulkCmdOpts.gRPCServer, "grpc-server", DefaultServer, "Indigo gRPC Server to connect to")
 	bulkCmd.Flags().Int32Var(&bulkCmdOpts.batchSize, "batch-size", DefaultBatchSize, "batch size of bulk request")
-	bulkCmd.Flags().StringVar(&bulkCmdOpts.resource, "resource", DefaultResource, "resource file")
+	bulkCmd.Flags().StringVar(&bulkCmdOpts.request, "request", DefaultResource, "request file")
 
 	RootCmd.AddCommand(bulkCmd)
 }

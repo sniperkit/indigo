@@ -17,10 +17,9 @@ package rest
 import (
 	"fmt"
 	"github.com/gorilla/mux"
-	"github.com/mosuka/indigo/proto"
+	"github.com/mosuka/indigo/client"
 	"github.com/mosuka/indigo/server/rest/handler"
 	log "github.com/sirupsen/logrus"
-	"google.golang.org/grpc"
 	"net"
 	"net/http"
 )
@@ -28,38 +27,28 @@ import (
 type indigoRESTServer struct {
 	router   *mux.Router
 	listener net.Listener
-	conn     *grpc.ClientConn
+	client   *client.IndigoClientWrapper
 }
 
 func NewIndigoRESTServer(port int, basePath, server string) *indigoRESTServer {
 	router := mux.NewRouter()
 	router.StrictSlash(true)
 
-	conn, err := grpc.Dial(server, grpc.WithInsecure())
-	if err == nil {
-		log.WithFields(log.Fields{
-			"server": server,
-		}).Info("succeeded in creating connection")
-	} else {
-		log.WithFields(log.Fields{
-			"server": server,
-			"err":    err,
-		}).Error("failed to create connection")
-
+	icw, err := client.NewIndigoClientWrapper(server)
+	if err != nil {
 		return nil
 	}
-
-	client := proto.NewIndigoClient(conn)
+	defer icw.Conn.Close()
 
 	/*
 	 * set handlers
 	 */
-	router.Handle(fmt.Sprintf("%s/", basePath), handler.NewGetIndexHandler(client)).Methods("GET")
-	router.Handle(fmt.Sprintf("%s/{id}", basePath), handler.NewPutDocumentHandler(client)).Methods("PUT")
-	router.Handle(fmt.Sprintf("%s/{id}", basePath), handler.NewGetDocumentHandler(client)).Methods("GET")
-	router.Handle(fmt.Sprintf("%s/{id}", basePath), handler.NewDeleteDocumentHandler(client)).Methods("DELETE")
-	router.Handle(fmt.Sprintf("%s/_bulk", basePath), handler.NewBulkHandler(client)).Methods("POST")
-	router.Handle(fmt.Sprintf("%s/_search", basePath), handler.NewSearchHandler(client)).Methods("POST")
+	router.Handle(fmt.Sprintf("%s/", basePath), handler.NewGetIndexHandler(icw)).Methods("GET")
+	router.Handle(fmt.Sprintf("%s/{id}", basePath), handler.NewPutDocumentHandler(icw)).Methods("PUT")
+	router.Handle(fmt.Sprintf("%s/{id}", basePath), handler.NewGetDocumentHandler(icw)).Methods("GET")
+	router.Handle(fmt.Sprintf("%s/{id}", basePath), handler.NewDeleteDocumentHandler(icw)).Methods("DELETE")
+	router.Handle(fmt.Sprintf("%s/_bulk", basePath), handler.NewBulkHandler(icw)).Methods("POST")
+	router.Handle(fmt.Sprintf("%s/_search", basePath), handler.NewSearchHandler(icw)).Methods("POST")
 
 	listener, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
 	if err == nil {
@@ -77,7 +66,7 @@ func NewIndigoRESTServer(port int, basePath, server string) *indigoRESTServer {
 	return &indigoRESTServer{
 		router:   router,
 		listener: listener,
-		conn:     conn,
+		client:   icw,
 	}
 }
 
@@ -95,7 +84,7 @@ func (irs *indigoRESTServer) Start() error {
 }
 
 func (irs *indigoRESTServer) Stop() error {
-	err := irs.conn.Close()
+	err := irs.client.Close()
 	if err == nil {
 		log.Info("succeeded in closing connection")
 	} else {

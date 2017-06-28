@@ -17,17 +17,18 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/buger/jsonparser"
 	"github.com/mosuka/indigo/client"
-	"github.com/mosuka/indigo/util"
 	"github.com/spf13/cobra"
 	"golang.org/x/net/context"
+	"io/ioutil"
 	"os"
 )
 
 type PutDocumentCommandOptions struct {
-	id       string
-	fields   string
-	resource string
+	id      string
+	fields  string
+	request string
 }
 
 var putDocumentCmdOpts PutDocumentCommandOptions
@@ -40,43 +41,53 @@ var putDocumentCmd = &cobra.Command{
 }
 
 func runEPutDocumentCmd(cmd *cobra.Command, args []string) error {
-	// create request
-	var putDocumentRequest *util.PutDocumentRequest
+	// read request
+	var data []byte
 	var err error
-	if cmd.Flag("resource").Changed {
-		if putDocumentCmdOpts.resource == "-" {
-			putDocumentRequest, err = util.NewPutDocumentRequest(os.Stdin)
+	if cmd.Flag("request").Changed {
+		if putDocumentCmdOpts.request == "-" {
+			data, err = ioutil.ReadAll(os.Stdin)
 		} else {
-			file, err := os.Open(putDocumentCmdOpts.resource)
+			file, err := os.Open(putDocumentCmdOpts.request)
 			if err != nil {
 				return err
 			}
 			defer file.Close()
-
-			putDocumentRequest, err = util.NewPutDocumentRequest(file)
+			data, err = ioutil.ReadAll(file)
 			if err != nil {
 				return err
 			}
 		}
 	}
 
-	// overwrite request
-	if cmd.Flag("id").Changed {
-		putDocumentRequest.Document.Id = putDocumentCmdOpts.id
+	// get id
+	id, err := jsonparser.GetString(data, "document", "id")
+	if err != nil {
+		return err
 	}
+
+	// get fields
+	fieldsBytes, _, _, err := jsonparser.Get(data, "document", "fields")
+	if err != nil {
+		return err
+	}
+	var fields map[string]interface{}
+	err = json.Unmarshal(fieldsBytes, &fields)
+	if err != nil {
+		return err
+	}
+
+	// overwrite id
+	if cmd.Flag("id").Changed {
+		id = putDocumentCmdOpts.id
+	}
+
+	// overwrite fields
 	if cmd.Flag("fields").Changed {
-		var fields map[string]interface{}
-		err := json.Unmarshal([]byte(putDocumentCmdOpts.fields), &fields)
+		err = json.Unmarshal([]byte(putDocumentCmdOpts.fields), &fields)
 		if err != nil {
 			return err
 		}
-		putDocumentRequest.Document.Fields = fields
-	}
-
-	// create proto message
-	req, err := putDocumentRequest.MarshalProto()
-	if err != nil {
-		return err
 	}
 
 	// create client
@@ -84,16 +95,10 @@ func runEPutDocumentCmd(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
-	defer icw.Conn.Close()
+	defer icw.Close()
 
 	// request
-	resp, err := icw.Client.PutDocument(context.Background(), req)
-	if err != nil {
-		return err
-	}
-
-	// create response
-	putDocumentResponse, err := util.NewPutDocumentResponse(resp)
+	resp, err := icw.PutDocument(context.Background(), id, fields)
 	if err != nil {
 		return err
 	}
@@ -101,15 +106,15 @@ func runEPutDocumentCmd(cmd *cobra.Command, args []string) error {
 	// output response
 	switch rootCmdOpts.outputFormat {
 	case "text":
-		fmt.Printf("%v\n", putDocumentResponse)
+		fmt.Printf("%v\n", resp)
 	case "json":
-		output, err := json.MarshalIndent(putDocumentResponse, "", "  ")
+		output, err := json.MarshalIndent(resp, "", "  ")
 		if err != nil {
 			return err
 		}
 		fmt.Printf("%s\n", output)
 	default:
-		fmt.Printf("%v\n", putDocumentResponse)
+		fmt.Printf("%v\n", resp)
 	}
 
 	return nil
@@ -117,8 +122,8 @@ func runEPutDocumentCmd(cmd *cobra.Command, args []string) error {
 
 func init() {
 	putDocumentCmd.Flags().StringVar(&putDocumentCmdOpts.id, "id", DefaultId, "document id")
-	putDocumentCmd.Flags().StringVar(&putDocumentCmdOpts.resource, "resource", DefaultResource, "resource file")
 	putDocumentCmd.Flags().StringVar(&putDocumentCmdOpts.fields, "fields", DefaultDocFields, "document fields")
+	putDocumentCmd.Flags().StringVar(&putDocumentCmdOpts.request, "request", DefaultResource, "request file")
 
 	putCmd.AddCommand(putDocumentCmd)
 }

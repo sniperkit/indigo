@@ -16,21 +16,22 @@ package handler
 
 import (
 	"encoding/json"
-	"github.com/mosuka/indigo/proto"
-	"github.com/mosuka/indigo/util"
+	"github.com/buger/jsonparser"
+	"github.com/mosuka/indigo/client"
 	log "github.com/sirupsen/logrus"
 	"golang.org/x/net/context"
+	"io/ioutil"
 	"net/http"
 	"strconv"
 )
 
 type BulkHandler struct {
-	client proto.IndigoClient
+	client *client.IndigoClientWrapper
 }
 
-func NewBulkHandler(client proto.IndigoClient) *BulkHandler {
+func NewBulkHandler(c *client.IndigoClientWrapper) *BulkHandler {
 	return &BulkHandler{
-		client: client,
+		client: c,
 	}
 }
 
@@ -39,12 +40,44 @@ func (h *BulkHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		"req": req,
 	}).Info("")
 
-	// create request
-	bulkRequest, err := util.NewBulkRequest(req.Body)
+	// read request
+	data, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		log.WithFields(log.Fields{
 			"err": err,
-		}).Error("failed to create bulk request")
+		}).Error("failed to read request body")
+
+		Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	// get batch_size
+	batchSize, err := jsonparser.GetInt(data, "batch_size")
+	if err != nil {
+		log.WithFields(log.Fields{
+			"err": err,
+		}).Error("failed to get batch size")
+
+		Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	// get requests
+	requestsBytes, _, _, err := jsonparser.Get(data, "requests")
+	if err != nil {
+		log.WithFields(log.Fields{
+			"err": err,
+		}).Error("failed to get update requests")
+
+		Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	var requests []map[string]interface{}
+	err = json.Unmarshal(requestsBytes, &requests)
+	if err != nil {
+		log.WithFields(log.Fields{
+			"err": err,
+		}).Error("failed to create update requests")
 
 		Error(w, err.Error(), http.StatusBadRequest)
 		return
@@ -61,25 +94,14 @@ func (h *BulkHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 			Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
-		bulkRequest.BatchSize = int32(i)
+		batchSize = int64(i)
 	}
-	if bulkRequest.BatchSize <= 0 {
-		bulkRequest.BatchSize = DefaultBatchSize
-	}
-
-	// create proto message
-	protoReq, err := bulkRequest.MarshalProto()
-	if err != nil {
-		log.WithFields(log.Fields{
-			"err": err,
-		}).Error("failed to create proto message")
-
-		Error(w, err.Error(), http.StatusBadRequest)
-		return
+	if batchSize <= 0 {
+		batchSize = int64(DefaultBatchSize)
 	}
 
 	// request
-	resp, err := h.client.Bulk(context.Background(), protoReq)
+	resp, err := h.client.Bulk(context.Background(), requests, int32(batchSize))
 	if err != nil {
 		log.WithFields(log.Fields{
 			"err": err,
@@ -89,19 +111,8 @@ func (h *BulkHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	// create response
-	bulkResponse, err := util.NewBulkResponse(resp)
-	if err != nil {
-		log.WithFields(log.Fields{
-			"err": err,
-		}).Error("failed to create bulk response")
-
-		Error(w, err.Error(), http.StatusServiceUnavailable)
-		return
-	}
-
 	// output response
-	output, err := json.MarshalIndent(bulkResponse, "", "  ")
+	output, err := json.MarshalIndent(resp, "", "  ")
 	if err != nil {
 		log.WithFields(log.Fields{
 			"err": err,

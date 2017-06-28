@@ -18,16 +18,17 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/blevesearch/bleve"
+	"github.com/buger/jsonparser"
 	"github.com/mosuka/indigo/client"
-	"github.com/mosuka/indigo/util"
 	"github.com/spf13/cobra"
 	"golang.org/x/net/context"
+	"io/ioutil"
 	"os"
 )
 
 type SearchCommandOptions struct {
 	gRPCServer       string
-	resource         string
+	request          string
 	query            string
 	size             int
 	from             int
@@ -51,47 +52,54 @@ var searchCmd = &cobra.Command{
 }
 
 func runESearchCmd(cmd *cobra.Command, args []string) error {
-	// create request
-	var searchRequest *util.SearchRequest
+	// read request
+	var data []byte
 	var err error
-	if cmd.Flag("resource").Changed {
-		if searchCmdOpts.resource == "-" {
-			searchRequest, err = util.NewSearchRequest(os.Stdin)
-			if err != nil {
-				return err
-			}
+	if cmd.Flag("request").Changed {
+		if searchCmdOpts.request == "-" {
+			data, err = ioutil.ReadAll(os.Stdin)
 		} else {
-			file, err := os.Open(searchCmdOpts.resource)
+			file, err := os.Open(searchCmdOpts.request)
 			if err != nil {
 				return err
 			}
 			defer file.Close()
-
-			searchRequest, err = util.NewSearchRequest(file)
+			data, err = ioutil.ReadAll(file)
 			if err != nil {
 				return err
 			}
 		}
 	}
 
+	// get search_request
+	searchRequestBytes, _, _, err := jsonparser.Get(data, "search_request")
+	if err != nil {
+		return err
+	}
+	var searchRequest *bleve.SearchRequest
+	err = json.Unmarshal(searchRequestBytes, &searchRequest)
+	if err != nil {
+		return err
+	}
+
 	// overwrite request
 	if cmd.Flag("query").Changed {
-		searchRequest.SearchRequest.Query = bleve.NewQueryStringQuery(searchCmdOpts.query)
+		searchRequest.Query = bleve.NewQueryStringQuery(searchCmdOpts.query)
 	}
 	if cmd.Flag("size").Changed {
-		searchRequest.SearchRequest.Size = searchCmdOpts.size
+		searchRequest.Size = searchCmdOpts.size
 	}
 	if cmd.Flag("from").Changed {
-		searchRequest.SearchRequest.From = searchCmdOpts.from
+		searchRequest.From = searchCmdOpts.from
 	}
 	if cmd.Flag("explain").Changed {
-		searchRequest.SearchRequest.Explain = searchCmdOpts.explain
+		searchRequest.Explain = searchCmdOpts.explain
 	}
 	if cmd.Flag("field").Changed {
-		searchRequest.SearchRequest.Fields = searchCmdOpts.fields
+		searchRequest.Fields = searchCmdOpts.fields
 	}
 	if cmd.Flag("sort").Changed {
-		searchRequest.SearchRequest.SortBy(searchCmdOpts.sorts)
+		searchRequest.SortBy(searchCmdOpts.sorts)
 	}
 	if cmd.Flag("facets").Changed {
 		facetRequest := bleve.FacetsRequest{}
@@ -99,7 +107,7 @@ func runESearchCmd(cmd *cobra.Command, args []string) error {
 		if err != nil {
 			return err
 		}
-		searchRequest.SearchRequest.Facets = facetRequest
+		searchRequest.Facets = facetRequest
 	}
 	if cmd.Flag("highlight").Changed {
 		highlightRequest := bleve.NewHighlight()
@@ -107,21 +115,15 @@ func runESearchCmd(cmd *cobra.Command, args []string) error {
 		if err != nil {
 			return err
 		}
-		searchRequest.SearchRequest.Highlight = highlightRequest
+		searchRequest.Highlight = highlightRequest
 	}
 	if cmd.Flag("highlight-style").Changed || cmd.Flag("highlight-field").Changed {
 		highlightRequest := bleve.NewHighlightWithStyle(searchCmdOpts.highlightStyle)
 		highlightRequest.Fields = searchCmdOpts.highlightFields
-		searchRequest.SearchRequest.Highlight = highlightRequest
+		searchRequest.Highlight = highlightRequest
 	}
 	if cmd.Flag("include-locations").Changed {
-		searchRequest.SearchRequest.IncludeLocations = searchCmdOpts.includeLocations
-	}
-
-	// create proto message
-	req, err := searchRequest.MarshalProto()
-	if err != nil {
-		return err
+		searchRequest.IncludeLocations = searchCmdOpts.includeLocations
 	}
 
 	// create client
@@ -132,13 +134,7 @@ func runESearchCmd(cmd *cobra.Command, args []string) error {
 	defer icw.Conn.Close()
 
 	// request
-	resp, err := icw.Client.Search(context.Background(), req)
-	if err != nil {
-		return err
-	}
-
-	// create response
-	searchResponse, err := util.NewSearchResonse(resp)
+	resp, err := icw.Search(context.Background(), searchRequest)
 	if err != nil {
 		return err
 	}
@@ -146,15 +142,15 @@ func runESearchCmd(cmd *cobra.Command, args []string) error {
 	// output response
 	switch rootCmdOpts.outputFormat {
 	case "text":
-		fmt.Printf("%v\n", searchResponse)
+		fmt.Printf("%v\n", resp)
 	case "json":
-		output, err := json.MarshalIndent(searchResponse, "", "  ")
+		output, err := json.MarshalIndent(resp, "", "  ")
 		if err != nil {
 			return err
 		}
 		fmt.Printf("%s\n", output)
 	default:
-		fmt.Printf("%v\n", searchResponse)
+		fmt.Printf("%v\n", resp)
 	}
 
 	return nil
@@ -162,7 +158,7 @@ func runESearchCmd(cmd *cobra.Command, args []string) error {
 
 func init() {
 	searchCmd.Flags().StringVar(&searchCmdOpts.gRPCServer, "grpc-server", DefaultServer, "Indigo gRPC Server to connect to")
-	searchCmd.Flags().StringVar(&searchCmdOpts.resource, "resource", DefaultResource, "resource file")
+	searchCmd.Flags().StringVar(&searchCmdOpts.request, "request", DefaultResource, "resource file")
 	searchCmd.Flags().StringVar(&searchCmdOpts.query, "query", DefaultQuery, "query string")
 	searchCmd.Flags().IntVar(&searchCmdOpts.size, "size", DefaultSize, "number of hits to return")
 	searchCmd.Flags().IntVar(&searchCmdOpts.from, "from", DefaultFrom, "starting from index of the hits to return")

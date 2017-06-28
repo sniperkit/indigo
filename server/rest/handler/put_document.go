@@ -16,21 +16,22 @@ package handler
 
 import (
 	"encoding/json"
+	"github.com/buger/jsonparser"
 	"github.com/gorilla/mux"
-	"github.com/mosuka/indigo/proto"
-	"github.com/mosuka/indigo/util"
+	"github.com/mosuka/indigo/client"
 	log "github.com/sirupsen/logrus"
 	"golang.org/x/net/context"
+	"io/ioutil"
 	"net/http"
 )
 
 type PutDocumentHandler struct {
-	client proto.IndigoClient
+	client *client.IndigoClientWrapper
 }
 
-func NewPutDocumentHandler(client proto.IndigoClient) *PutDocumentHandler {
+func NewPutDocumentHandler(c *client.IndigoClientWrapper) *PutDocumentHandler {
 	return &PutDocumentHandler{
-		client: client,
+		client: c,
 	}
 }
 
@@ -41,33 +42,54 @@ func (h *PutDocumentHandler) ServeHTTP(w http.ResponseWriter, req *http.Request)
 
 	vars := mux.Vars(req)
 
-	// create request
-	putDocumentRequest, err := util.NewPutDocumentRequest(req.Body)
+	// read request
+	data, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		log.WithFields(log.Fields{
 			"err": err,
-		}).Error("failed to create put document request")
+		}).Error("failed to read request body")
+
+		Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	// get id
+	id, err := jsonparser.GetString(data, "document", "id")
+	if err != nil {
+		log.WithFields(log.Fields{
+			"err": err,
+		}).Error("failed to get id")
+
+		Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	// get fields
+	fieldsBytes, _, _, err := jsonparser.Get(data, "document", "fields")
+	if err != nil {
+		log.WithFields(log.Fields{
+			"err": err,
+		}).Error("failed to get fields")
+
+		Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	var fields map[string]interface{}
+	err = json.Unmarshal(fieldsBytes, &fields)
+	if err != nil {
+		log.WithFields(log.Fields{
+			"err": err,
+		}).Error("failed to create fields")
 
 		Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
 	// overwrite request
-	putDocumentRequest.Document.Id = vars["id"]
-
-	// create proto message
-	protoReq, err := putDocumentRequest.MarshalProto()
-	if err != nil {
-		log.WithFields(log.Fields{
-			"err": err,
-		}).Error("failed to create proto message")
-
-		Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
+	id = vars["id"]
 
 	// request
-	resp, err := h.client.PutDocument(context.Background(), protoReq)
+	resp, err := h.client.PutDocument(context.Background(), id, fields)
 	if err != nil {
 		log.WithFields(log.Fields{
 			"req": req,
@@ -77,19 +99,8 @@ func (h *PutDocumentHandler) ServeHTTP(w http.ResponseWriter, req *http.Request)
 		return
 	}
 
-	// create response
-	putDocumentResponse, err := util.NewPutDocumentResponse(resp)
-	if err != nil {
-		log.WithFields(log.Fields{
-			"req": req,
-		}).Error("failed to create put document response")
-
-		Error(w, err.Error(), http.StatusServiceUnavailable)
-		return
-	}
-
 	// output response
-	output, err := json.MarshalIndent(putDocumentResponse, "", "  ")
+	output, err := json.MarshalIndent(resp, "", "  ")
 	if err != nil {
 		log.WithFields(log.Fields{
 			"req": req,

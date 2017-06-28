@@ -17,20 +17,19 @@ package handler
 import (
 	"encoding/json"
 	"github.com/gorilla/mux"
-	"github.com/mosuka/indigo/proto"
-	"github.com/mosuka/indigo/util"
+	"github.com/mosuka/indigo/client"
 	log "github.com/sirupsen/logrus"
 	"golang.org/x/net/context"
 	"net/http"
 )
 
 type DeleteDocumentHandler struct {
-	client proto.IndigoClient
+	client *client.IndigoClientWrapper
 }
 
-func NewDeleteDocumentHandler(client proto.IndigoClient) *DeleteDocumentHandler {
+func NewDeleteDocumentHandler(c *client.IndigoClientWrapper) *DeleteDocumentHandler {
 	return &DeleteDocumentHandler{
-		client: client,
+		client: c,
 	}
 }
 
@@ -41,30 +40,8 @@ func (h *DeleteDocumentHandler) ServeHTTP(w http.ResponseWriter, req *http.Reque
 
 	vars := mux.Vars(req)
 
-	// create request
-	deleteDocumentRequest, err := util.NewDeleteDocumentRequest(vars["id"])
-	if err != nil {
-		log.WithFields(log.Fields{
-			"req": req,
-		}).Error("failed to create delete document request")
-
-		Error(w, err.Error(), http.StatusServiceUnavailable)
-		return
-	}
-
-	// create proto message
-	protoReq, err := deleteDocumentRequest.MarshalProto()
-	if err != nil {
-		log.WithFields(log.Fields{
-			"req": req,
-		}).Error("failed to create proto message")
-
-		Error(w, err.Error(), http.StatusServiceUnavailable)
-		return
-	}
-
 	// request
-	resp, err := h.client.DeleteDocument(context.Background(), protoReq)
+	resp, err := h.client.DeleteDocument(context.Background(), vars["id"])
 	if err != nil {
 		log.WithFields(log.Fields{
 			"req": req,
@@ -74,19 +51,8 @@ func (h *DeleteDocumentHandler) ServeHTTP(w http.ResponseWriter, req *http.Reque
 		return
 	}
 
-	// create response
-	deleteDocumentResponse, err := util.NewDeleteDocumentResponse(resp)
-	if err != nil {
-		log.WithFields(log.Fields{
-			"req": req,
-		}).Error("failed to create delete document response")
-
-		Error(w, err.Error(), http.StatusServiceUnavailable)
-		return
-	}
-
 	// output response
-	output, err := json.MarshalIndent(deleteDocumentResponse, "", "  ")
+	output, err := json.MarshalIndent(resp, "", "  ")
 	if err != nil {
 		log.WithFields(log.Fields{
 			"err": err,

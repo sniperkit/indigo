@@ -17,20 +17,19 @@ package handler
 import (
 	"encoding/json"
 	"github.com/gorilla/mux"
-	"github.com/mosuka/indigo/proto"
-	"github.com/mosuka/indigo/util"
+	"github.com/mosuka/indigo/client"
 	log "github.com/sirupsen/logrus"
 	"golang.org/x/net/context"
 	"net/http"
 )
 
 type GetDocumentHandler struct {
-	client proto.IndigoClient
+	client *client.IndigoClientWrapper
 }
 
-func NewGetDocumentHandler(client proto.IndigoClient) *GetDocumentHandler {
+func NewGetDocumentHandler(c *client.IndigoClientWrapper) *GetDocumentHandler {
 	return &GetDocumentHandler{
-		client: client,
+		client: c,
 	}
 }
 
@@ -41,31 +40,8 @@ func (h *GetDocumentHandler) ServeHTTP(w http.ResponseWriter, req *http.Request)
 
 	vars := mux.Vars(req)
 
-	// create request
-	var getDocumentRequest *util.GetDocumentRequest
-	getDocumentRequest, err := util.NewGetDocumentRequest(vars["id"])
-	if err != nil {
-		log.WithFields(log.Fields{
-			"req": req,
-		}).Error("failed to create get document request")
-
-		Error(w, err.Error(), http.StatusServiceUnavailable)
-		return
-	}
-
-	// create proto message
-	protoReq, err := getDocumentRequest.MarshalProto()
-	if err != nil {
-		log.WithFields(log.Fields{
-			"req": req,
-		}).Error("failed to create proto message")
-
-		Error(w, err.Error(), http.StatusServiceUnavailable)
-		return
-	}
-
 	// request
-	resp, err := h.client.GetDocument(context.Background(), protoReq)
+	resp, err := h.client.GetDocument(context.Background(), vars["id"])
 	if err != nil {
 		log.WithFields(log.Fields{
 			"req": req,
@@ -75,19 +51,8 @@ func (h *GetDocumentHandler) ServeHTTP(w http.ResponseWriter, req *http.Request)
 		return
 	}
 
-	// create response
-	getDocumentResponse, err := util.NewGetDocumentRespone(resp)
-	if err != nil {
-		log.WithFields(log.Fields{
-			"req": req,
-		}).Error("failed to create get document request")
-
-		Error(w, err.Error(), http.StatusServiceUnavailable)
-		return
-	}
-
 	// request
-	output, err := json.MarshalIndent(getDocumentResponse, "", "  ")
+	output, err := json.MarshalIndent(resp, "", "  ")
 	if err != nil {
 		log.WithFields(log.Fields{
 			"err": err,
